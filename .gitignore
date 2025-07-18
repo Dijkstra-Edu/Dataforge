@@ -5,3 +5,4 @@ app.log
 *.py[cod]
 venv/
 .env/
+.env

@@ -30,16 +30,15 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is missing or incomplete, install dependencies manually:
-
-```bash
-pip install fastapi uvicorn httpx python-dotenv
+Navigate to the app folder
+```
+cd app
 ```
 
 Then, start the FastAPI server:
 
 ```bash
-python -m uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 
 You should see:

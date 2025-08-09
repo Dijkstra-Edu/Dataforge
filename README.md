@@ -30,7 +30,21 @@ Install the required dependencies:
 pip install -r requirements.txt
 ```
 
-Navigate to the app folder
+Next add a .env folder in the root folder (outside of app). Inside of the app, add the following env variables:
+
+```
+GITHUB_TOKEN=<GitHub Personal Access Token (Classic)>
+```
+
+To get a Personal Access Token:
+- Go to GitHub → Settings → Developer Settings → Personal Access Tokens.
+- Click Generate new token (Classic or Fine-grained).
+- Give it:
+  - repo scope if you want to access private repos.
+  - read:org if you want org details.
+- Copy the token and put it in .env.
+
+After this, Navigate to the app folder
 ```
 cd app
 ```

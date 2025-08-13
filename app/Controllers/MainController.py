@@ -7,7 +7,7 @@ async def getGitHubData(userName: str, params: SearchParams):
     if params:
         return await GitHubService.getGitHubDataWithSearchParams(userName, params)
     else:
-        return await GitHubService.getAllGitHubData(userName)
+        return GitHubService.getAllGitHubData(userName)
 
 # POST Commands
 async def postDownloadCertificate (userName: str):

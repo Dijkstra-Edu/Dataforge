@@ -20,128 +20,244 @@ HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}" if GITHUB_TOKEN else ""
 }
 
-# -------------------- Public API --------------------
-
-async def getAllGitHubData(username: str):
-    default_params = {"commits": True, "issues": True, "pulls": True}
-    return await count_user_contributions(username, "Dijkstra-Edu", default_params)
-
-async def getGitHubDataWithSearchParams(username: str, params: SearchParams):
-    return await count_user_contributions(username, "Dijkstra-Edu", params.searchParams)
-
-# -------------------- DTO --------------------
-
-class GitHubContributions(BaseModel):
-    username: str
-    organization: str
-    total_commits: int
-    total_issues: int
-    total_pull_requests: int
-    total_lines_added: int
-    total_lines_deleted: int
-
 # -------------------- Internal Service --------------------
 
-async def fetch_json(url: str):
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, headers=HEADERS)
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=f"GitHub API error: {response.text}")
-        return response.json()
+import os
+import requests
+from collections import defaultdict
+import json
+from typing import Dict, Any
+import requests
 
-async def get_org_repos(org: str):
-    url = f"{GITHUB_API}/orgs/{org}/repos?per_page=100"
-    return await fetch_json(url)
+LEETCODE_API = "https://leetcode.com/graphql"
 
-# TODO - This needs to be done through the API, not like this
-async def count_user_contributions(username: str, org: str, params: Dict[str, bool]) -> GitHubContributions:
-    async with httpx.AsyncClient() as client:
-        repos = await get_org_repos(org)
+def getAllLeetcodeData(userName: str) -> Dict[str, Any]:
+    lc_query = """
+      query getFullUserProfile($username: String!) {
+        matchedUser(username: $username) {
+          username
+          profile {
+            realName
+            aboutMe
+            school
+            websites
+            countryName
+            company
+            jobTitle
+            skillTags
+            ranking
+            userAvatar
+            reputation
+            solutionCount
+          }
+          submitStatsGlobal {
+            acSubmissionNum {
+              difficulty
+              count
+            }
+          }
+          badges {
+            name
+            icon
+            hoverText
+          }
+          languageProblemCount {
+            languageName
+            problemsSolved
+          }
+          tagProblemCounts {
+            advanced {
+              tagName
+              problemsSolved
+            }
+            intermediate {
+              tagName
+              problemsSolved
+            }
+            fundamental {
+              tagName
+              problemsSolved
+            }
+          }
+        }
 
-        total_commits = 0
-        total_issues = 0
-        total_pull_requests = 0
-        total_lines_added = 0
-        total_lines_deleted = 0
+        userContestRanking(username: $username) {
+            attendedContestsCount
+            rating
+            globalRanking
+            totalParticipants
+            topPercentage
+            badge {
+              name
+            }
+        }
+        userContestRankingHistory(username: $username) {
+            attended
+            trendDirection
+            problemsSolved
+            totalProblems
+            finishTimeInSeconds
+            rating
+            ranking
+            contest {
+              title
+              startTime
+            }
+        }
+      }
+    """
 
-        # Process repositories concurrently
-        repo_tasks = []
-        for repo in repos:
-            repo_name = repo['name']
-            full_name = f"{org}/{repo_name}"
-            repo_tasks.append(process_repo(client, full_name, username, params))
-
-        results = await asyncio.gather(*repo_tasks, return_exceptions=True)
-
-        for result in results:
-            if not isinstance(result, Exception):
-                total_commits += result['commits']
-                total_issues += result['issues']
-                total_pull_requests += result['pulls']
-                total_lines_added += result['additions']
-                total_lines_deleted += result['deletions']
-
-    return GitHubContributions(
-        username=username,
-        organization=org,
-        total_commits=total_commits,
-        total_issues=total_issues,
-        total_pull_requests=total_pull_requests,
-        total_lines_added=total_lines_added,
-        total_lines_deleted=total_lines_deleted
-    )
-
-async def process_repo(client: httpx.AsyncClient, full_name: str, username: str, params: Dict[str, bool]) -> Dict:
-    result = {
-        'commits': 0,
-        'issues': 0,
-        'pulls': 0,
-        'additions': 0,
-        'deletions': 0
-    }
-
-    if params.get("commits", True):
-        # Process commits
-        commits_url = f"{GITHUB_API}/repos/{full_name}/commits?author={username}&per_page=100"
-        commits = await fetch_json_with_client(client, commits_url)
-        result['commits'] = len(commits)
-
-        # Process commit stats concurrently
-        commit_tasks = []
-        for commit in commits:
-            sha = commit.get("sha")
-            if sha:
-                commit_detail_url = f"{GITHUB_API}/repos/{full_name}/commits/{sha}"
-                commit_tasks.append(get_commit_stats(client, commit_detail_url))
-
-        commit_stats = await asyncio.gather(*commit_tasks, return_exceptions=True)
-        for stats in commit_stats:
-            if isinstance(stats, dict):
-                result['additions'] += stats.get("additions", 0)
-                result['deletions'] += stats.get("deletions", 0)
-
-    if params.get("issues", True):
-        issues_url = f"{GITHUB_API}/repos/{full_name}/issues?creator={username}&state=all&per_page=100"
-        issues = await fetch_json_with_client(client, issues_url)
-        result['issues'] = sum(1 for issue in issues if 'pull_request' not in issue)
-
-    if params.get("pulls", True):
-        pulls_url = f"{GITHUB_API}/repos/{full_name}/pulls?state=all&creator={username}&per_page=100"
-        pulls = await fetch_json_with_client(client, pulls_url)
-        result['pulls'] = len(pulls)
-
-    return result
-
-async def fetch_json_with_client(client: httpx.AsyncClient, url: str):
-    response = await client.get(url, headers=HEADERS)
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=f"GitHub API error: {response.text}")
-    return response.json()
-
-async def get_commit_stats(client: httpx.AsyncClient, url: str):
     try:
-        response = await client.get(url, headers=HEADERS)
-        return response.json().get("stats", {})
+        response = requests.post(
+            LEETCODE_API,
+            json={"query": lc_query, "variables": {"username": userName}},
+            timeout=20
+        )
+        data = response.json()
+
+        if "errors" in data:
+            return {"leetcode": {"error": data["errors"]}}
+
+        result_data = data.get("data", {})
+
+        return {
+            "leetcode": {
+                "profile": result_data.get("matchedUser"),
+                "contestRanking": result_data.get("userContestRanking"),
+                # "contestHistory": result_data.get("userContestRankingHistory")
+            }
+        }
+
     except Exception as e:
-        logger.warning(f"Failed to fetch commit stats: {e}")
-        return {}
+        return {"leetcode": {"error": str(e)}}
+
+def getAllGitHubData(username: str) -> Dict[str, Any]:
+    
+#   General Data
+# - UserName
+# - Full Name
+# - Avatar Img Link
+# - Bio
+# - Followers
+# - Following
+# - Current Company
+# - Current Location
+# - Time Zone
+# - Websites/Links
+# - Organizations List
+
+# Dijkstra Specific Statistics
+# - Team (List of Objects)
+#      - Team Name
+#      - Team Link
+#      - Superior
+# - Repositories Contributed to (List) - Repository list (all of these stats need to be specific to Repo within Dijkstra)
+#     - Lines Added
+#     - Lines Removed
+#     - Frameworks present in Repo (We assume that this is what the user has worked with)
+#     - Languages Used (By User) : List
+#          - Language Name
+#          - Language Percentage Used
+#          - Total Lines contributed with said Language
+#     - PR's raised
+#     - Commits
+#     - Issues Created
+# - Total PR's
+# - Total Lines contributed
+# - Total Commits
+# - Total Issues Created
+# - Start Date
+# - Time Period (Start Date to Last Contribution)
+# - Dijkstra Rank (Say Gold)
+# - Repositories Forked
+
+# Overall GitHub Statistics
+# - Total Lines Contributed
+# - Total PR's raised
+# - Total Issues Created
+# - Total Repos (forked/private)
+# - Total Commits
+# - Languages Used (By User) : List
+#          - Language Name
+#          - Language Percentage Used
+#          - Total Lines contributed with said Language
+# - Contribution Graph Link
+
+    return {
+      "general_data": {
+          "username": "johndoe",
+          "full_name": "John Doe",
+          "avatar_img_link": "https://avatars.githubusercontent.com/u/123456?v=4",
+          "bio": "Software engineer passionate about open source and education.",
+          "followers": 150,
+          "following": 45,
+          "current_company": "Dijkstra",
+          "current_location": "Zurich, Switzerland",
+          "time_zone": "CET",
+          "websites_links": ["https://johndoe.dev", "https://github.com/johndoe"],
+          "organizations_list": ["Dijkstra", "Python Software Foundation"]
+      },
+      "dijkstra_statistics": {
+          "team": [
+              {
+                  "team_name": "Backend Wizards",
+                  "team_link": "https://github.com/orgs/Dijkstra/teams/backend-wizards",
+                  "superior": "Alice Smith"
+              },
+              {
+                  "team_name": "Frontend Ninjas",
+                  "team_link": "https://github.com/orgs/Dijkstra/teams/frontend-ninjas",
+                  "superior": "Bob Johnson"
+              }
+          ],
+          "repositories_contributed_to": [
+              {
+                  "repo_name": "dijkstra-core",
+                  "lines_added": 1200,
+                  "lines_removed": 300,
+                  "frameworks_present": ["FastAPI", "React"],
+                  "languages_used": [
+                      {"language_name": "Python", "percentage_used": 70, "total_lines": 840},
+                      {"language_name": "TypeScript", "percentage_used": 30, "total_lines": 360}
+                  ],
+                  "prs_raised": 10,
+                  "commits": 25,
+                  "issues_created": 5
+              },
+              {
+                  "repo_name": "dijkstra-frontend",
+                  "lines_added": 800,
+                  "lines_removed": 200,
+                  "frameworks_present": ["Next.js", "TailwindCSS"],
+                  "languages_used": [
+                      {"language_name": "TypeScript", "percentage_used": 90, "total_lines": 720},
+                      {"language_name": "CSS", "percentage_used": 10, "total_lines": 80}
+                  ],
+                  "prs_raised": 7,
+                  "commits": 18,
+                  "issues_created": 3
+              }
+          ],
+          "total_prs": 17,
+          "total_lines_contributed": 2500,
+          "total_commits": 43,
+          "total_issues_created": 8,
+          "start_date": "2023-01-15",
+          "time_period": "2023-01-15 to 2025-08-13",
+          "dijkstra_rank": "Gold",
+          "repositories_forked": ["dijkstra-utils", "dijkstra-docs"]
+      },
+      "overall_github_statistics": {
+          "total_lines_contributed": 10000,
+          "total_prs_raised": 75,
+          "total_issues_created": 20,
+          "total_repos": 30,
+          "total_commits": 150,
+          "languages_used": [
+              {"language_name": "Python", "percentage_used": 60, "total_lines": 6000},
+              {"language_name": "TypeScript", "percentage_used": 30, "total_lines": 3000},
+              {"language_name": "CSS", "percentage_used": 10, "total_lines": 1000}
+          ],
+          "contribution_graph_link": "https://github.com/johndoe"
+      }
+  }

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from Settings.logging_config import setup_logging
-from Services.github_service import GitHubService
-from Services.leetcode_service import LeetCodeService
+from Services.User.github_service import GitHubService
+from Services.User.leetcode_service import LeetCodeService
 
 # Initialize logging
 logger = setup_logging()

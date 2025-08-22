@@ -28,8 +28,8 @@ class GitHubService:
 # - Current Company
 # - Current Location
 # - Time Zone
-# - Websites/Links
-# - Organizations List
+# - Websites/Links (Array)
+# - Organizations List (Array) [FK to Organizations Table]
 
 # Dijkstra Specific Statistics
 # - Team (List of Objects)

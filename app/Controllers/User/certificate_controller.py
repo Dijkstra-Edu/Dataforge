@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from Settings.logging_config import setup_logging
-from Services.certificate_service import CertificateGeneratorService
+from Services.User.certificate_service import CertificateGeneratorService
 
 # Initialize logging
 logger = setup_logging()

@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlmodel import Session
 
 from Schema.jobs_schema import JobCreate, JobRead, JobUpdate
-from Services.jobs_service import JobService
+from Services.Opportunities.jobs_service import JobService
 from Settings.logging_config import setup_logging
 from db import get_session
 

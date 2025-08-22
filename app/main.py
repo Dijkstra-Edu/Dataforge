@@ -1,16 +1,9 @@
-from typing import List
-from sqlmodel import Session
-from fastapi import Depends, FastAPI, Request, HTTPException
+from fastapi import Depends, FastAPI
 from Settings.logging_config import setup_logging
-from Entities.SearchParams import SearchParams
-from app.Controllers import main_controller
-from uuid import UUID
-
-from Schema.jobs_schema import JobCreate, JobRead, JobUpdate
-from Services.jobs_service import JobService
-from app.Controllers import job_controller
-from app.Controllers import certificate_controller
-from db import get_session, init_db
+from Controllers import main_controller
+from Controllers.Opportunities import job_controller
+from Controllers.User import certificate_controller
+from db import init_db
 
 app = FastAPI()
 
@@ -27,5 +20,6 @@ def on_startup():
 def on_shutdown():
     logger.info("Shutting down the application...")
 
+app.include_router(main_controller.router)
 app.include_router(certificate_controller.router)
 app.include_router(job_controller.router)

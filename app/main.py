@@ -4,6 +4,8 @@ from fastapi import FastAPI, Request, HTTPException
 from Settings.logging_config import setup_logging
 from Entities.SearchParams import SearchParams
 from Controllers import MainController 
+import requests,os
+from collections import Counter
 
 app = FastAPI()
 
@@ -21,6 +23,10 @@ async def postDownloadCertificate(userName: str):
     return await MainController.postDownloadCertificate(userName)
 
 @app.get('/Dijkstra/v1/certificate/data/{userName}')
-async def getGitHubData(userName: str):
+async def getCertData(userName: str):
     logger.info("GET Request GitHub Data for user: " + userName)
-    return await MainController.getGitHubData(userName, None) # Combine this with the other API
+    return await MainController.getCertData(userName) # Combine this with the other API
+
+
+
+

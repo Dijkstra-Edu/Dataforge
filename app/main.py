@@ -1,26 +1,25 @@
-import uvicorn
-import httpx
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import Depends, FastAPI
 from Settings.logging_config import setup_logging
-from Entities.SearchParams import SearchParams
-from Controllers import MainController 
+from Controllers import main_controller
+from Controllers.Opportunities import job_controller
+from Controllers.User import certificate_controller
+from db import init_db
 
 app = FastAPI()
 
 # Initialize logging
 logger = setup_logging()
 
-@app.get('/Dijkstra/v1/certificate/health', status_code=200)
-async def root():
-    logger.info("Health Endpoint Triggered")
-    return {"status": 200, 'message': 'Dijkstra Certificate Generator Health Endpoint Triggered!!!'}
+@app.on_event("startup")
+def on_startup():
+    logger.info("Starting up the application...")
+    init_db()
+    logger.info("Database initialized successfully.")
 
-@app.post('/Dijkstra/v1/certificate/download/{userName}')
-async def postDownloadCertificate(userName: str):
-    logger.info("POST Request Certificate Download for user: " + userName)
-    return await MainController.postDownloadCertificate(userName)
+@app.on_event("shutdown")
+def on_shutdown():
+    logger.info("Shutting down the application...")
 
-@app.get('/Dijkstra/v1/certificate/data/{userName}')
-async def getGitHubData(userName: str):
-    logger.info("GET Request GitHub Data for user: " + userName)
-    return await MainController.getGitHubData(userName, None) # Combine this with the other API
+app.include_router(main_controller.router)
+app.include_router(certificate_controller.router)
+app.include_router(job_controller.router)

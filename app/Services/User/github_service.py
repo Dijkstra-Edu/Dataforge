@@ -1,18 +1,12 @@
 import os
 from typing import Dict
-import httpx
-import asyncio
-from fastapi import HTTPException
+import os
+from typing import Dict, Any
 from dotenv import load_dotenv
-from pydantic import BaseModel
-
-from Entities import SearchParams
 from Settings.logging_config import setup_logging
 
 logger = setup_logging()
 load_dotenv()
-
-GITHUB_API = "https://api.github.com"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 HEADERS = {
@@ -20,118 +14,9 @@ HEADERS = {
     "Authorization": f"Bearer {GITHUB_TOKEN}" if GITHUB_TOKEN else ""
 }
 
-# -------------------- Internal Service --------------------
-
-import os
-import requests
-from collections import defaultdict
-import json
-from typing import Dict, Any
-import requests
-
-LEETCODE_API = "https://leetcode.com/graphql"
-
-def getAllLeetcodeData(userName: str) -> Dict[str, Any]:
-    lc_query = """
-      query getFullUserProfile($username: String!) {
-        matchedUser(username: $username) {
-          username
-          profile {
-            realName
-            aboutMe
-            school
-            websites
-            countryName
-            company
-            jobTitle
-            skillTags
-            ranking
-            userAvatar
-            reputation
-            solutionCount
-          }
-          submitStatsGlobal {
-            acSubmissionNum {
-              difficulty
-              count
-            }
-          }
-          badges {
-            name
-            icon
-            hoverText
-          }
-          languageProblemCount {
-            languageName
-            problemsSolved
-          }
-          tagProblemCounts {
-            advanced {
-              tagName
-              problemsSolved
-            }
-            intermediate {
-              tagName
-              problemsSolved
-            }
-            fundamental {
-              tagName
-              problemsSolved
-            }
-          }
-        }
-
-        userContestRanking(username: $username) {
-            attendedContestsCount
-            rating
-            globalRanking
-            totalParticipants
-            topPercentage
-            badge {
-              name
-            }
-        }
-        userContestRankingHistory(username: $username) {
-            attended
-            trendDirection
-            problemsSolved
-            totalProblems
-            finishTimeInSeconds
-            rating
-            ranking
-            contest {
-              title
-              startTime
-            }
-        }
-      }
-    """
-
-    try:
-        response = requests.post(
-            LEETCODE_API,
-            json={"query": lc_query, "variables": {"username": userName}},
-            timeout=20
-        )
-        data = response.json()
-
-        if "errors" in data:
-            return {"leetcode": {"error": data["errors"]}}
-
-        result_data = data.get("data", {})
-
-        return {
-            "leetcode": {
-                "profile": result_data.get("matchedUser"),
-                "contestRanking": result_data.get("userContestRanking"),
-                # "contestHistory": result_data.get("userContestRankingHistory")
-            }
-        }
-
-    except Exception as e:
-        return {"leetcode": {"error": str(e)}}
-
-def getAllGitHubData(username: str) -> Dict[str, Any]:
+class GitHubService:
+  @staticmethod
+  def getAllGitHubData(username: str) -> Dict[str, Any]:
     
 #   General Data
 # - UserName
@@ -143,8 +28,8 @@ def getAllGitHubData(username: str) -> Dict[str, Any]:
 # - Current Company
 # - Current Location
 # - Time Zone
-# - Websites/Links
-# - Organizations List
+# - Websites/Links (Array)
+# - Organizations List (Array) [FK to Organizations Table]
 
 # Dijkstra Specific Statistics
 # - Team (List of Objects)
@@ -261,3 +146,5 @@ def getAllGitHubData(username: str) -> Dict[str, Any]:
           "contribution_graph_link": "https://github.com/johndoe"
       }
   }
+
+

@@ -71,26 +71,23 @@ Once the server is running, you can access:
 - **Interactive Docs (Swagger UI):**  
   👉 `http://127.0.0.1:8000/docs`
 
-### 📥 Download a Certificate
 
-```http
-POST /Dijkstra/v1/certificate/download/{userName}
-```
-- Generates and returns a personalized certificate for the given `{userName}`.
+### Naming Convention
 
-### 📊 Fetch GitHub Contribution Data
+The Naming Convention is specified by the PEP8 Standard.
 
-```http
-GET /Dijkstra/v1/certificate/data/{userName}?fromDate=YYYY-MM-DD&toDate=YYYY-MM-DD
-```
-- Returns contribution data for the given GitHub username and optional date range.
+| Entity                 | Convention                    | Example                         |
+| ---------------------- | ----------------------------- | ------------------------------- |
+| **Variables**          | `snake_case`                  | `user_id`, `total_count`        |
+| **Functions/Methods**  | `snake_case`                  | `get_user()`, `send_email()`    |
+| **Classes**            | `PascalCase`                  | `UserService`, `AuthController` |
+| **Exceptions**         | `PascalCase` + `Error` suffix | `ValidationError`               |
+| **Constants**          | `ALL_CAPS_WITH_UNDERSCORES`   | `MAX_RETRIES`, `DEFAULT_PORT`   |
+| **Modules (files)**    | `snake_case.py`               | `user_service.py`               |
+| **Packages (folders)** | `snake_case/`                 | `services/`, `models/`          |
+| **Private/Internal**   | `_single_leading_underscore`  | `_cache`, `_helper_function()`  |
+| **Magic methods**      | `__double_underscores__`      | `__init__`, `__str__`           |
 
-### ❤️ Health Check
-
-```http
-GET /Dijkstra/v1/certificate/health
-```
-- Returns a success message to confirm the server is running.
 
 ---
 

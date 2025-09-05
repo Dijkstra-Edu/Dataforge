@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
-from Entities.SQL.Enums.enums import Difficulty, ProjectLevel, Tools, WorkLocationType, EmploymentType, Currency
+from Entities.SQL.Enums.enums import Difficulty, ProjectLevel, Rank, Tools, WorkLocationType, EmploymentType, Currency
 from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String
 
 # Base class with UUID PK and timestamps
@@ -166,3 +166,20 @@ class Fellowship(UUIDBaseTable, table=True):
     organization_rel: Optional[Organization] = Relationship(
         back_populates="fellowships"
     )
+
+# -------------------------------------------------------------------------
+# User model
+# -------------------------------------------------------------------------
+
+class User(UUIDBaseTable, table=True):
+    __tablename__ = "Users"
+
+    github_user_name: str = Field(nullable=False, unique=True)
+    first_name: str = Field(nullable=False)
+    middle_name: Optional[str] = None
+    last_name: str = Field(nullable=False)
+    rank: Rank = Field(
+        default=Rank.UNRANKED,
+        sa_column=Column(SQLEnum(Rank, name="RANK"), nullable=False),
+    )
+    streak: Optional[int] = None

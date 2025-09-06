@@ -21,7 +21,7 @@ class UserRepository:
         statement = select(User).where(User.id == user_id)
         return self.session.exec(statement).first()
 
-    def get_by_github(self, github_user_name: str) -> Optional[User]:
+    def get_by_github_username(self, github_user_name: str) -> Optional[User]:
         statement = select(User).where(User.github_user_name == github_user_name)
         return self.session.exec(statement).first()
 
@@ -31,16 +31,28 @@ class UserRepository:
         limit: int = 20,
         sort_by: str = "created_at",
         order: str = "desc",
+        first_name: Optional[str] = None,
+        last_name: Optional[str] = None,
         github_user_name: Optional[str] = None,
         rank: Optional[str] = None,
+        min_streak: Optional[int] = None,
+        max_streak: Optional[int] = None,
     ) -> List[User]:
         statement = select(User)
 
         # Filtering
+        if first_name:
+            statement = statement.where(User.first_name.ilike(f"%{first_name}%"))
+        if last_name:
+            statement = statement.where(User.last_name.ilike(f"%{last_name}%"))
         if github_user_name:
             statement = statement.where(User.github_user_name.ilike(f"%{github_user_name}%"))
         if rank:
             statement = statement.where(User.rank == rank)
+        if min_streak is not None:
+            statement = statement.where(User.streak >= min_streak)
+        if max_streak is not None:
+            statement = statement.where(User.streak <= max_streak)
 
         # Sorting
         sort_column = getattr(User, sort_by, User.created_at)
@@ -55,6 +67,9 @@ class UserRepository:
         return self.session.exec(statement).all()
 
     def autocomplete(self, query: str, field: str = "github_user_name", limit: int = 10) -> List[User]:
+        """
+        Autocomplete based on a given field (default: github_user_name).
+        """
         field_column = getattr(User, field, User.github_user_name)
         statement = (
             select(User)

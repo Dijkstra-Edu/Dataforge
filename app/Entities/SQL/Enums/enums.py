@@ -147,10 +147,11 @@ class WorkLocationType(str, Enum):
     REMOTE = "REMOTE"
     HYBRID = "HYBRID"
 
-# School Type (not explicitly in schema, but inferred)
-# class SchoolType(str, Enum):
-#     UNIVERSITY = "UNIVERSITY"
-#     COLLEGE = "COLLEGE"
-#     SCHOOL = "SCHOOL"
-#     ONLINE = "ONLINE"
+# TEST_SCORE_TYPE
+class TestScoreType(str, Enum):
+    GRE = "GRE"
+    GMAT = "GMAT"
+    CGPA = "CGPA"    
+    TENTH = "TENTH"
+    TWELFTH = "TWELFTH"
 

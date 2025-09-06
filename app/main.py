@@ -3,6 +3,8 @@ from Settings.logging_config import setup_logging
 from Controllers import main_controller
 from Controllers.Opportunities import job_controller
 from Controllers.User import certificate_controller
+from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
+from Controllers.User import user_controller
 from db import init_db
 
 app = FastAPI()
@@ -23,3 +25,7 @@ def on_shutdown():
 app.include_router(main_controller.router)
 app.include_router(certificate_controller.router)
 app.include_router(job_controller.router)
+app.include_router(fellowships_controller.router)
+app.include_router(organization_controller.router)
+app.include_router(projects_opportunities_controller.router)
+app.include_router(user_controller.router)

@@ -1,4 +1,4 @@
-# 🎓 Certificate-Generator
+# 🎓 Dijkstra Main Server
 
 **Certificate-Generator** is a FastAPI-powered backend application that generates personalized certificates based on user data. It includes API endpoints to retrieve GitHub data and download certificates — perfect for automating certificates in bulk for events, competitions, etc.
 
@@ -34,6 +34,8 @@ Next add a .env folder in the root folder (outside of app). Inside of the app, a
 
 ```
 GITHUB_TOKEN=<GitHub Personal Access Token (Classic)>
+POSTGRES_URL=<Enter your personal PsotgreSQL Server Connection String>
+ENV=DEV
 ```
 
 To get a Personal Access Token:
@@ -43,6 +45,11 @@ To get a Personal Access Token:
   - repo scope if you want to access private repos.
   - read:org if you want org details.
 - Copy the token and put it in .env.
+
+To get a PostgreSQL Server Connection String:
+- Create an account on [Supabase](http://supabase.com/) to use a hosted PostgreSQL server or setup a local server on your PC by donwloading the [PostgreSQL client](https://www.enterprisedb.com/downloads/postgres-postgresql-downloads)
+- Upload the Schema present in the Schema folder (The latest one) for your server
+- Add the test data that is available for local testing
 
 After this, Navigate to the app folder
 ```

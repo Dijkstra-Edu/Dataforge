@@ -7,50 +7,151 @@ from typing_extensions import Annotated
 from uuid import UUID, uuid4
 
 # Enums for USER-DEFINED types
-class CertificationType(str, Enum):
-    PROFESSIONAL = "professional"
-    ACADEMIC = "academic"
-    COURSE = "course"
-    # Add other types as needed
+from enum import Enum
 
+# CAUSE
+class Cause(str, Enum):
+    EDUCATION = "EDUCATION"
+    ENVIRONMENT = "ENVIRONMENT"
+    SOCIAL_CAUSES = "SOCIAL_CAUSES"
+    HUMAN_RIGHT = "HUMAN_RIGHT"
+    SCIENCE_TECHNOLOGY = "SCIENCE_TECHNOLOGY"
+
+# CERTIFICATION_TYPE
+class CertificationType(str, Enum):
+    CERTIFICATE = "CERTIFICATE"
+    LICENSE = "LICENSE"
+    CERTIFICATION = "CERTIFICATION"
+
+# CURRENCY
 class Currency(str, Enum):
     INR = "INR"
     USD = "USD"
-    EUR = "EUR"
-    GBP = "GBP"
     CHF = "CHF"
+    EUR = "EUR"
     AUD = "AUD"
     SGD = "SGD"
-    # Add other currencies as needed
+    GBP = "GBP"
 
-class SchoolType(str, Enum):
-    UNIVERSITY = "university"
-    COLLEGE = "college"
-    SCHOOL = "school"
-    ONLINE = "online"
-    # Add other types as needed
-
-class LocationType(str, Enum):
-    PHYSICAL = "physical"
-    REMOTE = "remote"
-    HYBRID = "hybrid"
-
-class EmploymentType(str, Enum):
-    FULL_TIME = "full_time"
-    PART_TIME = "part_time"
-    CONTRACT = "contract"
-    INTERNSHIP = "internship"
-    FREELANCE = "freelance"
-
-class Rank(str, Enum):
-    UNRANKED = "unranked"
-    BRONZE = "bronze"
-    SILVER = "silver"
-    GOLD = "gold"
-    PLATINUM = "platinum"
-
+# DIFFICULTY
 class Difficulty(str, Enum):
-    BEGINNER = "beginner"
-    INTERMEDIATE = "intermediate"
-    ADVANCED = "advanced"
-    EXPERT = "expert"
+    EASY = "EASY"
+    MEDIUM = "MEDIUM"
+    HARD = "HARD"
+    EXTREME = "EXTREME"
+
+# DOMAIN
+class Domain(str, Enum):
+    FRONTEND = "FRONTEND"
+    BACKEND = "BACKEND"
+    FULLSTACK = "FULLSTACK"
+    SDE_TEST = "SDE_TEST"
+    QUALITY_ASSURANCE = "QUALITY_ASSURANCE"
+    TEST_AUTOMATION = "TEST_AUTOMATION"
+    DEVOPS = "DEVOPS"
+    MLOPS = "MLOPS"
+    CI_CD = "CI_CD"
+    CLOUD = "CLOUD"
+    SITE_RELIABILITY = "SITE_RELIABILITY"
+    SOFTWARE_INFRASTRUCTURE = "SOFTWARE_INFRASTRUCTURE"
+    SYSTEMS = "SYSTEMS"
+    EMBEDDED_IOT = "EMBEDDED_IOT"
+    ML_ENGINEERING = "ML_ENGINEERING"
+    ML_RESEARCH = "ML_RESEARCH"
+    DATA_SCIENCE_ANALYSIS = "DATA_SCIENCE_ANALYSIS"
+    DATA_ENGINEERING = "DATA_ENGINEERING"
+    APPLICATION = "APPLICATION"
+    ANDROID = "ANDROID"
+    IOS = "IOS"
+    CROSS_PLATFORM_MOBILE = "CROSS_PLATFORM_MOBILE"
+    WINDOWS = "WINDOWS"
+    MACOS = "MACOS"
+    LINUX = "LINUX"
+    CROSS_PLATFORM_PC = "CROSS_PLATFORM_PC"
+    COMPUTER_SYSTEMS = "COMPUTER_SYSTEMS"
+    COMPILERS = "COMPILERS"
+    GAME_DEV = "GAME_DEV"
+    APPLICATION_SECURITY = "APPLICATION_SECURITY"
+    PLATFORM_SECURITY = "PLATFORM_SECURITY"
+    DEVSECOPS = "DEVSECOPS"
+    UI_UX = "UI_UX"
+    PRODUCT_MANAGEMENT = "PRODUCT_MANAGEMENT"
+    PRODUCT_ENGINEERING = "PRODUCT_ENGINEERING"
+    TECHNICAL_WRITING = "TECHNICAL_WRITING"
+    OTHER = "OTHER"
+
+# EMPLOYMENT_TYPE
+class EmploymentType(str, Enum):
+    FULL_TIME = "FULL_TIME"
+    PART_TIME = "PART_TIME"
+    SELF_EMPLOYED = "SELF_EMPLOYED"
+    FREELANCE = "FREELANCE"
+    CONTRACT = "CONTRACT"
+    INTERNSHIP = "INTERNSHIP"
+    APPRENTICESHIP = "APPRENTICESHIP"
+    SEASONAL = "SEASONAL"
+
+# LEETCODE_TAG_CATEGORY
+class LeetcodeTagCategory(str, Enum):
+    FUNDAMENTAL = "FUNDAMENTAL"
+    INTERMEDIATE = "INTERMEDIATE"
+    ADVANCED = "ADVANCED"
+
+# PROJECT_LEVEL
+class ProjectLevel(str, Enum):
+    USER_PROJECT = "USER_PROJECT"
+    DIJKSTRA_PROJECT = "DIJKSTRA_PROJECT"
+    DIJKSTRA_AFFILIATE_PROJECT = "DIJKSTRA_AFFILIATE_PROJECT"
+    OS_FRIENDLY_PROJECTS = "OS_FRIENDLY_PROJECTS"
+    OS_HARD_PROJECTS = "OS_HARD_PROJECTS"
+
+# RANK
+class Rank(str, Enum):
+    UNRANKED = "UNRANKED"
+    IRON = "IRON"
+    BRONZE = "BRONZE"
+    SILVER = "SILVER"
+    GOLD = "GOLD"
+    PLATINUM = "PLATINUM"
+    DIAMOND = "DIAMOND"
+    EMERALD = "EMERALD"
+    OBSIDIAN = "OBSIDIAN"
+
+# ROLE
+class Role(str, Enum):
+    OWNER = "OWNER"
+    ADMIN = "ADMIN"
+    TEAM_LEAD = "TEAM_LEAD"
+
+# STATUS
+class Status(str, Enum):
+    TODO = "TODO"
+    IN_PROGRESS = "IN_PROGRESS"
+    DONE = "DONE"
+    BACKLOG = "BACKLOG"
+    BLOCKED = "BLOCKED"
+    OTHER = "OTHER"
+
+# TOOLS
+class Tools(str, Enum):
+    JAVA = "Java"
+    C = "C"
+    CPP = "C++"
+    PYTHON = "Python"
+    CSHARP = "C#"
+    RUST = "Rust"
+
+# WORK_LOCATION_TYPE
+class WorkLocationType(str, Enum):
+    ON_SITE = "ON_SITE"
+    REMOTE = "REMOTE"
+    HYBRID = "HYBRID"
+
+# TEST_SCORE_TYPE
+class TestScoreType(str, Enum):
+    GRE = "GRE"
+    GMAT = "GMAT"
+    CGPA = "CGPA"    
+    TENTH = "TENTH"
+    TWELFTH = "TWELFTH"
+

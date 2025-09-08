@@ -96,6 +96,7 @@ The Naming Convention is specified by the PEP8 Standard.
 | **Magic methods**      | `__double_underscores__`      | `__init__`, `__str__`           |
 
 
+
 ---
 
 ## 📜 License

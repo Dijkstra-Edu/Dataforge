@@ -224,7 +224,7 @@ class Publications(UUIDBaseTable, table=True):
     title: str = Field(nullable=False)
     publisher: str = Field(nullable=False)
     authors: List[str] = Field(
-        sa_column=Column(ARRAY(String)), nullable=False
+        sa_column=Column(ARRAY(String), nullable=False)
     )
     publication_date: date = Field(nullable=False)
     publication_url: str = Field(nullable=False)
@@ -412,11 +412,11 @@ class Blog(UUIDBaseTable, table=True):
     description: str = Field(nullable=False)
     publish_date: date = Field(nullable=False)
     tags: List[str] = Field(
-        sa_column=Column(ARRAY(String)), nullable=False
+        sa_column=Column(ARRAY(String), nullable=False)
     )
     image: str = Field(nullable=False)
     authors: List[str] = Field(
-        sa_column=Column(ARRAY(String)), nullable=False
+        sa_column=Column(ARRAY(String), nullable=False)
     )
     content: str = Field(nullable=False)
 

@@ -4,7 +4,7 @@ from Controllers import main_controller
 from Controllers.Opportunities import job_controller
 from Controllers.User import certificate_controller, workexperience_controller, profile_controller, user_controller
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
-from app.Controllers.User import location_controller
+from Controllers.User import location_controller
 from db import init_db
 
 app = FastAPI()

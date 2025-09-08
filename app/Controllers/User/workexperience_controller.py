@@ -4,8 +4,8 @@ from uuid import UUID
 from sqlmodel import Session
 
 from Settings.logging_config import setup_logging
-from app.Schema.workexperience_schema import CreateWorkExperience, ReadWorkExperience, ReadWorkExperienceWithRelations, UpdateWorkExperience
-from app.Services.User.workexperience_service import WorkExperienceService
+from Schema.workexperience_schema import CreateWorkExperience, ReadWorkExperience, ReadWorkExperienceWithRelations, UpdateWorkExperience
+from Services.User.workexperience_service import WorkExperienceService
 from db import get_session
 from Entities.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain
 

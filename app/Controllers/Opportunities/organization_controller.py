@@ -6,7 +6,7 @@ from sqlmodel import Session
 from Schema.organization_schema import CreateOrganization, UpdateOrganization
 from Services.Opportunities.organization_service import OrganizationService
 from Settings.logging_config import setup_logging
-from app.Schema.organization_schema import ReadOrganization
+from Schema.organization_schema import ReadOrganization
 from db import get_session
 
 logger = setup_logging()

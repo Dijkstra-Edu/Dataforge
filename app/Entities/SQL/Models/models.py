@@ -41,8 +41,8 @@ class User(UUIDBaseTable, table=True):
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
     blog_posts: List["Blog"] = Relationship(back_populates="user_rel")
     links: Optional["Links"] = Relationship(back_populates="user_rel")
-    created_tasks: List["Task"] = Relationship(back_populates="creator_rel")
-    assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel")
+    created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
+    assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -475,8 +475,8 @@ class Task(UUIDBaseTable, table=True):
 
     # Relationships
     project_rel: ProjectTask = Relationship(back_populates="tasks")
-    creator_rel: User = Relationship(back_populates="created_tasks")
-    assignee_rel: Optional[User] = Relationship(back_populates="assigned_tasks")
+    creator_rel: User = Relationship(back_populates="created_tasks", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
+    assignee_rel: Optional[User] = Relationship(back_populates="assigned_tasks", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
 
 # -------------------------------------------------------------------------
 # Organization model
@@ -537,6 +537,10 @@ class Job(UUIDBaseTable, table=True):
         default=None, foreign_key="Organizations.id", nullable=True
     )
     organization_rel: Optional[Organization] = Relationship(back_populates="jobs")
+
+    technologies: Optional[List[str]] = Field(
+        default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
+    )
 
 # -------------------------------------------------------------------------
 # Projects Opportunities model
@@ -620,7 +624,7 @@ class Fellowship(UUIDBaseTable, table=True):
         default_factory=list, sa_column=Column(ARRAY(String))
     )
     technologies: Optional[List[str]] = Field(
-        default_factory=list, sa_column=Column(ARRAY(String))
+        default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
 
     # Relationships

@@ -11,7 +11,7 @@ from Entities.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain
 
 logger = setup_logging()
 
-router = APIRouter(prefix="/Dijkstra/v1/work-experiences", tags=["Work Experiences"])
+router = APIRouter(prefix="/Dijkstra/v1/wp", tags=["Work Experiences"])
 
 
 @router.post("/", response_model=ReadWorkExperience)

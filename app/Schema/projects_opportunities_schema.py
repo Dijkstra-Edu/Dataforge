@@ -10,7 +10,7 @@ class CreateProject(BaseModel):
     project_level: Optional[ProjectLevel] = None
     is_user_project: Optional[bool] = None
     owner: Optional[str] = None
-    organization: Optional[UUID] = None
+    organization: UUID
     organization_logo: Optional[str] = None
     hero_image: Optional[str] = None
     repository: Optional[str] = None
@@ -59,7 +59,7 @@ class ReadProject(BaseModel):
     project_level: Optional[ProjectLevel]
     is_user_project: Optional[bool]
     owner: Optional[str]
-    organization: Optional[UUID]
+    organization: UUID
     organization_logo: Optional[str]
     hero_image: Optional[str]
     repository: Optional[str]

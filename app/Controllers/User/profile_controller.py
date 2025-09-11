@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
@@ -18,16 +18,9 @@ router = APIRouter(prefix="/Dijkstra/v1/profile", tags=["Profiles"])
 def create_profile(profile_create: CreateProfile, session: Session = Depends(get_session)):
     service = ProfileService(session)
     logger.info(f"Creating Profile for user ID: {profile_create.user_id}")
-    try:
-        profile = service.create_profile(profile_create)
-        logger.info(f"Created Profile with ID: {profile.id}")
-        return profile
-    except ValueError as e:
-        logger.warning(f"Failed to create profile: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error creating profile: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    profile = service.create_profile(profile_create)
+    logger.info(f"Created Profile with ID: {profile.id}")
+    return profile
 
 
 @router.get("/{profile_id}", response_model=ReadProfileWithUser)
@@ -35,9 +28,6 @@ def get_profile(profile_id: UUID, session: Session = Depends(get_session)):
     service = ProfileService(session)
     logger.info(f"Fetching Profile with ID: {profile_id}")
     profile = service.get_profile(profile_id)
-    if not profile:
-        logger.warning(f"Profile not found: {profile_id}")
-        raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
 
@@ -46,9 +36,6 @@ def get_profile_by_user_id(user_id: UUID, session: Session = Depends(get_session
     service = ProfileService(session)
     logger.info(f"Fetching Profile for user ID: {user_id}")
     profile = service.get_profile_by_user_id(user_id)
-    if not profile:
-        logger.warning(f"Profile not found for user ID: {user_id}")
-        raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
 
@@ -82,31 +69,16 @@ def update_profile(
     profile_id: UUID, profile_update: UpdateProfile, session: Session = Depends(get_session)
 ):
     service = ProfileService(session)
-    logger.info(
-        f"Updating Profile ID: {profile_id} with data: {profile_update.dict(exclude_unset=True)}"
-    )
-    try:
-        profile = service.update_profile(profile_id, profile_update)
-        if not profile:
-            logger.warning(f"Attempted update for missing Profile: {profile_id}")
-            raise HTTPException(status_code=404, detail="Profile not found")
-        logger.info(f"Updated Profile ID: {profile.id}")
-        return profile
-    except ValueError as e:
-        logger.warning(f"Failed to update profile: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error updating profile: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    logger.info(f"Updating Profile ID: {profile_id} with data: {profile_update.dict(exclude_unset=True)}")
+    profile = service.update_profile(profile_id, profile_update)
+    logger.info(f"Updated Profile ID: {profile.id}")
+    return profile
 
 
 @router.delete("/{profile_id}", response_model=ReadProfile)
 def delete_profile(profile_id: UUID, session: Session = Depends(get_session)):
     service = ProfileService(session)
     logger.info(f"Deleting Profile ID: {profile_id}")
-    profile = service.delete_profile(profile_id)
-    if not profile:
-        logger.warning(f"Attempted delete for missing Profile: {profile_id}")
-        raise HTTPException(status_code=404, detail="Profile not found")
-    logger.info(f"Deleted Profile ID: {profile.id}")
-    return profile
+    message = service.delete_profile(profile_id)
+    logger.info(message)
+    return {"detail": message}

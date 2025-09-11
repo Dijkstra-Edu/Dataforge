@@ -18,16 +18,9 @@ router = APIRouter(prefix="/Dijkstra/v1/wp", tags=["Work Experiences"])
 def create_work_experience(work_experience_create: CreateWorkExperience, session: Session = Depends(get_session)):
     service = WorkExperienceService(session)
     logger.info(f"Creating Work Experience: {work_experience_create.title} at {work_experience_create.company_name}")
-    try:
-        work_experience = service.create_work_experience(work_experience_create)
-        logger.info(f"Created Work Experience with ID: {work_experience.id}")
-        return work_experience
-    except ValueError as e:
-        logger.warning(f"Failed to create work experience: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error creating work experience: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    work_experience = service.create_work_experience(work_experience_create)
+    logger.info(f"Created Work Experience with ID: {work_experience.id}")
+    return work_experience
 
 
 @router.get("/{work_experience_id}", response_model=ReadWorkExperienceWithRelations)
@@ -35,9 +28,7 @@ def get_work_experience(work_experience_id: UUID, session: Session = Depends(get
     service = WorkExperienceService(session)
     logger.info(f"Fetching Work Experience with ID: {work_experience_id}")
     work_experience = service.get_work_experience(work_experience_id)
-    if not work_experience:
-        logger.warning(f"Work Experience not found: {work_experience_id}")
-        raise HTTPException(status_code=404, detail="Work Experience not found")
+    logger.info(f"Fetched Work Experience: {work_experience.title} at {work_experience.company_name}")
     return work_experience
 
 
@@ -115,31 +106,15 @@ def update_work_experience(
     work_experience_id: UUID, work_experience_update: UpdateWorkExperience, session: Session = Depends(get_session)
 ):
     service = WorkExperienceService(session)
-    logger.info(
-        f"Updating Work Experience ID: {work_experience_id} with data: {work_experience_update.dict(exclude_unset=True)}"
-    )
-    try:
-        work_experience = service.update_work_experience(work_experience_id, work_experience_update)
-        if not work_experience:
-            logger.warning(f"Attempted update for missing Work Experience: {work_experience_id}")
-            raise HTTPException(status_code=404, detail="Work Experience not found")
-        logger.info(f"Updated Work Experience ID: {work_experience.id}")
-        return work_experience
-    except ValueError as e:
-        logger.warning(f"Failed to update work experience: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error updating work experience: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
+    logger.info(f"Updating Work Experience ID: {work_experience_id} with data: {work_experience_update.dict(exclude_unset=True)}")
+    work_experience = service.update_work_experience(work_experience_id, work_experience_update)
+    logger.info(f"Updated Work Experience ID: {work_experience.id}")
+    return work_experience
 
 @router.delete("/{work_experience_id}", response_model=ReadWorkExperience)
 def delete_work_experience(work_experience_id: UUID, session: Session = Depends(get_session)):
     service = WorkExperienceService(session)
     logger.info(f"Deleting Work Experience ID: {work_experience_id}")
-    work_experience = service.delete_work_experience(work_experience_id)
-    if not work_experience:
-        logger.warning(f"Attempted delete for missing Work Experience: {work_experience_id}")
-        raise HTTPException(status_code=404, detail="Work Experience not found")
-    logger.info(f"Deleted Work Experience ID: {work_experience.id}")
-    return work_experience
+    message = service.delete_work_experience(work_experience_id)
+    logger.info(f"Deleted Work Experience ID: {work_experience_id}")
+    return {"detail": message}

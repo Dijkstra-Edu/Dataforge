@@ -6,6 +6,7 @@ from typing import List, Optional
 from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile
 from Schema.SQL.Models.models import Profile, User
 from Repository.User.profile_repository import ProfileRepository
+from Utils.Exceptions.user_exceptions import ProfileAlreadyExists, ProfileNotFound, ProfileNotFound, UserNotFound
 
 class ProfileService:
     def __init__(self, session: Session):
@@ -16,21 +17,27 @@ class ProfileService:
         # Check if user exists
         user = self.session.get(User, profile_create.user_id)
         if not user:
-            raise ValueError(f"User with ID '{profile_create.user_id}' does not exist")
+            raise UserNotFound(profile_create.user_id)
         
         # Check if profile already exists for this user
         existing_profile = self.repo.get_by_user_id(profile_create.user_id)
         if existing_profile:
-            raise ValueError(f"Profile already exists for user ID '{profile_create.user_id}'")
+            raise ProfileAlreadyExists(profile_create.user_id)
         
         profile = Profile(**profile_create.dict(exclude_unset=True))
         return self.repo.create(profile)
 
     def get_profile(self, profile_id: UUID) -> Optional[Profile]:
-        return self.repo.get(profile_id)
+        profile = self.repo.get(profile_id)
+        if not profile:
+            return ProfileNotFound(profile_id)
+        return profile
 
     def get_profile_by_user_id(self, user_id: UUID) -> Optional[Profile]:
-        return self.repo.get_by_user_id(user_id)
+        profile = self.repo.get_by_user_id(user_id)
+        if not profile:
+            return ProfileNotFound(user_id)
+        return profile
 
     def list_profiles(
         self,
@@ -54,30 +61,31 @@ class ProfileService:
     def update_profile(self, profile_id: UUID, profile_update: UpdateProfile) -> Optional[Profile]:
         profile = self.repo.get(profile_id)
         if not profile:
-            return None
-        
+            return ProfileNotFound(profile_id)
+
         # Check if user_id is being updated and if the new user exists
         if profile_update.user_id and profile_update.user_id != profile.user_id:
             user = self.session.get(User, profile_update.user_id)
             if not user:
-                raise ValueError(f"User with ID '{profile_update.user_id}' does not exist")
-            
+                raise UserNotFound(profile_update.user_id)
+
             # Check if profile already exists for the new user
             existing_profile = self.repo.get_by_user_id(profile_update.user_id)
             if existing_profile:
-                raise ValueError(f"Profile already exists for user ID '{profile_update.user_id}'")
-        
+                raise ProfileAlreadyExists(profile_update.user_id)
+
         update_data = profile_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(profile, key, value)
         return self.repo.update(profile)
 
-    def delete_profile(self, profile_id: UUID) -> Optional[Profile]:
+    def delete_profile(self, profile_id: UUID) -> Optional[str]:
         profile = self.repo.get(profile_id)
-        if profile:
-            self.repo.delete(profile)
-        return profile
-    
+        if not profile:
+            return ProfileNotFound(profile_id)
+        self.repo.delete(profile)
+        return f"Profile with ID {profile_id} deleted successfully."
+
     # Secondary Methods
     def get_profile_with_user_details(self, profile_id: UUID) -> Optional[Profile]:
         profile = self.repo.get_with_user_details(profile_id)

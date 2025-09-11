@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
-
+from sqlalchemy.exc import SQLAlchemyError
 from Schema.SQL.Models.models import WorkExperience
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 
@@ -11,10 +11,14 @@ class WorkExperienceRepository:
         self.session = session
 
     def create(self, work_experience: WorkExperience) -> WorkExperience:
-        self.session.add(work_experience)
-        self.session.commit()
-        self.session.refresh(work_experience)
-        return work_experience
+        try:
+            self.session.add(work_experience)
+            self.session.commit()
+            self.session.refresh(work_experience)
+            return work_experience
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, work_experience_id: UUID) -> Optional[WorkExperience]:
         statement = select(WorkExperience).where(WorkExperience.id == work_experience_id)
@@ -90,11 +94,19 @@ class WorkExperienceRepository:
         return self.session.exec(statement).all()
 
     def update(self, work_experience: WorkExperience) -> WorkExperience:
-        self.session.add(work_experience)
-        self.session.commit()
-        self.session.refresh(work_experience)
-        return work_experience
+        try:
+            self.session.add(work_experience)
+            self.session.commit()
+            self.session.refresh(work_experience)
+            return work_experience
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, work_experience: WorkExperience):
-        self.session.delete(work_experience)
-        self.session.commit()
+        try:
+            self.session.delete(work_experience)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise

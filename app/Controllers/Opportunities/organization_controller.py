@@ -46,6 +46,6 @@ def update_organization(org_id: UUID, org_update: UpdateOrganization, session: S
 def delete_organization(org_id: UUID, session: Session = Depends(get_session)):
     service = OrganizationService(session)
     logger.info(f"Deleting organization ID: {org_id}")
-    org = service.delete_organization(org_id)
-    logger.info(f"Deleted organization ID: {org.id}")
-    return org
+    message = service.delete_organization(org_id)
+    logger.info(message)
+    return {"detail": message}

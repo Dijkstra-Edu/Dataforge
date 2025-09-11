@@ -7,6 +7,7 @@ from Schema.SQL.Models.models import WorkExperience, Profile, Location
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 from Repository.User.workexperience_repository import WorkExperienceRepository
 from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, UpdateWorkExperience
+from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, WorkExperienceNotFound
 
 class WorkExperienceService:
     def __init__(self, session: Session):
@@ -17,22 +18,28 @@ class WorkExperienceService:
         # Check if profile exists
         profile = self.session.get(Profile, work_experience_create.profile_id)
         if not profile:
-            raise ValueError(f"Profile with ID '{work_experience_create.profile_id}' does not exist")
+            raise ProfileNotFound(work_experience_create.profile_id)
         
         # Check if location exists if provided
         if work_experience_create.location:
             location = self.session.get(Location, work_experience_create.location)
             if not location:
-                raise ValueError(f"Location with ID '{work_experience_create.location}' does not exist")
+                raise LocationNotFound(work_experience_create.location)
         
         work_experience = WorkExperience(**work_experience_create.dict(exclude_unset=True))
         return self.repo.create(work_experience)
 
     def get_work_experience(self, work_experience_id: UUID) -> Optional[WorkExperience]:
-        return self.repo.get(work_experience_id)
+        work_experience = self.repo.get(work_experience_id)
+        if not work_experience:
+            raise WorkExperienceNotFound(work_experience_id)
+        return work_experience
 
     def get_work_experiences_by_profile_id(self, profile_id: UUID) -> List[WorkExperience]:
-        return self.repo.get_by_profile_id(profile_id)
+        work_experiences = self.repo.get_by_profile_id(profile_id)
+        if not work_experiences:
+            raise WorkExperienceNotFound(profile_id)
+        return work_experiences
 
     def list_work_experiences(
         self,
@@ -91,21 +98,22 @@ class WorkExperienceService:
         if work_experience_update.profile_id and work_experience_update.profile_id != work_experience.profile_id:
             profile = self.session.get(Profile, work_experience_update.profile_id)
             if not profile:
-                raise ValueError(f"Profile with ID '{work_experience_update.profile_id}' does not exist")
-        
+                raise ProfileNotFound(work_experience_update.profile_id)
+
         # Check if location is being updated and if it exists
         if work_experience_update.location and work_experience_update.location != work_experience.location:
             location = self.session.get(Location, work_experience_update.location)
             if not location:
-                raise ValueError(f"Location with ID '{work_experience_update.location}' does not exist")
+                raise LocationNotFound(work_experience_update.location)
         
         update_data = work_experience_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(work_experience, key, value)
         return self.repo.update(work_experience)
 
-    def delete_work_experience(self, work_experience_id: UUID) -> Optional[WorkExperience]:
+    def delete_work_experience(self, work_experience_id: UUID) -> Optional[str]:
         work_experience = self.repo.get(work_experience_id)
-        if work_experience:
-            self.repo.delete(work_experience)
-        return work_experience
+        if not work_experience:
+            raise WorkExperienceNotFound(work_experience_id)
+        self.repo.delete(work_experience)
+        return f"Work Experience {work_experience_id} deleted successfully"

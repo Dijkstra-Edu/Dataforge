@@ -38,4 +38,4 @@ class OrganizationService:
         if not org:
             raise OrganizationNotFound(org_id)
         self.repo.delete(org)
-        return org
+        return f"Organization {org_id} deleted successfully"

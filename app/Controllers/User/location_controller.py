@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
@@ -16,25 +16,15 @@ router = APIRouter(prefix="/Dijkstra/v1/location", tags=["Locations"])
 def create_location(location_create: CreateLocation, session: Session = Depends(get_session)):
     service = LocationService(session)
     logger.info(f"Creating Location: {location_create.city}, {location_create.country}")
-    try:
-        location = service.create_location(location_create)
-        logger.info(f"Created Location with ID: {location.id}")
-        return location
-    except ValueError as e:
-        logger.warning(f"Failed to create location: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error creating location: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    location = service.create_location(location_create)
+    logger.info(f"Created Location with ID: {location.id}")
+    return location
 
 @router.get("/{location_id}", response_model=ReadLocation)
 def get_location(location_id: UUID, session: Session = Depends(get_session)):
     service = LocationService(session)
     logger.info(f"Fetching Location with ID: {location_id}")
     location = service.get_location(location_id)
-    if not location:
-        logger.warning(f"Location not found: {location_id}")
-        raise HTTPException(status_code=404, detail="Location not found")
     return location
 
 @router.get("/", response_model=List[ReadLocation])
@@ -83,30 +73,15 @@ def update_location(
     location_id: UUID, location_update: UpdateLocation, session: Session = Depends(get_session)
 ):
     service = LocationService(session)
-    logger.info(
-        f"Updating Location ID: {location_id} with data: {location_update.dict(exclude_unset=True)}"
-    )
-    try:
-        location = service.update_location(location_id, location_update)
-        if not location:
-            logger.warning(f"Attempted update for missing Location: {location_id}")
-            raise HTTPException(status_code=404, detail="Location not found")
-        logger.info(f"Updated Location ID: {location.id}")
-        return location
-    except ValueError as e:
-        logger.warning(f"Failed to update location: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error updating location: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    logger.info(f"Updating Location ID: {location_id} with data: {location_update.dict(exclude_unset=True)}")
+    location = service.update_location(location_id, location_update)
+    logger.info(f"Updated Location ID: {location.id}")
+    return location
 
 @router.delete("/{location_id}", response_model=ReadLocation)
 def delete_location(location_id: UUID, session: Session = Depends(get_session)):
     service = LocationService(session)
     logger.info(f"Deleting Location ID: {location_id}")
-    location = service.delete_location(location_id)
-    if not location:
-        logger.warning(f"Attempted delete for missing Location: {location_id}")
-        raise HTTPException(status_code=404, detail="Location not found")
-    logger.info(f"Deleted Location ID: {location.id}")
-    return location
+    message = service.delete_location(location_id)
+    logger.info(message)
+    return {"detail": message}

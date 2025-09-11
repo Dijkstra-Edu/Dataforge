@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
-
+from sqlalchemy.exc import SQLAlchemyError
 from Schema.SQL.Models.models import Profile
 
 class ProfileRepository:
@@ -10,10 +10,14 @@ class ProfileRepository:
         self.session = session
 
     def create(self, profile: Profile) -> Profile:
-        self.session.add(profile)
-        self.session.commit()
-        self.session.refresh(profile)
-        return profile
+        try:
+            self.session.add(profile)
+            self.session.commit()
+            self.session.refresh(profile)
+            return profile
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, profile_id: UUID) -> Optional[Profile]:
         statement = select(Profile).where(Profile.id == profile_id)
@@ -50,14 +54,22 @@ class ProfileRepository:
         return self.session.exec(statement).all()
 
     def update(self, profile: Profile) -> Profile:
-        self.session.add(profile)
-        self.session.commit()
-        self.session.refresh(profile)
-        return profile
+        try:
+            self.session.add(profile)
+            self.session.commit()
+            self.session.refresh(profile)
+            return profile
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, profile: Profile):
-        self.session.delete(profile)
-        self.session.commit()
+        try:
+            self.session.delete(profile)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     # Secondary Methods
     def get_with_user_details(self, profile_id: UUID) -> Optional[Profile]:

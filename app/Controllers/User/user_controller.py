@@ -1,7 +1,7 @@
 # Controllers/users_controller.py
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
@@ -19,16 +19,9 @@ router = APIRouter(prefix="/Dijkstra/v1/u", tags=["Users"])
 def create_user(user_create: CreateUser, session: Session = Depends(get_session)):
     service = UserService(session)
     logger.info(f"Creating User: {user_create.github_user_name}")
-    try:
-        user = service.create_user(user_create)
-        logger.info(f"Created User with ID: {user.id}")
-        return user
-    except ValueError as e:
-        logger.warning(f"Failed to create user: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error creating user: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    user = service.create_user(user_create)
+    logger.info(f"Created User with ID: {user.id}")
+    return user
 
 
 @router.get("/{user_id}", response_model=ReadUser)
@@ -36,9 +29,6 @@ def get_user(user_id: UUID, session: Session = Depends(get_session)):
     service = UserService(session)
     logger.info(f"Fetching User with ID: {user_id}")
     user = service.get_user(user_id)
-    if not user:
-        logger.warning(f"User not found: {user_id}")
-        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
@@ -47,9 +37,6 @@ def get_user_by_github_username(github_user_name: str, session: Session = Depend
     service = UserService(session)
     logger.info(f"Fetching User with GitHub username: {github_user_name}")
     user = service.get_user_by_github_username(github_user_name)
-    if not user:
-        logger.warning(f"User not found with GitHub username: {github_user_name}")
-        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
@@ -108,31 +95,16 @@ def update_user(
     user_id: UUID, user_update: UpdateUser, session: Session = Depends(get_session)
 ):
     service = UserService(session)
-    logger.info(
-        f"Updating User ID: {user_id} with data: {user_update.dict(exclude_unset=True)}"
-    )
-    try:
-        user = service.update_user(user_id, user_update)
-        if not user:
-            logger.warning(f"Attempted update for missing User: {user_id}")
-            raise HTTPException(status_code=404, detail="User not found")
-        logger.info(f"Updated User ID: {user.id}")
-        return user
-    except ValueError as e:
-        logger.warning(f"Failed to update user: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error updating user: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+    logger.info(f"Updating User ID: {user_id} with data: {user_update.dict(exclude_unset=True)}")
+    user = service.update_user(user_id, user_update)
+    logger.info(f"Updated User ID: {user.id}")
+    return user
 
 
 @router.delete("/{user_id}", response_model=ReadUser)
 def delete_user(user_id: UUID, session: Session = Depends(get_session)):
     service = UserService(session)
     logger.info(f"Deleting User ID: {user_id}")
-    user = service.delete_user(user_id)
-    if not user:
-        logger.warning(f"Attempted delete for missing User: {user_id}")
-        raise HTTPException(status_code=404, detail="User not found")
-    logger.info(f"Deleted User ID: {user.id}")
-    return user
+    message = service.delete_user(user_id)
+    logger.info(message)
+    return {"detail": message}

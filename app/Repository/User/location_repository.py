@@ -3,16 +3,21 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 from Schema.SQL.Models.models import Location
+from sqlalchemy.exc import SQLAlchemyError
 
 class LocationRepository:
     def __init__(self, session: Session):
         self.session = session
 
     def create(self, location: Location) -> Location:
-        self.session.add(location)
-        self.session.commit()
-        self.session.refresh(location)
-        return location
+        try:
+            self.session.add(location)
+            self.session.commit()
+            self.session.refresh(location)
+            return location
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, location_id: UUID) -> Optional[Location]:
         statement = select(Location).where(Location.id == location_id)
@@ -63,11 +68,19 @@ class LocationRepository:
         return self.session.exec(statement).all()
 
     def update(self, location: Location) -> Location:
-        self.session.add(location)
-        self.session.commit()
-        self.session.refresh(location)
-        return location
+        try:
+            self.session.add(location)
+            self.session.commit()
+            self.session.refresh(location)
+            return location
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, location: Location):
-        self.session.delete(location)
-        self.session.commit()
+        try:
+            self.session.delete(location)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise

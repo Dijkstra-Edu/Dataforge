@@ -5,17 +5,21 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 from Schema.SQL.Models.models import User
-
+from sqlalchemy.exc import SQLAlchemyError
 
 class UserRepository:
     def __init__(self, session: Session):
         self.session = session
 
     def create(self, user: User) -> User:
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
-        return user
+        try:
+            self.session.add(user)
+            self.session.commit()
+            self.session.refresh(user)
+            return user
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, user_id: UUID) -> Optional[User]:
         statement = select(User).where(User.id == user_id)
@@ -79,11 +83,19 @@ class UserRepository:
         return self.session.exec(statement).all()
 
     def update(self, user: User) -> User:
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
-        return user
+        try:
+            self.session.add(user)
+            self.session.commit()
+            self.session.refresh(user)
+            return user
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, user: User):
-        self.session.delete(user)
-        self.session.commit()
+        try:
+            self.session.delete(user)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise

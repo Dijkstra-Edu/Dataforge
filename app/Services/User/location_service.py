@@ -4,6 +4,7 @@ from sqlmodel import Session
 from Entities.UserDTOs.location_entity import CreateLocation, UpdateLocation
 from Schema.SQL.Models.models import Location
 from Repository.User.location_repository import LocationRepository
+from Utils.Exceptions.user_exceptions import LocationNotFound
 
 class LocationService:
     def __init__(self, session: Session):
@@ -14,7 +15,10 @@ class LocationService:
         return self.repo.create(location)
 
     def get_location(self, location_id: UUID) -> Optional[Location]:
-        return self.repo.get(location_id)
+        location = self.repo.get(location_id)
+        if not location:
+            return LocationNotFound(location_id)
+        return location
 
     def list_locations(
         self,
@@ -53,15 +57,16 @@ class LocationService:
     def update_location(self, location_id: UUID, location_update: UpdateLocation) -> Optional[Location]:
         location = self.repo.get(location_id)
         if not location:
-            return None
+            return LocationNotFound(location_id)
         
         update_data = location_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(location, key, value)
         return self.repo.update(location)
 
-    def delete_location(self, location_id: UUID) -> Optional[Location]:
+    def delete_location(self, location_id: UUID) -> Optional[str]:
         location = self.repo.get(location_id)
-        if location:
-            self.repo.delete(location)
-        return location
+        if not location:
+            return LocationNotFound(location_id)
+        self.repo.delete(location)
+        return f"Location {location_id} deleted successfully"

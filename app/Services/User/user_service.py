@@ -6,6 +6,7 @@ from sqlmodel import Session
 from Repository.User.user_repository import UserRepository
 from Entities.UserDTOs.user_entity import CreateUser, UpdateUser
 from Schema.SQL.Models.models import User
+from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, UserNotFound
 
 
 class UserService:
@@ -16,16 +17,22 @@ class UserService:
         # Check if github username already exists
         existing_user = self.repo.get_by_github_username(user_create.github_user_name)
         if existing_user:
-            raise ValueError(f"User with github username '{user_create.github_user_name}' already exists")
+            raise GitHubUsernameAlreadyExists(user_create.github_user_name)
         
         user = User(**user_create.dict(exclude_unset=True))
         return self.repo.create(user)
 
     def get_user(self, user_id: UUID) -> Optional[User]:
-        return self.repo.get(user_id)
+        user = self.repo.get(user_id)
+        if not user:
+            return UserNotFound(user_id)
+        return user
 
     def get_user_by_github_username(self, github_user_name: str) -> Optional[User]:
-        return self.repo.get_by_github_username(github_user_name)
+        user = self.repo.get_by_github_username(github_user_name)
+        if not user:
+            return GitHubUsernameNotFound(github_user_name)
+        return user
 
     def list_users(
         self,
@@ -70,21 +77,22 @@ class UserService:
     def update_user(self, user_id: UUID, user_update: UpdateUser) -> Optional[User]:
         user = self.repo.get(user_id)
         if not user:
-            return None
+            return UserNotFound(user_id)
         
         # Check if github username is being updated and if it already exists
         if user_update.github_user_name and user_update.github_user_name != user.github_user_name:
             existing_user = self.repo.get_by_github_username(user_update.github_user_name)
             if existing_user:
-                raise ValueError(f"User with github username '{user_update.github_user_name}' already exists")
+                raise GitHubUsernameAlreadyExists(user_update.github_user_name)
         
         update_data = user_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(user, key, value)
         return self.repo.update(user)
 
-    def delete_user(self, user_id: UUID) -> Optional[User]:
+    def delete_user(self, user_id: UUID) -> Optional[str]:
         user = self.repo.get(user_id)
-        if user:
-            self.repo.delete(user)
-        return user
+        if not user:
+            return UserNotFound(user_id)
+        self.repo.delete(user)
+        return f"User {user_id} deleted successfully"

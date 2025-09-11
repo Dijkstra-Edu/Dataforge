@@ -23,8 +23,6 @@ def create_project(project_create: CreateProject, session: Session = Depends(get
 def get_project(project_id: UUID, session: Session = Depends(get_session)):
     service = ProjectsOpportunitiesService(session)
     project = service.get_project(project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 @router.get("/", response_model=List[ReadProject])
@@ -62,14 +60,11 @@ def autocomplete_projects(
 def update_project(project_id: UUID, project_update: UpdateProject, session: Session = Depends(get_session)):
     service = ProjectsOpportunitiesService(session)
     project = service.update_project(project_id, project_update)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
     return project
 
 @router.delete("/{project_id}", response_model=ReadProject)
 def delete_project(project_id: UUID, session: Session = Depends(get_session)):
     service = ProjectsOpportunitiesService(session)
-    project = service.delete_project(project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
-    return project
+    message = service.delete_project(project_id)
+    logger.info(message)
+    return {"detail": message}

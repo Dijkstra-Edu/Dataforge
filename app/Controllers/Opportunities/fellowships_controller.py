@@ -28,9 +28,6 @@ def get_fellowship(fellowship_id: UUID, session: Session = Depends(get_session))
     service = FellowshipService(session)
     logger.info(f"Fetching Fellowship with ID: {fellowship_id}")
     fellowship = service.get_fellowship(fellowship_id)
-    if not fellowship:
-        logger.warning(f"Fellowship not found: {fellowship_id}")
-        raise HTTPException(status_code=404, detail="Fellowship not found")
     return fellowship
 
 
@@ -58,9 +55,6 @@ def update_fellowship(fellowship_id: UUID, fellowship_update: UpdateFellowship, 
     service = FellowshipService(session)
     logger.info(f"Updating Fellowship ID: {fellowship_id} with data: {fellowship_update.dict(exclude_unset=True)}")
     fellowship = service.update_fellowship(fellowship_id, fellowship_update)
-    if not fellowship:
-        logger.warning(f"Fellowship not found for update: {fellowship_id}")
-        raise HTTPException(status_code=404, detail="Fellowship not found")
     logger.info(f"Fellowship updated: {fellowship.id}")
     return fellowship
 
@@ -69,12 +63,9 @@ def update_fellowship(fellowship_id: UUID, fellowship_update: UpdateFellowship, 
 def delete_fellowship(fellowship_id: UUID, session: Session = Depends(get_session)):
     service = FellowshipService(session)
     logger.info(f"Deleting Fellowship ID: {fellowship_id}")
-    fellowship = service.delete_fellowship(fellowship_id)
-    if not fellowship:
-        logger.warning(f"Fellowship not found for deletion: {fellowship_id}")
-        raise HTTPException(status_code=404, detail="Fellowship not found")
-    logger.info(f"Fellowship deleted: {fellowship.id}")
-    return fellowship
+    message = service.delete_fellowship(fellowship_id)
+    logger.info(message)
+    return {"detail": message}
 
 
 @router.get("/autocomplete/", response_model=List[ReadFellowship])

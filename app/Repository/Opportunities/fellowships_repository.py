@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import desc, asc
-
+from sqlalchemy.exc import SQLAlchemyError
 from Entities.SQL.Models.models import Fellowship
 
 
@@ -11,10 +11,14 @@ class FellowshipRepository:
         self.session = session
 
     def create(self, fellowship: Fellowship) -> Fellowship:
-        self.session.add(fellowship)
-        self.session.commit()
-        self.session.refresh(fellowship)
-        return fellowship
+        try:
+            self.session.add(fellowship)
+            self.session.commit()
+            self.session.refresh(fellowship)
+            return fellowship
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, fellowship_id: UUID) -> Optional[Fellowship]:
         statement = select(Fellowship).where(Fellowship.id == fellowship_id)
@@ -59,8 +63,12 @@ class FellowshipRepository:
         return fellowship
 
     def delete(self, fellowship: Fellowship):
-        self.session.delete(fellowship)
-        self.session.commit()
+        try:
+            self.session.delete(fellowship)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def autocomplete(self, query: str, field: str = "title", limit: int = 10) -> List[Fellowship]:
         field_column = getattr(Fellowship, field, Fellowship.title)

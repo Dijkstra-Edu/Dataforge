@@ -1,6 +1,6 @@
 # controllers/organizations_controller.py
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends
 from uuid import UUID
 from sqlmodel import Session
 from Schema.organization_schema import CreateOrganization, UpdateOrganization, ReadOrganization
@@ -24,18 +24,10 @@ def create_organization(org_create: CreateOrganization, session: Session = Depen
 def get_organization(org_id: UUID, session: Session = Depends(get_session)):
     service = OrganizationService(session)
     logger.info(f"Fetching organization with ID: {org_id}")
-    org = service.get_organization(org_id)
-    if not org:
-        logger.warning(f"Organization not found: {org_id}")
-        raise HTTPException(status_code=404, detail="Organization not found")
-    return org
+    return service.get_organization(org_id)
 
 @router.get("/", response_model=List[ReadOrganization])
-def list_organizations(
-    skip: int = 0,
-    limit: int = 20,
-    session: Session = Depends(get_session),
-):
+def list_organizations(skip: int = 0, limit: int = 20, session: Session = Depends(get_session)):
     service = OrganizationService(session)
     logger.info(f"Listing organizations: skip={skip}, limit={limit}")
     orgs = service.list_organizations(skip=skip, limit=limit)
@@ -47,9 +39,6 @@ def update_organization(org_id: UUID, org_update: UpdateOrganization, session: S
     service = OrganizationService(session)
     logger.info(f"Updating organization ID: {org_id} with data: {org_update.dict(exclude_unset=True)}")
     org = service.update_organization(org_id, org_update)
-    if not org:
-        logger.warning(f"Attempted update for missing organization: {org_id}")
-        raise HTTPException(status_code=404, detail="Organization not found")
     logger.info(f"Updated organization ID: {org.id}")
     return org
 
@@ -58,8 +47,5 @@ def delete_organization(org_id: UUID, session: Session = Depends(get_session)):
     service = OrganizationService(session)
     logger.info(f"Deleting organization ID: {org_id}")
     org = service.delete_organization(org_id)
-    if not org:
-        logger.warning(f"Attempted delete for missing organization: {org_id}")
-        raise HTTPException(status_code=404, detail="Organization not found")
     logger.info(f"Deleted organization ID: {org.id}")
     return org

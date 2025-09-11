@@ -1,11 +1,12 @@
 # services/projects_opportunities_service.py
+from typing import Optional
 from uuid import UUID
 from sqlmodel import Session
 from Entities.SQL.Models.models import Organization, ProjectsOpportunities
 from Repository.Opportunities.projects_opportunities_repository import ProjectsOpportunitiesRepository
 from Schema.projects_opportunities_schema import CreateProject, UpdateProject
 from Entities.SQL.Enums.enums import Tools
-from Utils.Exceptions.opportunities_exceptions import OrganizationNotFound
+from Utils.Exceptions.opportunities_exceptions import OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
 
 class ProjectsOpportunitiesService:
@@ -27,7 +28,10 @@ class ProjectsOpportunitiesService:
         return self.repo.create(project)
 
     def get_project(self, project_id: UUID) -> ProjectsOpportunities:
-        return self.repo.get(project_id)
+        project = self.repo.get(project_id)
+        if not project:
+            raise ProjectOpportunityNotFound(project_id)
+        return project
 
     def list_projects(
         self,
@@ -45,7 +49,7 @@ class ProjectsOpportunitiesService:
     def update_project(self, project_id: UUID, project_update: UpdateProject) -> ProjectsOpportunities:
         project = self.repo.get(project_id)
         if not project:
-            return None
+            raise ProjectOpportunityNotFound(project_id)
         update_data = project_update.dict(exclude_unset=True)
 
          # Validate tools if present
@@ -58,8 +62,9 @@ class ProjectsOpportunitiesService:
             setattr(project, key, value)
         return self.repo.update(project)
 
-    def delete_project(self, project_id: UUID):
+    def delete_project(self, project_id: UUID) -> Optional[str] :
         project = self.repo.get(project_id)
-        if project:
-            self.repo.delete(project)
-        return project
+        if not project:
+            raise ProjectOpportunityNotFound(project_id)
+        self.repo.delete(project)
+        return f"Project {project_id} deleted successfully"

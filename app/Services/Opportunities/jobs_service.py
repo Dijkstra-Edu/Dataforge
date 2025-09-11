@@ -1,13 +1,13 @@
 # services/jobs_service.py
 from uuid import UUID
-from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from typing import List, Optional
 
 from Repository.Opportunities.jobs_repository import JobRepository
 from Schema.jobs_schema import CreateJob, UpdateJob
 from Entities.SQL.Models.models import Job, Organization
-from Entities.SQL.Enums.enums import Tools
+from Utils.Exceptions.opportunities_exceptions import JobNotFound, OrganizationNotFound
+from Utils.Helpers.opportunities_helpers import _validate_tools
 
 
 class JobService:
@@ -16,31 +16,22 @@ class JobService:
         self.repo = JobRepository(session)
 
     def create_job(self, job_create: CreateJob) -> Job:
-        # Check if the organization exists
+        # Check organization exists
         org = self.session.get(Organization, job_create.organization)
         if not org:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Organization with ID {job_create.organization} does not exist."
-            )
-        
-        # Validate technologies
-        if job_create.technologies:
-            invalid_techs = [
-                tech for tech in job_create.technologies
-                if tech not in Tools._value2member_map_
-            ]
-            if invalid_techs:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid technologies: {invalid_techs}. Must be one of {list(Tools)}"
-                )
+            raise OrganizationNotFound(job_create.organization)
+
+        # Validate tools
+        _validate_tools(job_create.technologies, "technologies")
         
         job = Job(**job_create.dict(exclude_unset=True))
         return self.repo.create(job)
 
     def get_job(self, job_id: UUID) -> Optional[Job]:
-        return self.repo.get(job_id)
+        job = self.repo.get(job_id)
+        if not job:
+            raise JobNotFound(job_id)
+        return job
 
     def list_jobs(
         self,
@@ -85,27 +76,20 @@ class JobService:
     def update_job(self, job_id: UUID, job_update: UpdateJob) -> Optional[Job]:
         job = self.repo.get(job_id)
         if not job:
-            return None
+            raise JobNotFound(job_id)
         update_data = job_update.dict(exclude_unset=True)
 
-        # Validate technologies if present
+        # Validate tools if present
         if "technologies" in update_data:
-            invalid_techs = [
-                tech for tech in update_data["technologies"]
-                if tech not in Tools._value2member_map_
-            ]
-            if invalid_techs:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid technologies: {invalid_techs}. Must be one of {list(Tools)}"
-                )
+            _validate_tools(update_data["technologies"], "technologies")
 
         for key, value in update_data.items():
             setattr(job, key, value)
         return self.repo.update(job)
 
-    def delete_job(self, job_id: UUID) -> Optional[Job]:
+    def delete_job(self, job_id: UUID) -> Optional[str]:
         job = self.repo.get(job_id)
-        if job:
-            self.repo.delete(job)
-        return job
+        if not job:
+            raise JobNotFound(job_id)
+        self.repo.delete(job)
+        return f"Job {job_id} deleted successfully"

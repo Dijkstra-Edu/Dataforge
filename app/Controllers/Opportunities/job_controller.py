@@ -25,11 +25,7 @@ def create_job(job_create: CreateJob, session: Session = Depends(get_session)):
 def get_job(job_id: UUID, session: Session = Depends(get_session)):
     service = JobService(session)
     logger.info(f"Fetching Job with ID: {job_id}")
-    job = service.get_job(job_id)
-    if not job:
-        logger.warning(f"Job not found: {job_id}")
-        raise HTTPException(status_code=404, detail="Job not found")
-    return job
+    return service.get_job(job_id)
 
 
 @router.get("/", response_model=List[ReadJob])
@@ -77,34 +73,20 @@ def autocomplete_jobs(
 ):
     service = JobService(session)
     logger.info(f"Autocomplete query='{query}' field='{field}' limit={limit}")
-    results = service.autocomplete_jobs(query, field, limit)
-    logger.info(f"Autocomplete returned {len(results)} results")
-    return results
+    return service.autocomplete_jobs(query, field, limit)
 
 
 @router.put("/{job_id}", response_model=ReadJob)
-def update_job(
-    job_id: UUID, job_update: UpdateJob, session: Session = Depends(get_session)
-):
+def update_job(job_id: UUID, job_update: UpdateJob, session: Session = Depends(get_session)):
     service = JobService(session)
-    logger.info(
-        f"Updating Job ID: {job_id} with data: {job_update.dict(exclude_unset=True)}"
-    )
-    job = service.update_job(job_id, job_update)
-    if not job:
-        logger.warning(f"Attempted update for missing Job: {job_id}")
-        raise HTTPException(status_code=404, detail="Job not found")
-    logger.info(f"Updated Job ID: {job.id}")
-    return job
+    logger.info(f"Updating Job ID: {job_id} with data: {job_update.dict(exclude_unset=True)}")
+    return service.update_job(job_id, job_update)
 
 
 @router.delete("/{job_id}", response_model=ReadJob)
 def delete_job(job_id: UUID, session: Session = Depends(get_session)):
     service = JobService(session)
     logger.info(f"Deleting Job ID: {job_id}")
-    job = service.delete_job(job_id)
-    if not job:
-        logger.warning(f"Attempted delete for missing Job: {job_id}")
-        raise HTTPException(status_code=404, detail="Job not found")
-    logger.info(f"Deleted Job ID: {job.id}")
-    return job
+    message = service.delete_job(job_id)
+    logger.info(message)
+    return {"detail": message}

@@ -1,12 +1,13 @@
 from typing import List, Optional
 from uuid import UUID
-from fastapi import HTTPException, status
 from sqlmodel import Session
 
 from Entities.SQL.Models.models import Fellowship, Organization
 from Repository.Opportunities.fellowships_repository import FellowshipRepository
 from Schema.fellowships_schema import CreateFellowship, UpdateFellowship
 from Entities.SQL.Enums.enums import Tools
+from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, OrganizationNotFound
+from Utils.Helpers.opportunities_helpers import _validate_tools
 
 
 class FellowshipService:
@@ -15,31 +16,22 @@ class FellowshipService:
         self.repo = FellowshipRepository(session)
 
     def create_fellowship(self, fellowship_create: CreateFellowship) -> Fellowship:
-        # Check if the organization exists
+        # Check organization exists
         org = self.session.get(Organization, fellowship_create.organization)
         if not org:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Organization with ID {fellowship_create.organization} does not exist."
-            )
-        
-        # Validate technologies
-        if fellowship_create.technologies:
-            invalid_techs = [
-                tech for tech in fellowship_create.technologies
-                if tech not in Tools._value2member_map_
-            ]
-            if invalid_techs:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid technologies: {invalid_techs}. Must be one of {list(Tools)}"
-                )
+            raise OrganizationNotFound(fellowship_create.organization)
+
+        # Validate tools
+        _validate_tools(fellowship_create.technologies, "technologies")
         
         fellowship = Fellowship(**fellowship_create.dict(exclude_unset=True))
         return self.repo.create(fellowship)
 
     def get_fellowship(self, fellowship_id: UUID) -> Optional[Fellowship]:
-        return self.repo.get(fellowship_id)
+        fellowship = self.repo.get(fellowship_id)
+        if not fellowship:
+            raise FellowshipNotFound(fellowship_id)
+        return fellowship
 
     def list_fellowships(
         self,
@@ -57,30 +49,23 @@ class FellowshipService:
     def update_fellowship(self, fellowship_id: UUID, fellowship_update: UpdateFellowship) -> Optional[Fellowship]:
         fellowship = self.repo.get(fellowship_id)
         if not fellowship:
-            return None
+            raise FellowshipNotFound(fellowship_id)
         update_data = fellowship_update.dict(exclude_unset=True)
 
-        # Validate technologies if present
+        # Validate tools if present
         if "technologies" in update_data:
-            invalid_techs = [
-                tech for tech in update_data["technologies"]
-                if tech not in Tools._value2member_map_
-            ]
-            if invalid_techs:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid technologies: {invalid_techs}. Must be one of {list(Tools)}"
-                )
+            _validate_tools(update_data["technologies"], "technologies")
         
         for key, value in update_data.items():
             setattr(fellowship, key, value)
         return self.repo.update(fellowship)
 
-    def delete_fellowship(self, fellowship_id: UUID) -> Optional[Fellowship]:
+    def delete_fellowship(self, fellowship_id: UUID) -> Optional[str]:
         fellowship = self.repo.get(fellowship_id)
-        if fellowship:
-            self.repo.delete(fellowship)
-        return fellowship
+        if not fellowship:
+            raise FellowshipNotFound(fellowship_id)
+        self.repo.delete(fellowship)
+        return f"Fellowship {fellowship_id} deleted successfully"
 
     def autocomplete_fellowships(self, query: str, field: str = "title", limit: int = 10) -> List[Fellowship]:
         return self.repo.autocomplete(query, field, limit)

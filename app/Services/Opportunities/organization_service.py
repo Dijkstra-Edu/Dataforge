@@ -5,6 +5,7 @@ from sqlmodel import Session
 from Repository.Opportunities.organizations_repository import OrganizationRepository
 from Schema.organization_schema import CreateOrganization, UpdateOrganization
 from Entities.SQL.Models.models import Organization
+from Utils.Exceptions.opportunities_exceptions import OrganizationNotFound
 
 class OrganizationService:
     def __init__(self, session: Session):
@@ -15,7 +16,10 @@ class OrganizationService:
         return self.repo.create(org)
 
     def get_organization(self, org_id: UUID) -> Organization:
-        return self.repo.get(org_id)
+        org = self.repo.get(org_id)
+        if not org:
+            raise OrganizationNotFound(org_id)
+        return org
 
     def list_organizations(self, skip: int = 0, limit: int = 100):
         return self.repo.list(skip, limit)
@@ -23,7 +27,7 @@ class OrganizationService:
     def update_organization(self, org_id: UUID, org_update: UpdateOrganization) -> Organization:
         org = self.repo.get(org_id)
         if not org:
-            return None
+            raise OrganizationNotFound(org_id)
         update_data = org_update.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(org, key, value)
@@ -31,6 +35,7 @@ class OrganizationService:
 
     def delete_organization(self, org_id: UUID):
         org = self.repo.get(org_id)
-        if org:
-            self.repo.delete(org)
+        if not org:
+            raise OrganizationNotFound(org_id)
+        self.repo.delete(org)
         return org

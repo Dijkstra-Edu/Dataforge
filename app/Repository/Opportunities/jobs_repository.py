@@ -3,6 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
+from sqlalchemy.exc import SQLAlchemyError
 
 from Entities.SQL.Models.models import Job
 
@@ -11,10 +12,14 @@ class JobRepository:
         self.session = session
 
     def create(self, job: Job) -> Job:
-        self.session.add(job)
-        self.session.commit()
-        self.session.refresh(job)
-        return job
+        try:
+            self.session.add(job)
+            self.session.commit()
+            self.session.refresh(job)
+            return job
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, job_id: UUID) -> Optional[Job]:
         statement = select(Job).where(Job.id == job_id)
@@ -39,7 +44,7 @@ class JobRepository:
         if title:
             statement = statement.where(Job.title.ilike(f"%{title}%"))
         if organization:
-            statement = statement.where(Job.organization_id == organization)
+            statement = statement.where(Job.organization == organization)
         if location:
             statement = statement.where(Job.location.ilike(f"%{location}%"))
         if location_type:
@@ -74,11 +79,19 @@ class JobRepository:
         return self.session.exec(statement).all()
 
     def update(self, job: Job) -> Job:
-        self.session.add(job)
-        self.session.commit()
-        self.session.refresh(job)
-        return job
+        try:
+            self.session.add(job)
+            self.session.commit()
+            self.session.refresh(job)
+            return job
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, job: Job):
-        self.session.delete(job)
-        self.session.commit()
+        try:
+            self.session.delete(job)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise

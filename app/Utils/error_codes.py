@@ -10,6 +10,8 @@ class ErrorCodes:
         abc: Alphanumeric error number (A01, A02, etc.)
     """
 
+    GENERIC_ERROR = "GEN-ERR-000"  # Generic error code for uncategorized errors
+
     # -----------------------------
     # Opportunities → Project Opportunities
     # -----------------------------
@@ -33,3 +35,27 @@ class ErrorCodes:
 
     # Not found errors
     OPPT_PROJ_NF_A01 = "OPPT-PROJ-NF-A01"  # Project not found
+
+    # -----------------------------
+    # Opportunities → Organizations
+    # -----------------------------
+
+    # Database errors
+    OPPT_ORG_DB_A01 = "OPPT-ORG-DB-A01"  # Failure inserting organization
+    OPPT_ORG_DB_A02 = "OPPT-ORG-DB-A02"  # Failure updating organization
+    OPPT_ORG_DB_A03 = "OPPT-ORG-DB-A03"  # Failure deleting organization
+
+    # Server / Unexpected errors
+    OPPT_ORG_SRV_A01 = "OPPT-ORG-SRV-A01"  # Generic server error
+    OPPT_ORG_SRV_A02 = "OPPT-ORG-SRV-A02"  # Error fetching organizations list
+
+    # Authentication / Permission errors
+    OPPT_ORG_AUTH_A01 = "OPPT-ORG-AUTH-A01"  # User not authorized
+    OPPT_ORG_AUTH_A02 = "OPPT-ORG-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    OPPT_ORG_VAL_A01 = "OPPT-ORG-VAL-A01"  # Invalid organization payload
+    OPPT_ORG_VAL_A02 = "OPPT-ORG-VAL-A02"  # Required field missing
+
+    # Not found errors
+    OPPT_ORG_NF_A01 = "OPPT-ORG-NF-A01"  # Organization not found

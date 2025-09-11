@@ -3,16 +3,21 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from Entities.SQL.Models.models import ProjectsOpportunities
+from sqlalchemy.exc import SQLAlchemyError
 
 class ProjectsOpportunitiesRepository:
     def __init__(self, session: Session):
         self.session = session
 
     def create(self, project: ProjectsOpportunities) -> ProjectsOpportunities:
-        self.session.add(project)
-        self.session.commit()
-        self.session.refresh(project)
-        return project
+        try:
+            self.session.add(project)
+            self.session.commit()
+            self.session.refresh(project)
+            return project
+        except SQLAlchemyError as e:
+            self.session.rollback()
+            raise
 
     def get(self, project_id: UUID) -> Optional[ProjectsOpportunities]:
         statement = select(ProjectsOpportunities).where(ProjectsOpportunities.id == project_id)
@@ -50,11 +55,19 @@ class ProjectsOpportunitiesRepository:
         return self.session.exec(statement).all()
 
     def update(self, project: ProjectsOpportunities) -> ProjectsOpportunities:
-        self.session.add(project)
-        self.session.commit()
-        self.session.refresh(project)
-        return project
+        try:
+            self.session.add(project)
+            self.session.commit()
+            self.session.refresh(project)
+            return project
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise
 
     def delete(self, project: ProjectsOpportunities):
-        self.session.delete(project)
-        self.session.commit()
+        try:
+            self.session.delete(project)
+            self.session.commit()
+        except SQLAlchemyError:
+            self.session.rollback()
+            raise

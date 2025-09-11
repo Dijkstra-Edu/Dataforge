@@ -554,18 +554,18 @@ class ProjectsOpportunities(UUIDBaseTable, table=True):
     )
     is_user_project: Optional[bool] = None
     owner: Optional[str] = None
-    organization: Optional[UUID] = Field(
-        default=None, foreign_key="Organizations.id", nullable=True
+    organization: UUID = Field(
+        foreign_key="Organizations.id", nullable=False
     )
     organization_logo: Optional[str] = None
     hero_image: Optional[str] = None
     repository: Optional[str] = None
 
     # languages & frameworks (USER-DEFINED in schema, but let's treat as TEXT ARRAY for flexibility)
-    languages: Optional[List[str]] = Field(
+    languages: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
-    frameworks: Optional[List[str]] = Field(
+    frameworks: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
 

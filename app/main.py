@@ -5,6 +5,7 @@ from Controllers.Opportunities import job_controller
 from Controllers.User import certificate_controller, workexperience_controller, profile_controller, user_controller
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
 from Controllers.User import location_controller
+from Controllers.error_handlers import register_exception_handlers
 from db import init_db
 
 app = FastAPI()
@@ -22,6 +23,7 @@ def on_startup():
 def on_shutdown():
     logger.info("Shutting down the application...")
 
+register_exception_handlers(app)
 app.include_router(main_controller.router)
 
 app.include_router(user_controller.router)

@@ -12,7 +12,7 @@ from db import get_session
 
 logger = setup_logging()
 
-router = APIRouter(prefix="/Dijkstra/v1/users", tags=["Users"])
+router = APIRouter(prefix="/Dijkstra/v1/u", tags=["Users"])
 
 
 @router.post("/", response_model=ReadUser)

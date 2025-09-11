@@ -11,7 +11,7 @@ from db import get_session
 
 logger = setup_logging()
 
-router = APIRouter(prefix="/Dijkstra/v1/profiles", tags=["Profiles"])
+router = APIRouter(prefix="/Dijkstra/v1/profile", tags=["Profiles"])
 
 
 @router.post("/", response_model=ReadProfile)

@@ -10,7 +10,7 @@ from db import get_session
 
 logger = setup_logging()
 
-router = APIRouter(prefix="/Dijkstra/v1/locations", tags=["Locations"])
+router = APIRouter(prefix="/Dijkstra/v1/location", tags=["Locations"])
 
 @router.post("/", response_model=ReadLocation)
 def create_location(location_create: CreateLocation, session: Session = Depends(get_session)):

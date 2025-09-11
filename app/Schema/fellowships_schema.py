@@ -3,6 +3,8 @@ from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel
 
+from Entities.SQL.Enums.enums import Tools
+
 
 # Input DTOs
 class CreateFellowship(BaseModel):
@@ -22,11 +24,12 @@ class CreateFellowship(BaseModel):
     category: Optional[str] = None
     benefits: Optional[List[str]] = []
     requirements: Optional[List[str]] = []
-    technologies: Optional[List[str]] = []
+    technologies: Optional[List[Tools]] = []
 
 
 class UpdateFellowship(BaseModel):
     title: Optional[str] = None
+    organization: Optional[UUID] = None
     hero_image: Optional[str] = None
     location: Optional[str] = None
     location_type: Optional[str] = None
@@ -41,7 +44,7 @@ class UpdateFellowship(BaseModel):
     category: Optional[str] = None
     benefits: Optional[List[str]] = None
     requirements: Optional[List[str]] = None
-    technologies: Optional[List[str]] = None
+    technologies: Optional[List[Tools]] = None
 
 
 # Output DTO
@@ -63,6 +66,6 @@ class ReadFellowship(BaseModel):
     category: Optional[str]
     benefits: Optional[List[str]]
     requirements: Optional[List[str]]
-    technologies: Optional[List[str]]
+    technologies: Optional[List[Tools]]
     created_at: datetime
     updated_at: datetime

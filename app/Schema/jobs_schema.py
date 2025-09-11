@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel
 
-from Entities.SQL.Models.models import WorkLocationType, EmploymentType, Currency
+from Entities.SQL.Models.models import WorkLocationType, EmploymentType, Currency, Tools
 
 # ----------------------
 # Input DTOs
@@ -30,6 +30,7 @@ class CreateJob(BaseModel):
     category: Optional[str] = None
     perks: Optional[List[str]] = []
     organization: UUID
+    technologies: Optional[List[Tools]] = []
 
 
 class UpdateJob(BaseModel):
@@ -53,6 +54,7 @@ class UpdateJob(BaseModel):
     category: Optional[str] = None
     perks: Optional[List[str]] = None
     organization: Optional[UUID] = None
+    technologies: Optional[List[Tools]] = []
 
 
 # ----------------------
@@ -82,6 +84,7 @@ class ReadJob(BaseModel):
     organization: UUID
     created_at: datetime
     updated_at: datetime
+    technologies: Optional[List[Tools]] = []
 
     class Config:
         orm_mode = True

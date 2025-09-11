@@ -4,8 +4,8 @@ from sqlmodel import Session, select
 from typing import List, Optional
 
 from Repository.Opportunities.jobs_repository import JobRepository
-from Schema.jobs_schema import CreateJob, UpdateJob
-from Entities.SQL.Models.models import Job, Organization
+from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob
+from Schema.SQL.Models.models import Job, Organization
 from Utils.Exceptions.opportunities_exceptions import JobNotFound, OrganizationNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
 

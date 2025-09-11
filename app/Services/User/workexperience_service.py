@@ -3,10 +3,10 @@ from sqlmodel import Session
 from typing import List, Optional
 from datetime import date
 
-from Entities.SQL.Models.models import WorkExperience, Profile, Location
-from Entities.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
+from Schema.SQL.Models.models import WorkExperience, Profile, Location
+from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 from Repository.User.workexperience_repository import WorkExperienceRepository
-from Schema.workexperience_schema import CreateWorkExperience, UpdateWorkExperience
+from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, UpdateWorkExperience
 
 class WorkExperienceService:
     def __init__(self, session: Session):

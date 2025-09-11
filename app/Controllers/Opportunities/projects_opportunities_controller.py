@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
-from Schema.projects_opportunities_schema import CreateProject, UpdateProject, ReadProject
+from Entities.OpportunityDTOs.projects_opportunities_entity import CreateProject, UpdateProject, ReadProject
 from Services.Opportunities.projects_opportunities_service import ProjectsOpportunitiesService
 from Settings.logging_config import setup_logging
 from db import get_session

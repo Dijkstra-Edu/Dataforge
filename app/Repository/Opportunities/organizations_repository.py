@@ -3,7 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 
-from Entities.SQL.Models.models import Organization
+from Schema.SQL.Models.models import Organization
 
 class OrganizationRepository:
     def __init__(self, session: Session):

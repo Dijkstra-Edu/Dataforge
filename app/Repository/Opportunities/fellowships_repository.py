@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import desc, asc
 from sqlalchemy.exc import SQLAlchemyError
-from Entities.SQL.Models.models import Fellowship
+from Schema.SQL.Models.models import Fellowship
 
 
 class FellowshipRepository:

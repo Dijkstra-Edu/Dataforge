@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
-from Entities.SQL.Enums.enums import (
+from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
     LeetcodeTagCategory, Status, TestScoreType

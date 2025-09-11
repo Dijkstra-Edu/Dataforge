@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 
-from Entities.SQL.Models.models import Profile
+from Schema.SQL.Models.models import Profile
 
 class ProfileRepository:
     def __init__(self, session: Session):

@@ -2,10 +2,10 @@
 from typing import Optional
 from uuid import UUID
 from sqlmodel import Session
-from Entities.SQL.Models.models import Organization, ProjectsOpportunities
+from Schema.SQL.Models.models import Organization, ProjectsOpportunities
 from Repository.Opportunities.projects_opportunities_repository import ProjectsOpportunitiesRepository
-from Schema.projects_opportunities_schema import CreateProject, UpdateProject
-from Entities.SQL.Enums.enums import Tools
+from Entities.OpportunityDTOs.projects_opportunities_entity import CreateProject, UpdateProject
+from Schema.SQL.Enums.enums import Tools
 from Utils.Exceptions.opportunities_exceptions import OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
 

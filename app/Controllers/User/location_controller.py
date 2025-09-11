@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Schema.location_schema import CreateLocation, UpdateLocation, ReadLocation
+from Entities.UserDTOs.location_entity import CreateLocation, UpdateLocation, ReadLocation
 from Services.User.location_service import LocationService
 from Settings.logging_config import setup_logging
 from db import get_session

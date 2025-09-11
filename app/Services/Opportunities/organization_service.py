@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlmodel import Session
 
 from Repository.Opportunities.organizations_repository import OrganizationRepository
-from Schema.organization_schema import CreateOrganization, UpdateOrganization
-from Entities.SQL.Models.models import Organization
+from Entities.OpportunityDTOs.organization_entity import CreateOrganization, UpdateOrganization
+from Schema.SQL.Models.models import Organization
 from Utils.Exceptions.opportunities_exceptions import OrganizationNotFound
 
 class OrganizationService:

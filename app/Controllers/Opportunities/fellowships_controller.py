@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 import logging
 
-from Schema.fellowships_schema import CreateFellowship, UpdateFellowship, ReadFellowship
+from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, UpdateFellowship, ReadFellowship
 from Services.Opportunities.fellowships_service import FellowshipService
 from db import get_session
 from Settings.logging_config import setup_logging

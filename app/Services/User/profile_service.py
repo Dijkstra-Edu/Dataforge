@@ -3,8 +3,8 @@ from sqlmodel import Session, select
 from typing import List, Optional
 
 
-from Schema.profile_schema import CreateProfile, UpdateProfile
-from Entities.SQL.Models.models import Profile, User
+from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile
+from Schema.SQL.Models.models import Profile, User
 from Repository.User.profile_repository import ProfileRepository
 
 class ProfileService:

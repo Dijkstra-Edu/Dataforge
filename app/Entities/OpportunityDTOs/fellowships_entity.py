@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel
 
-from Entities.SQL.Enums.enums import Tools
+from Schema.SQL.Enums.enums import Tools
 
 
 # Input DTOs

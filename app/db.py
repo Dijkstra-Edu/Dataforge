@@ -11,7 +11,7 @@ engine = create_engine(os.getenv("POSTGRES_URL"), echo=True)
 
 # Create all tables (optional, usually at app startup)
 def init_db():
-    from Entities.SQL.Models import models  # Import your models here
+    from Schema.SQL.Models import models  # Import your models here
     SQLModel.metadata.create_all(engine)
 
 # Dependency for FastAPI

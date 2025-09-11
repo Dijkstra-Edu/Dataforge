@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
-from Entities.SQL.Models.models import Rank
+from Schema.SQL.Models.models import Rank
 
 # ----------------------
 # Input DTOs

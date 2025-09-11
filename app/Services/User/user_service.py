@@ -4,8 +4,8 @@ from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
 from Repository.User.user_repository import UserRepository
-from Schema.user_schema import CreateUser, UpdateUser
-from Entities.SQL.Models.models import User
+from Entities.UserDTOs.user_entity import CreateUser, UpdateUser
+from Schema.SQL.Models.models import User
 
 
 class UserService:

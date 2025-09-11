@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Schema.profile_schema import CreateProfile, UpdateProfile, ReadProfile, ReadProfileWithUser
+from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile, ReadProfileWithUser
 
 from Settings.logging_config import setup_logging
 from Services.User.profile_service import ProfileService

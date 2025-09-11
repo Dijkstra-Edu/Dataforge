@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends
 from uuid import UUID
 from sqlmodel import Session
-from Schema.organization_schema import CreateOrganization, UpdateOrganization, ReadOrganization
+from Entities.OpportunityDTOs.organization_entity import CreateOrganization, UpdateOrganization, ReadOrganization
 from Services.Opportunities.organization_service import OrganizationService
 from Settings.logging_config import setup_logging
 from db import get_session

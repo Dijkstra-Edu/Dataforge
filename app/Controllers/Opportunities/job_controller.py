@@ -2,7 +2,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
-from Schema.jobs_schema import CreateJob, UpdateJob, ReadJob
+from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob, ReadJob
 from Services.Opportunities.jobs_service import JobService
 from Settings.logging_config import setup_logging
 from db import get_session

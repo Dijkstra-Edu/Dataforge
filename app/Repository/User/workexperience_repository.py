@@ -3,8 +3,8 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 
-from Entities.SQL.Models.models import WorkExperience
-from Entities.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
+from Schema.SQL.Models.models import WorkExperience
+from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 
 class WorkExperienceRepository:
     def __init__(self, session: Session):

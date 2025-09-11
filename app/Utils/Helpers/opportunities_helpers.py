@@ -1,4 +1,4 @@
-from Entities.SQL.Enums.enums import Tools
+from Schema.SQL.Enums.enums import Tools
 from Utils.Exceptions.opportunities_exceptions import InvalidTools
 
 def _validate_tools(values, field_name: str):

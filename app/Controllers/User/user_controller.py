@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Schema.user_schema import CreateUser, UpdateUser, ReadUser
+from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, ReadUser
 from Services.User.user_service import UserService
 from Settings.logging_config import setup_logging
 from db import get_session

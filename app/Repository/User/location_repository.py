@@ -2,7 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
-from Entities.SQL.Models.models import Location
+from Schema.SQL.Models.models import Location
 
 class LocationRepository:
     def __init__(self, session: Session):

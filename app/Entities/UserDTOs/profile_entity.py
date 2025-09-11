@@ -50,5 +50,5 @@ class ReadProfileWithUser(ReadProfile):
 
 
 # Import here to avoid circular imports
-from Schema.user_schema import ReadUser
+from Entities.UserDTOs.user_entity import ReadUser
 ReadProfileWithUser.update_forward_refs()

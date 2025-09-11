@@ -1,8 +1,8 @@
 from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
-from Schema.location_schema import CreateLocation, UpdateLocation
-from Entities.SQL.Models.models import Location
+from Entities.UserDTOs.location_entity import CreateLocation, UpdateLocation
+from Schema.SQL.Models.models import Location
 from Repository.User.location_repository import LocationRepository
 
 class LocationService:

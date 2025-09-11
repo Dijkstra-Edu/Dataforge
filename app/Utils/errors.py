@@ -2,7 +2,7 @@
 from turtle import title
 from fastapi import HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
-from Schema.error_schema import APIError
+from Entities.error_entity import APIError
 
 def raise_api_error(
     code: str,

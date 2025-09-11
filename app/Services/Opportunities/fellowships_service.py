@@ -2,10 +2,10 @@ from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session
 
-from Entities.SQL.Models.models import Fellowship, Organization
+from Schema.SQL.Models.models import Fellowship, Organization
 from Repository.Opportunities.fellowships_repository import FellowshipRepository
-from Schema.fellowships_schema import CreateFellowship, UpdateFellowship
-from Entities.SQL.Enums.enums import Tools
+from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, UpdateFellowship
+from Schema.SQL.Enums.enums import Tools
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, OrganizationNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
 

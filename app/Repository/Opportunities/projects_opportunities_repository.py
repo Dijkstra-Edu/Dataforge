@@ -2,7 +2,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
-from Entities.SQL.Models.models import ProjectsOpportunities
+from Schema.SQL.Models.models import ProjectsOpportunities
 from sqlalchemy.exc import SQLAlchemyError
 
 class ProjectsOpportunitiesRepository:

@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel, field_validator
 
-from Entities.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
+from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 
 # ----------------------
 # Input DTOs
@@ -152,6 +152,6 @@ class ReadWorkExperienceWithRelations(ReadWorkExperience):
 
 
 # Import here to avoid circular imports
-from Schema.profile_schema import ReadProfile
-from Schema.location_schema import ReadLocation
+from Entities.UserDTOs.profile_entity import ReadProfile
+from Entities.UserDTOs.location_entity import ReadLocation
 ReadWorkExperienceWithRelations.model_rebuild()

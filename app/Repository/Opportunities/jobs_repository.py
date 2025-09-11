@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
 
-from Entities.SQL.Models.models import Job
+from Schema.SQL.Models.models import Job
 
 class JobRepository:
     def __init__(self, session: Session):

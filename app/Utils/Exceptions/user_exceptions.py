@@ -37,3 +37,13 @@ class GitHubUsernameAlreadyExists(ServiceError):
     def __init__(self, github_username):
         super().__init__(f"User with GitHub username '{github_username}' already exists.")
         self.github_username = github_username
+
+class VolunteeringNotFound(ServiceError):
+    def __init__(self, volunteering_id):
+        super().__init__(f"Volunteering entry with ID {volunteering_id} does not exist.")
+        self.volunteering_id = volunteering_id
+
+class PublicationNotFound(ServiceError):
+    def __init__(self, publication_id):
+        super().__init__(f"Publication with ID {publication_id} does not exist.")
+        self.publication_id = publication_id

@@ -387,7 +387,7 @@ class Github(UUIDBaseTable, table=True):
 class Links(UUIDBaseTable, table=True):
     __tablename__ = "Links"
 
-    user_id: Optional[UUID] = Field(foreign_key="User.id", nullable=True)
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
     portfolio_link: Optional[str] = None
     github_user_name: str = Field(nullable=False, unique=True)
     github_link: str = Field(nullable=False)
@@ -399,7 +399,7 @@ class Links(UUIDBaseTable, table=True):
     orcid_link: str = Field(nullable=False)
 
     # Relationships
-    user_rel: Optional[User] = Relationship(back_populates="links")
+    user_rel: User = Relationship(back_populates="links")
 
 # -------------------------------------------------------------------------
 # Blog model

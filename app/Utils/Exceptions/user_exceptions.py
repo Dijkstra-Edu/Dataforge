@@ -37,3 +37,12 @@ class GitHubUsernameAlreadyExists(ServiceError):
     def __init__(self, github_username):
         super().__init__(f"User with GitHub username '{github_username}' already exists.")
         self.github_username = github_username
+class LinksNotFound(ServiceError):
+    def __init__(self, identifier):
+        super().__init__(f"Links with identifier {identifier} do not exist.")
+        self.identifier = identifier
+
+class LinksAlreadyExists(ServiceError):
+    def __init__(self, user_id):
+        super().__init__(f"Links already exist for user ID {user_id}.")
+        self.user_id = user_id

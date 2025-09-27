@@ -219,4 +219,28 @@ class ErrorCodes:
     USER_WORKEXP_VAL_A02 = "USER-WORKEXP-VAL-A02"  # Required field missing
 
     # Not found errors
-    USER_WORKEXP_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
+    USER_WORK_EXPERIENCE_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
+
+    # -----------------------------
+    # Users → Certificate
+    # -----------------------------
+
+    # Database errors
+    USER_CERTIFICATE_DB_A01 = "USER-CERTIFICATE-DB-A01"  # Failure inserting certificate
+    USER_CERTIFICATE_DB_A02 = "USER-CERTIFICATE-DB-A02"  # Failure updating certificate
+    USER_CERTIFICATE_DB_A03 = "USER-CERTIFICATE-DB-A03"  # Failure deleting certificate
+
+    # Server / Unexpected errors
+    USER_CERTIFICATE_SRV_A01 = "USER-CERTIFICATE-SRV-A01"  # Generic server error
+    USER_CERTIFICATE_SRV_A02 = "USER-CERTIFICATE-SRV-A02"  # Error fetching certificates list
+
+    # Authentication / Permission errors
+    USER_CERTIFICATE_AUTH_A01 = "USER-CERTIFICATE-AUTH-A01"  # User not authorized
+    USER_CERTIFICATE_AUTH_A02 = "USER-CERTIFICATE-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_CERTIFICATE_VAL_A01 = "USER-CERTIFICATE-VAL-A01"  # Invalid certificate payload
+    USER_CERTIFICATE_VAL_A02 = "USER-CERTIFICATE-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_CERTIFICATE_NF_A01 = "USER-CERTIFICATE-NF-A01"  # Certificate not found

@@ -37,3 +37,18 @@ class GitHubUsernameAlreadyExists(ServiceError):
     def __init__(self, github_username):
         super().__init__(f"User with GitHub username '{github_username}' already exists.")
         self.github_username = github_username
+        
+class CertificateNotFound(ServiceError):
+    def __init__(self, certification_id):
+        super().__init__(f"Certificate with ID '{certification_id}' does not exist.")
+        self.certificate_id = certification_id
+
+class CertificateAlreadyExists(ServiceError):
+    def __init__( self, certification_id):
+        super().__init__(f"Certificate with ID '{certification_id}' already exits.")
+        
+class CertificationsUnAvailable(ServiceError):
+    def __init__( self):
+        super().__init__(f"No certifications exist.")
+        
+        

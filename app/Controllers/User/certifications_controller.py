@@ -4,26 +4,22 @@ from uuid import UUID
 
 from sqlmodel import Session
 from Settings.logging_config import setup_logging
-from Services.User.certificate_service import CertificateGeneratorService
+from Services.User.certifications_service import CertificationService
 from Entities.UserDTOs.certification_entity import CreateCertification, UpdateCertification, ReadCertification
 from db import get_session
 logger = setup_logging()
 
-router = APIRouter(prefix="/Dijkstra/v1/certificate", tags=["Certificate"])
+router = APIRouter(prefix="/Dijkstra/v1/certifications", tags=["Certifications"])
 
 @router.get('/health', status_code=200)
 async def root():
     logger.info("Health Endpoint Triggered")
-    return {"status": 200, 'message': 'Dijkstra Certificate Generator Health Endpoint Triggered!!!'}
+    return {"status": 200, 'message': 'Certifications Health Endpoint Triggered!!!'}
 
-@router.post('/download/{userName}')
-async def postDownloadCertificate(userName: str):
-    logger.info("POST Request Certificate Download for user: " + userName)
-    return await CertificateGeneratorService.mainCertificateGeneratorService(userName)
 
 @router.post("/", response_model=ReadCertification)
 def create_certification( certification_create: CreateCertification, session: Session = Depends(get_session)):
-    service  = CertificateGeneratorService(session)
+    service  = CertificationService(session)
     logger.info(f"Creating Certificate: {certification_create.name}, {certification_create.credential_id}")
     certificate = service.create_certification(certification_create)
     logger.info(f"Created Certificate with ID: {certificate.id}")
@@ -38,21 +34,21 @@ def list_certifications(
     issuing_organization: Optional[str] = None,
     session: Session = Depends(get_session)
 ):
-    service = CertificateGeneratorService(session)
+    service = CertificationService(session)
     logger.info(f"Fetching all certifications: skip={skip}, limit={limit}, sort_by={sort_by}, order={order}, issuing_organization={issuing_organization} ")
     certificates = service.list_all_certifications(skip=skip, limit=limit, sort_by=sort_by,order=order,issuing_organization=issuing_organization)
     return certificates
 
 @router.get("/{certification_id}", response_model= ReadCertification )
 def get_certification(certification_id: UUID, session: Session = Depends(get_session)):
-    service  = CertificateGeneratorService(session)
+    service  = CertificationService(session)
     logger.info(f"Fetching Certificate with ID: {certification_id}")
     certificate = service.get_certification(certification_id)
     return certificate
 
 @router.put("/{certification_id}", response_model=ReadCertification)
 def update_certification(certification_id: UUID,  certification_update: UpdateCertification, session: Session = Depends(get_session)):
-    service  = CertificateGeneratorService(session)
+    service  = CertificationService(session)
     logger.info(f"Updating Certificate ID: {certification_id} with data {certification_update.dict(exclude_unset=True)}")
     certificate = service.update_certification(certification_id, certification_update)
     logger.info(f"Updated Certificate with ID: {certificate.id}")
@@ -60,7 +56,7 @@ def update_certification(certification_id: UUID,  certification_update: UpdateCe
 
 @router.delete("/{certification_id}", response_model= ReadCertification )
 def delete_certification(certification_id: UUID, session: Session = Depends(get_session)):
-    service  = CertificateGeneratorService(session)
+    service  = CertificationService(session)
     logger.info(f"Delete Certificate with ID: {certification_id}")
     certification = service.get_certification(certification_id)
     message = service.delete_certification(certification_id)
@@ -68,5 +64,3 @@ def delete_certification(certification_id: UUID, session: Session = Depends(get_
     return certification
 
 
-
-    

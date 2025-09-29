@@ -4,14 +4,14 @@ from typing import List, Optional
 from sqlmodel import Session
 from Repository.User.certifications_repository import CertificationsRepository
 from Schema.SQL.Models.models import Certifications
-from Utils.Exceptions.user_exceptions import CertificateNotFound , CertificationsUnAvailable
+from Utils.Exceptions.user_exceptions import CertificationNotFound , CertificationUnAvailable
 from Entities.UserDTOs.certification_entity import CreateCertification, UpdateCertification
 
 
 logger = setup_logging()
 
-class CertificateGeneratorService:
-        # Placeholder for the actual certificate generation logic
+class CertificationService:
+       
         def __init__(self, session: Session):
             self.repo = CertificationsRepository(session)
         
@@ -26,13 +26,13 @@ class CertificateGeneratorService:
         def get_certification( self, certification_id: UUID) -> Optional[Certifications]:
             certification = self.repo.get(certification_id)
             if not certification:
-                raise CertificateNotFound(certification_id)
+                raise CertificationNotFound(certification_id)
             return certification
         
         def update_certification( self, certification_id: UUID,  certification_update: UpdateCertification ):
             certification = self.repo.get(certification_id)
             if not certification:
-                raise CertificateNotFound(certification_id)
+                raise CertificationNotFound(certification_id)
             
             update_data = certification_update.dict(exclude_unset=True)
             for key, value in update_data.items():
@@ -42,6 +42,6 @@ class CertificateGeneratorService:
         def delete_certification(self, certification_id:UUID) ->Optional[str]:
             certification = self.repo.get(certification_id)
             if not certification:
-                raise CertificateNotFound(certification_id)
+                raise CertificationNotFound(certification_id)
             self.repo.delete(certification)
             return f"Certification {certification_id} deleted successfully."

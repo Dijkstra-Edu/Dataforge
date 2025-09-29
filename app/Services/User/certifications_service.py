@@ -21,7 +21,10 @@ class CertificationService:
         
         
         def list_all_certifications(self, skip: int =0, limit: int =2, sort_by: str = "created_at",issuing_organization: Optional[str]= None, order: str = "desc", user_id: Optional[UUID] = None ) -> List[Certifications]:
-            return self.repo.list( skip=skip, limit=limit, sort_by=sort_by, order=order, user_id=user_id, issuing_organization=issuing_organization)
+            certifications =  self.repo.list( skip=skip, limit=limit, sort_by=sort_by, order=order, user_id=user_id, issuing_organization=issuing_organization)
+            if not certifications:
+                raise CertificationUnAvailable
+            return certifications
         
         def get_certification( self, certification_id: UUID) -> Optional[Certifications]:
             certification = self.repo.get(certification_id)

@@ -114,7 +114,7 @@ def register_exception_handlers(app):
     async def certification_not_found_handler(request: Request, exc: CertificationNotFound):
         logger.warning(f"Certificate not found: {exc.certificate_id}")
         raise_api_error(
-            code=ErrorCodes.USER_CERTIFICATE_NF_A01,
+            code=ErrorCodes.USER_CERTIFICATION_NF_A01,
             error="Certificate not found",
             detail=str(exc),
             status=404
@@ -124,7 +124,7 @@ def register_exception_handlers(app):
     async def certifications_unavailable_handler(request: Request, exc: CertificationUnAvailable):
         logger.info("No certifications available")
         raise_api_error(
-            code=ErrorCodes.USER_CERTIFICATE_NF_A01,
+            code=ErrorCodes.USER_CERTIFICATION_NF_A02,
             error="No certifications found",
             detail=str(exc),
             status=404

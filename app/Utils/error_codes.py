@@ -226,21 +226,22 @@ class ErrorCodes:
     # -----------------------------
 
     # Database errors
-    USER_CERTIFICATION_DB_A01 = "USER-CERTIFICATE-DB-A01"  # Failure inserting certificate
-    USER_CERTIFICATION_DB_A02 = "USER-CERTIFICATE-DB-A02"  # Failure updating certificate
-    USER_CERTIFICATION_DB_A03 = "USER-CERTIFICATE-DB-A03"  # Failure deleting certificate
+    USER_CERTIFICATION_DB_A01 = "USER_CERTIFICATION-DB-A01"  # Failure inserting certificate
+    USER_CERTIFICATION_DB_A02 = "USER_CERTIFICATION-DB-A02"  # Failure updating certificate
+    USER_CERTIFICATION_DB_A03 = "USER_CERTIFICATION-DB-A03"  # Failure deleting certificate
 
     # Server / Unexpected errors
-    USER_CERTIFICATION_SRV_A01 = "USER-CERTIFICATE-SRV-A01"  # Generic server error
-    USER_CERTIFICATION_SRV_A02 = "USER-CERTIFICATE-SRV-A02"  # Error fetching certificates list
+    USER_CERTIFICATION_SRV_A01 = "USER_CERTIFICATION-SRV-A01"  # Generic server error
+    USER_CERTIFICATION_SRV_A02 = "USER_CERTIFICATION-SRV-A02"  # Error fetching certifications list
 
     # Authentication / Permission errors
-    USER_CERTIFICATION_AUTH_A01 = "USER-CERTIFICATE-AUTH-A01"  # User not authorized
-    USER_CERTIFICATION_AUTH_A02 = "USER-CERTIFICATE-AUTH-A02"  # User session expired / invalid token
+    USER_CERTIFICATION_AUTH_A01 = "USER_CERTIFICATION-AUTH-A01"  # User not authorized
+    USER_CERTIFICATION_AUTH_A02 = "USER_CERTIFICATION-AUTH-A02"  # User session expired / invalid token
 
     # Validation / Input errors
-    USER_CERTIFICATION_VAL_A01 = "USER-CERTIFICATE-VAL-A01"  # Invalid certificate payload
-    USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATE-VAL-A02"  # Required field missing
+    USER_CERTIFICATION_VAL_A01 = "USER_CERTIFICATION-VAL-A01"  # Invalid certification payload
+    USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATION-VAL-A02"  # Required field missing
 
     # Not found errors
-    USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATE-NF-A01"  # Certificate not found
+    USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATION-NF-A01"  # Certification not found
+    USER_CERTIFICATION_NF_A02 = "USER_CERTIFICATION_NF_A02" #Certifications with applied filters not found

@@ -11,12 +11,6 @@ logger = setup_logging()
 
 router = APIRouter(prefix="/Dijkstra/v1/certifications", tags=["Certifications"])
 
-@router.get('/health', status_code=200)
-async def root():
-    logger.info("Health Endpoint Triggered")
-    return {"status": 200, 'message': 'Certifications Health Endpoint Triggered!!!'}
-
-
 @router.post("/", response_model=ReadCertification)
 def create_certification( certification_create: CreateCertification, session: Session = Depends(get_session)):
     service  = CertificationService(session)

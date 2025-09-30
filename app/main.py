@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI
 from Settings.logging_config import setup_logging
 from Controllers import main_controller
 from Controllers.Opportunities import job_controller
-from Controllers.User import dijkstra_certificate_controller, certifications_controller, workexperience_controller, profile_controller, user_controller,  links_controller, volunteering_controller, projects_controller, education_controller
+from Controllers.User import dijkstra_certificate_controller, certifications_controller, workexperience_controller, profile_controller, user_controller,  links_controller, volunteering_controller, projects_controller, education_controller, publication_controller
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
 from Controllers.User import location_controller
 from Controllers.error_handlers import register_exception_handlers
@@ -43,3 +43,4 @@ app.include_router(links_controller.router)
 app.include_router(volunteering_controller.router)
 app.include_router(projects_controller.router)
 app.include_router(education_controller.router)
+app.include_router(publication_controller.router)

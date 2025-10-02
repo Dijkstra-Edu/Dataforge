@@ -91,6 +91,12 @@ class EmploymentType(str, Enum):
     APPRENTICESHIP = "APPRENTICESHIP"
     SEASONAL = "SEASONAL"
 
+class SchoolType(str, Enum):
+    UNIVERSITY = "UNIVERSITY"
+    COLLEGE = "COLLEGE"
+    SCHOOL = "SCHOOL"
+    OTHER = "OTHER"
+
 # LEETCODE_TAG_CATEGORY
 class LeetcodeTagCategory(str, Enum):
     FUNDAMENTAL = "FUNDAMENTAL"

@@ -7,7 +7,7 @@ from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteg
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
 from Schema.SQL.Enums.enums import (
-    Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
+    Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
     LeetcodeTagCategory, Status, TestScoreType
 )
@@ -88,7 +88,9 @@ class Education(UUIDBaseTable, table=True):
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     school: str = Field(nullable=False)
-    school_type: str = Field(nullable=False)  # Should be an enum if defined
+    school_type: SchoolType = Field(
+        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"))
+    )
     degree: str = Field(nullable=False)
     field: str = Field(nullable=False)
     currently_studying: bool = Field(nullable=False)

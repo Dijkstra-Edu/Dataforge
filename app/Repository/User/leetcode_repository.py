@@ -108,19 +108,6 @@ class LeetcodeRepository:
         self.delete(record)
         return True
 
-    # def autocomplete(self, query: str, field: str = "lc_username", limit: int = 10) -> List[Leetcode]:
-    #     field_column = getattr(Leetcode, field, Leetcode.lc_username)
-    #     statement = (
-    #         select(Leetcode)
-    #         .where(field_column.ilike(f"%{query}%"))
-    #         .limit(limit)
-    #     )
-    #     return self.session.exec(statement).all()
-
-    # def get_with_relations(self, leetcode_id: UUID) -> Optional[Leetcode]:
-    #     """Return a Leetcode record; badges & tags can be accessed via relationships."""
-    #     return self.get(leetcode_id)
-
 
 # ------------------------------------------------------------------
 # Badge Repository

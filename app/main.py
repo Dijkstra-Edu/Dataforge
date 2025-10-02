@@ -7,10 +7,6 @@ from Controllers.Opportunities import fellowships_controller, organization_contr
 from Controllers.User import location_controller
 from Controllers.error_handlers import register_exception_handlers
 from db import init_db
-import sys
-
-print("Python version:", sys.version)
-
 app = FastAPI()
 
 # Initialize logging

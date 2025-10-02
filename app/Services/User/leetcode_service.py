@@ -1,10 +1,3 @@
-"""Minimal LeetCode service.
-
-Single public method: create_or_update_from_api(profile_id, lc_username)
-Fetches data from LeetCode GraphQL and upserts a row in the Leetcode table.
-Focuses on core profile + contest stats fields only.
-"""
-
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 import requests

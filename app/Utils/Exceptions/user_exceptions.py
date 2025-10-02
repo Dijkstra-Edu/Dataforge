@@ -46,3 +46,7 @@ class LinksAlreadyExists(ServiceError):
     def __init__(self, user_id):
         super().__init__(f"Links already exist for user ID {user_id}.")
         self.user_id = user_id
+class VolunteeringNotFound(ServiceError):
+    def __init__(self, volunteering_id):
+        super().__init__(f"Volunteering entry with ID {volunteering_id} does not exist.")
+        self.volunteering_id = volunteering_id

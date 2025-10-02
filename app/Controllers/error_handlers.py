@@ -3,7 +3,7 @@ from fastapi import Request
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
-from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, LocationNotFound, ProfileAlreadyExists, ProfileNotFound, UserNotFound, WorkExperienceNotFound, LinksNotFound, LinksAlreadyExists
+from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, LocationNotFound, ProfileAlreadyExists, ProfileNotFound, UserNotFound, WorkExperienceNotFound, LinksNotFound, LinksAlreadyExists, VolunteeringNotFound
 import logging
 
 logger = logging.getLogger(__name__)
@@ -170,3 +170,12 @@ def register_exception_handlers(app):
         )
 
 
+    @app.exception_handler(VolunteeringNotFound)
+    async def volunteering_not_found_handler(request: Request, exc: VolunteeringNotFound):
+        logger.warning(f"Volunteering not found: {exc.volunteering_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_VOLUNTEERING_NF_A01,
+            error="Volunteering not found",
+            detail=str(exc),
+            status=404
+        )

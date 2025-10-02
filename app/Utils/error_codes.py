@@ -220,3 +220,16 @@ class ErrorCodes:
 
     # Not found errors
     USER_WORKEXP_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
+
+    # -----------------------------
+    # Users → LeetCode
+    # -----------------------------
+    USER_LEETCODE_DB_A01 = "USER-LEETCODE-DB-A01"  # Failure inserting leetcode record
+    USER_LEETCODE_DB_A02 = "USER-LEETCODE-DB-A02"  # Failure updating leetcode record
+    USER_LEETCODE_DB_A03 = "USER-LEETCODE-DB-A03"  # Failure deleting leetcode record
+    USER_LEETCODE_SRV_A01 = "USER-LEETCODE-SRV-A01"  # Generic service error
+    USER_LEETCODE_SRV_A02 = "USER-LEETCODE-SRV-A02"  # External API fetch failure
+    USER_LEETCODE_VAL_A01 = "USER-LEETCODE-VAL-A01"  # Invalid input
+    USER_LEETCODE_NF_A01 = "USER-LEETCODE-NF-A01"  # Leetcode record not found
+    USER_LEETCODE_NF_A02 = "USER-LEETCODE-NF-A02"  # Badge not found
+    USER_LEETCODE_NF_A03 = "USER-LEETCODE-NF-A03"  # Tag not found

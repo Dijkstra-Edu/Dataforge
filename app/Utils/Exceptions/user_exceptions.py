@@ -37,3 +37,18 @@ class GitHubUsernameAlreadyExists(ServiceError):
     def __init__(self, github_username):
         super().__init__(f"User with GitHub username '{github_username}' already exists.")
         self.github_username = github_username
+
+class LeetcodeNotFound(ServiceError):
+    def __init__(self, leetcode_id):
+        super().__init__(f"LeetCode record with ID {leetcode_id} does not exist.")
+        self.leetcode_id = leetcode_id
+
+class LeetcodeBadgeNotFound(ServiceError):
+    def __init__(self, badge_id):
+        super().__init__(f"LeetCode badge with ID {badge_id} does not exist.")
+        self.badge_id = badge_id
+
+class LeetcodeTagNotFound(ServiceError):
+    def __init__(self, tag_id):
+        super().__init__(f"LeetCode tag with ID {tag_id} does not exist.")
+        self.tag_id = tag_id

@@ -4,8 +4,7 @@ from datetime import date, datetime, timezone
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
@@ -294,8 +293,9 @@ class Leetcode(UUIDBaseTable, table=True):
     country: Optional[str] = None
     company: Optional[str] = None
     job_title: Optional[str] = None
-    skill_tags: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
+    
+    skill_tags: Optional[List[Tools]] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
     ranking: Optional[int] = None
     avatar: Optional[str] = None
@@ -305,9 +305,7 @@ class Leetcode(UUIDBaseTable, table=True):
     easy_problems_solved: Optional[int] = None
     medium_problems_solved: Optional[int] = None
     hard_problems_solved: Optional[int] = None
-    language_problem_count: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
-    )
+    language_problem_count: Optional[List[dict]] = Field(sa_column=Column(ARRAY(JSONB)))
     attended_contests: Optional[int] = None
     competition_rating: Optional[float] = None
     global_ranking: Optional[int] = None

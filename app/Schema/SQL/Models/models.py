@@ -3,46 +3,23 @@ from datetime import date, datetime, timezone
 
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import (
-    ARRAY,
-    Column,
-    Enum as SQLEnum,
-    String,
-    Integer,
-    BigInteger,
-    Float,
-)
+from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
 from Schema.SQL.Enums.enums import (
-    Difficulty,
-    ProjectLevel,
-    Rank,
-    SchoolType,
-    Tools,
-    WorkLocationType,
-    EmploymentType,
-    Currency,
-    Cause,
-    CertificationType,
-    Domain,
-    LeetcodeTagCategory,
-    Status,
-    TestScoreType,
+    Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
+    EmploymentType, Currency, Cause, CertificationType, Domain,
+    LeetcodeTagCategory, Status, TestScoreType
 )
-
 
 # Base class with UUID PK and timestamps
 class UUIDBaseTable(SQLModel):
     id: UUID = Field(default_factory=uuid4, primary_key=True, nullable=False)
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), nullable=False
-    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
     updated_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        sa_column_kwargs={"onupdate": datetime.now(timezone.utc)},
+        sa_column_kwargs={"onupdate": datetime.now(timezone.utc)}
     )
-
 
 # -------------------------------------------------------------------------
 # User model
@@ -55,7 +32,8 @@ class User(UUIDBaseTable, table=True):
     middle_name: Optional[str] = None
     last_name: str = Field(nullable=False)
     rank: Rank = Field(
-        default=Rank.UNRANKED, sa_column=Column(SQLEnum(Rank, name="RANK"))
+        default=Rank.UNRANKED,
+        sa_column=Column(SQLEnum(Rank, name="RANK"))
     )
     streak: Optional[int] = None
 
@@ -63,15 +41,8 @@ class User(UUIDBaseTable, table=True):
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
     blog_posts: List["Blog"] = Relationship(back_populates="user_rel")
     links: Optional["Links"] = Relationship(back_populates="user_rel")
-    created_tasks: List["Task"] = Relationship(
-        back_populates="creator_rel",
-        sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"},
-    )
-    assigned_tasks: List["Task"] = Relationship(
-        back_populates="assignee_rel",
-        sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"},
-    )
-
+    created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
+    assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -93,7 +64,6 @@ class Profile(UUIDBaseTable, table=True):
     leetcode: Optional["Leetcode"] = Relationship(back_populates="profile_rel")
     resume: Optional["Resume"] = Relationship(back_populates="profile_rel")
 
-
 # -------------------------------------------------------------------------
 # Location model
 # -------------------------------------------------------------------------
@@ -108,10 +78,7 @@ class Location(UUIDBaseTable, table=True):
 
     # Relationships
     education: List["Education"] = Relationship(back_populates="location_rel")
-    work_experience: List["WorkExperience"] = Relationship(
-        back_populates="location_rel"
-    )
-
+    work_experience: List["WorkExperience"] = Relationship(back_populates="location_rel")
 
 # -------------------------------------------------------------------------
 # Education model
@@ -146,7 +113,6 @@ class Education(UUIDBaseTable, table=True):
     profile_rel: Profile = Relationship(back_populates="education")
     location_rel: Location = Relationship(back_populates="education")
 
-
 # -------------------------------------------------------------------------
 # WorkExperience model
 # -------------------------------------------------------------------------
@@ -172,7 +138,9 @@ class WorkExperience(UUIDBaseTable, table=True):
     description_general: str = Field(nullable=False)
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
-    work_done: List[str] = Field(sa_column=Column(ARRAY(String)))
+    work_done: List[str] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     company_score: Optional[float] = None
     time_spent_multiplier: Optional[float] = None
     work_done_multiplier: Optional[float] = None
@@ -183,7 +151,6 @@ class WorkExperience(UUIDBaseTable, table=True):
     # Relationships
     profile_rel: Profile = Relationship(back_populates="work_experience")
     location_rel: Location = Relationship(back_populates="work_experience")
-
 
 # -------------------------------------------------------------------------
 # Certifications model
@@ -208,7 +175,6 @@ class Certifications(UUIDBaseTable, table=True):
     # Relationships
     profile_rel: Profile = Relationship(back_populates="certifications")
 
-
 # -------------------------------------------------------------------------
 # TestScores model (updated to use UUID and TestScoreType enum)
 # -------------------------------------------------------------------------
@@ -227,7 +193,6 @@ class TestScores(UUIDBaseTable, table=True):
     # Relationships
     profile_rel: Profile = Relationship(back_populates="test_scores")
 
-
 # -------------------------------------------------------------------------
 # Volunteering model (updated to use UUID and currently_volunteering field)
 # -------------------------------------------------------------------------
@@ -237,7 +202,9 @@ class Volunteering(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     organization: str = Field(nullable=False)
     role: str = Field(nullable=False)
-    cause: Cause = Field(sa_column=Column(SQLEnum(Cause, name="CAUSE")))
+    cause: Cause = Field(
+        sa_column=Column(SQLEnum(Cause, name="CAUSE"))
+    )
     start_date: date = Field(nullable=False)
     end_date: Optional[date] = None
     currently_volunteering: bool = Field(nullable=False)
@@ -249,7 +216,6 @@ class Volunteering(UUIDBaseTable, table=True):
     # Relationships
     profile_rel: Profile = Relationship(back_populates="volunteering")
 
-
 # -------------------------------------------------------------------------
 # Publications model (updated to use UUID)
 # -------------------------------------------------------------------------
@@ -259,7 +225,9 @@ class Publications(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     title: str = Field(nullable=False)
     publisher: str = Field(nullable=False)
-    authors: List[str] = Field(sa_column=Column(ARRAY(String), nullable=False))
+    authors: List[str] = Field(
+        sa_column=Column(ARRAY(String), nullable=False)
+    )
     publication_date: date = Field(nullable=False)
     publication_url: str = Field(nullable=False)
     description: str = Field(nullable=False)
@@ -269,7 +237,6 @@ class Publications(UUIDBaseTable, table=True):
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="publications")
-
 
 # -------------------------------------------------------------------------
 # Projects model
@@ -287,8 +254,12 @@ class Projects(UUIDBaseTable, table=True):
     github_open_issues: int = Field(nullable=False)
     github_forks: int = Field(nullable=False)
     description: str = Field(nullable=False)
-    domain: Domain = Field(sa_column=Column(SQLEnum(Domain, name="DOMAIN")))
-    topics: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    domain: Domain = Field(
+        sa_column=Column(SQLEnum(Domain, name="DOMAIN"))
+    )
+    topics: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     tools: List[Tools] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")), nullable=False)
     )
@@ -310,7 +281,6 @@ class Projects(UUIDBaseTable, table=True):
     profile_rel: Profile = Relationship(back_populates="projects")
     owner_rel: "Github" = Relationship(back_populates="projects")
 
-
 # -------------------------------------------------------------------------
 # Leetcode model
 # -------------------------------------------------------------------------
@@ -326,7 +296,9 @@ class Leetcode(UUIDBaseTable, table=True):
     country: Optional[str] = None
     company: Optional[str] = None
     job_title: Optional[str] = None
-    skill_tags: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    skill_tags: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     ranking: Optional[int] = None
     avatar: Optional[str] = None
     reputation: Optional[int] = None
@@ -335,7 +307,9 @@ class Leetcode(UUIDBaseTable, table=True):
     easy_problems_solved: Optional[int] = None
     medium_problems_solved: Optional[int] = None
     hard_problems_solved: Optional[int] = None
-    language_problem_count: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    language_problem_count: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     attended_contests: Optional[int] = None
     competition_rating: Optional[float] = None
     global_ranking: Optional[int] = None
@@ -347,7 +321,6 @@ class Leetcode(UUIDBaseTable, table=True):
     profile_rel: Profile = Relationship(back_populates="leetcode")
     badges: List["LeetcodeBadges"] = Relationship(back_populates="leetcode_rel")
     tags: List["LeetcodeTags"] = Relationship(back_populates="leetcode_rel")
-
 
 # -------------------------------------------------------------------------
 # LeetcodeBadges model
@@ -362,7 +335,6 @@ class LeetcodeBadges(UUIDBaseTable, table=True):
 
     # Relationships
     leetcode_rel: Leetcode = Relationship(back_populates="badges")
-
 
 # -------------------------------------------------------------------------
 # LeetcodeTags model
@@ -380,7 +352,6 @@ class LeetcodeTags(UUIDBaseTable, table=True):
     # Relationships
     leetcode_rel: Leetcode = Relationship(back_populates="tags")
 
-
 # -------------------------------------------------------------------------
 # Github model
 # -------------------------------------------------------------------------
@@ -396,8 +367,12 @@ class Github(UUIDBaseTable, table=True):
     current_location: Optional[str] = None
     current_timezone: Optional[str] = None
     avatar: Optional[str] = None
-    websites: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
-    organization: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    websites: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
+    organization: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     total_lines_contributed: Optional[int] = None
     total_prs_raised: Optional[int] = None
     total_issues_created: Optional[int] = None
@@ -407,7 +382,6 @@ class Github(UUIDBaseTable, table=True):
 
     # Relationships
     projects: List["Projects"] = Relationship(back_populates="owner_rel")
-
 
 # -------------------------------------------------------------------------
 # Links model
@@ -429,7 +403,6 @@ class Links(UUIDBaseTable, table=True):
     # Relationships
     user_rel: User = Relationship(back_populates="links")
 
-
 # -------------------------------------------------------------------------
 # Blog model
 # -------------------------------------------------------------------------
@@ -440,14 +413,17 @@ class Blog(UUIDBaseTable, table=True):
     title: str = Field(nullable=False)
     description: str = Field(nullable=False)
     publish_date: date = Field(nullable=False)
-    tags: List[str] = Field(sa_column=Column(ARRAY(String), nullable=False))
+    tags: List[str] = Field(
+        sa_column=Column(ARRAY(String), nullable=False)
+    )
     image: str = Field(nullable=False)
-    authors: List[str] = Field(sa_column=Column(ARRAY(String), nullable=False))
+    authors: List[str] = Field(
+        sa_column=Column(ARRAY(String), nullable=False)
+    )
     content: str = Field(nullable=False)
 
     # Relationships
     user_rel: User = Relationship(back_populates="blog_posts")
-
 
 # -------------------------------------------------------------------------
 # Resume model (updated to make profile_id optional)
@@ -459,7 +435,6 @@ class Resume(UUIDBaseTable, table=True):
 
     # Relationships
     profile_rel: Optional[Profile] = Relationship(back_populates="resume")
-
 
 # -------------------------------------------------------------------------
 # ProjectTask model
@@ -475,7 +450,6 @@ class ProjectTask(UUIDBaseTable, table=True):
     tasks: List["Task"] = Relationship(back_populates="project_rel")
     organization_rel: "Organization" = Relationship(back_populates="project_tasks")
 
-
 # -------------------------------------------------------------------------
 # Task model
 # -------------------------------------------------------------------------
@@ -485,27 +459,26 @@ class Task(UUIDBaseTable, table=True):
     project_id: UUID = Field(foreign_key="ProjectTask.id", nullable=False)
     title: str = Field(nullable=False)
     description: Optional[str] = None
-    status: Status = Field(sa_column=Column(SQLEnum(Status, name="STATUS")))
+    status: Status = Field(
+        sa_column=Column(SQLEnum(Status, name="STATUS"))
+    )
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    labels: Optional[List[str]] = Field(sa_column=Column(ARRAY(String)))
+    labels: Optional[List[str]] = Field(
+        sa_column=Column(ARRAY(String))
+    )
     issue_url: Optional[str] = None
     creator_id: UUID = Field(foreign_key="User.id", nullable=False)
-    reviewer_id: Optional[List[UUID]] = Field(sa_column=Column(ARRAY(PG_UUID)))
+    reviewer_id: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
     assignee_id: Optional[UUID] = Field(foreign_key="User.id", nullable=True)
     repository_url: str = Field(nullable=False)
 
     # Relationships
     project_rel: ProjectTask = Relationship(back_populates="tasks")
-    creator_rel: User = Relationship(
-        back_populates="created_tasks",
-        sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"},
-    )
-    assignee_rel: Optional[User] = Relationship(
-        back_populates="assigned_tasks",
-        sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"},
-    )
-
+    creator_rel: User = Relationship(back_populates="created_tasks", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
+    assignee_rel: Optional[User] = Relationship(back_populates="assigned_tasks", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
 
 # -------------------------------------------------------------------------
 # Organization model
@@ -522,9 +495,10 @@ class Organization(UUIDBaseTable, table=True):
     projects: List["ProjectsOpportunities"] = Relationship(
         back_populates="organization_rel"
     )
-    fellowships: List["Fellowship"] = Relationship(back_populates="organization_rel")
+    fellowships: List["Fellowship"] = Relationship(
+        back_populates="organization_rel"
+    )
     project_tasks: List["ProjectTask"] = Relationship(back_populates="organization_rel")
-
 
 # -------------------------------------------------------------------------
 # Job model
@@ -570,7 +544,6 @@ class Job(UUIDBaseTable, table=True):
         default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
 
-
 # -------------------------------------------------------------------------
 # Projects Opportunities model
 # -------------------------------------------------------------------------
@@ -583,7 +556,9 @@ class ProjectsOpportunities(UUIDBaseTable, table=True):
     )
     is_user_project: Optional[bool] = None
     owner: Optional[str] = None
-    organization: UUID = Field(foreign_key="Organizations.id", nullable=False)
+    organization: UUID = Field(
+        foreign_key="Organizations.id", nullable=False
+    )
     organization_logo: Optional[str] = None
     hero_image: Optional[str] = None
     repository: Optional[str] = None
@@ -617,7 +592,6 @@ class ProjectsOpportunities(UUIDBaseTable, table=True):
 
     # Relationships
     organization_rel: Optional[Organization] = Relationship(back_populates="projects")
-
 
 # -------------------------------------------------------------------------
 # Fellowships model

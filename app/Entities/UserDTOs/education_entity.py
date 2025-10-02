@@ -3,12 +3,12 @@ from uuid import UUID
 from datetime import datetime, date
 from pydantic import BaseModel, field_validator
 
-from Schema.SQL.Enums.enums import WorkLocationType, Tools
+from Schema.SQL.Enums.enums import SchoolType, WorkLocationType, Tools
 
 class CreateEducation(BaseModel):
     profile_id: UUID
     school: str
-    school_type: str
+    school_type: SchoolType
     degree: str
     field: str
     currently_studying: bool
@@ -38,7 +38,7 @@ class CreateEducation(BaseModel):
 
 class UpdateEducation(BaseModel):
     school: Optional[str] = None
-    school_type: Optional[str] = None
+    school_type: Optional[SchoolType] = None
     degree: Optional[str] = None
     field: Optional[str] = None
     currently_studying: Optional[bool] = None
@@ -69,7 +69,7 @@ class ReadEducation(BaseModel):
     id: UUID
     profile_id: UUID
     school: str
-    school_type: str
+    school_type: SchoolType
     degree: str
     field: str
     currently_studying: bool

@@ -14,10 +14,7 @@ router = APIRouter(prefix="/Dijkstra/v1/education", tags=["Education"])
 
 
 @router.post("/", response_model=ReadEducation)
-def create_education(
-    education_create: CreateEducation,
-    session: Session = Depends(get_session),
-):
+def create_education(education_create: CreateEducation, session: Session = Depends(get_session)):
     service = EducationService(session)
     logger.info(f"Creating Education entry for profile_id={education_create.profile_id}")
     education = service.create_education(education_create)
@@ -41,20 +38,14 @@ def list_educations(
     session: Session = Depends(get_session),
 ):
     service = EducationService(session)
-    logger.info(
-        f"Listing Education entries: skip={skip}, limit={limit}, profile_id={profile_id}"
-    )
+    logger.info(f"Listing Education entries: skip={skip}, limit={limit}, profile_id={profile_id}")
     educations = service.list_educations(skip=skip, limit=limit, profile_id=profile_id)
     logger.info(f"Returned {len(educations)} education entries")
     return educations
 
 
 @router.put("/{education_id}", response_model=ReadEducation)
-def update_education(
-    education_id: UUID,
-    education_update: UpdateEducation,
-    session: Session = Depends(get_session),
-):
+def update_education(education_id: UUID, education_update: UpdateEducation, session: Session = Depends(get_session)):
     service = EducationService(session)
     logger.info(f"Updating Education ID: {education_id} with data: {education_update.dict(exclude_unset=True)}")
     education = service.update_education(education_id, education_update)
@@ -69,3 +60,11 @@ def delete_education(education_id: UUID, session: Session = Depends(get_session)
     message = service.delete_education(education_id)
     logger.info(message)
     return {"detail": message}
+
+@router.get("/profile/{profile_id}", response_model=List[ReadEducation])
+def get_educations_by_profile(profile_id: UUID, session: Session = Depends(get_session)):
+    service = EducationService(session)
+    logger.info(f"Fetching Education entries for profile_id={profile_id}")
+    educations = service.get_educations_by_profile(profile_id)
+    logger.info(f"Returned {len(educations)} education entries for profile_id={profile_id}")
+    return educations

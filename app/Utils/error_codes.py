@@ -270,3 +270,25 @@ class ErrorCodes:
     # Already exists errors
     USER_GITHUB_AE_A01 = "USER-GITHUB-AE-A01"  # GitHub username already exists
     USER_VOLUNTEERING_NF_A01 = "USER-VOLUNTEERING-NF-A01"  # Volunteering entry not found
+    # Users → Education
+    # -----------------------------
+
+    # Database errors
+    USER_EDUCATION_DB_A01 = "USER-EDUCATION-DB-A01"  # Failure inserting education
+    USER_EDUCATION_DB_A02 = "USER-EDUCATION-DB-A02"  # Failure updating education
+    USER_EDUCATION_DB_A03 = "USER-EDUCATION-DB-A03"  # Failure deleting education
+
+    # Server / Unexpected errors
+    USER_EDUCATION_SRV_A01 = "USER-EDUCATION-SRV-A01"  # Generic server error
+    USER_EDUCATION_SRV_A02 = "USER-EDUCATION-SRV-A02"  # Error fetching education list
+
+    # Authentication / Permission errors
+    USER_EDUCATION_AUTH_A01 = "USER-EDUCATION-AUTH-A01"  # User not authorized
+    USER_EDUCATION_AUTH_A02 = "USER-EDUCATION-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_EDUCATION_VAL_A01 = "USER-EDUCATION-VAL-A01"  # Invalid education payload
+    USER_EDUCATION_VAL_A02 = "USER-EDUCATION-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_EDUCATION_NF_A01 = "USER-EDUCATION-NF-A01"  # Education not found

@@ -23,13 +23,12 @@ class EducationRepository:
     def get(self, education_id: UUID) -> Optional[Education]:
         statement = select(Education).where(Education.id == education_id)
         return self.session.exec(statement).first()
+    
+    def get_by_profile_id(self, profile_id: UUID) -> List[Education]:
+        statement = select(Education).where(Education.profile_id == profile_id)
+        return self.session.exec(statement).all()
 
-    def list(
-        self,
-        skip: int = 0,
-        limit: int = 20,
-        profile_id: Optional[UUID] = None,
-    ) -> List[Education]:
+    def list(self, skip: int = 0, limit: int = 20, profile_id: Optional[UUID] = None) -> List[Education]:
         statement = select(Education)
         if profile_id:
             statement = statement.where(Education.profile_id == profile_id)

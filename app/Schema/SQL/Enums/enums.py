@@ -96,6 +96,8 @@ class SchoolType(str, Enum):
     COLLEGE = "COLLEGE"
     SCHOOL = "SCHOOL"
     OTHER = "OTHER"
+    COURSE = "COURSE"
+    BOOTCAMP = "BOOTCAMP"
 
 # LEETCODE_TAG_CATEGORY
 class LeetcodeTagCategory(str, Enum):

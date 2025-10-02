@@ -262,7 +262,7 @@ class Projects(UUIDBaseTable, table=True):
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")), nullable=False)
     )
     readme: bool = Field(nullable=False)
-    licence: bool = Field(nullable=False)
+    license: bool = Field(nullable=False)
     landing_page: bool = Field(nullable=False)
     landing_page_link: Optional[str] = None
     docs_page: bool = Field(nullable=False)

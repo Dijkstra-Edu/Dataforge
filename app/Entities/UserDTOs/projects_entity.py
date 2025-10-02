@@ -1,7 +1,7 @@
 from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from Schema.SQL.Enums.enums import Domain, Tools
 
 class CreateProject(BaseModel):
@@ -19,7 +19,7 @@ class CreateProject(BaseModel):
     topics: Optional[List[str]] = None
     tools: List[Tools]
     readme: bool
-    licence: bool
+    license: bool
     landing_page: bool
     landing_page_link: Optional[str] = None
     docs_page: bool
@@ -31,6 +31,18 @@ class CreateProject(BaseModel):
     complexity_rating: Optional[float] = None
     testing_framework_present: bool
     testing_framework: Optional[str] = None
+
+    @field_validator("name", "owner", "description")
+    def must_not_be_empty(cls, v, info):
+        if not v.strip():
+            raise ValueError(f"{info.field_name} cannot be empty")
+        return v.strip()
+
+    @field_validator("github_stars", "github_open_issues", "github_forks", "total_lines_contributed")
+    def must_be_non_negative(cls, v, info):
+        if v is not None and v < 0:
+            raise ValueError(f"{info.field_name} cannot be negative")
+        return v
 
 
 class UpdateProject(BaseModel):
@@ -48,7 +60,7 @@ class UpdateProject(BaseModel):
     topics: Optional[List[str]] = None
     tools: Optional[List[Tools]] = None
     readme: Optional[bool] = None
-    licence: Optional[bool] = None
+    license: Optional[bool] = None
     landing_page: Optional[bool] = None
     landing_page_link: Optional[str] = None
     docs_page: Optional[bool] = None
@@ -60,6 +72,18 @@ class UpdateProject(BaseModel):
     complexity_rating: Optional[float] = None
     testing_framework_present: Optional[bool] = None
     testing_framework: Optional[str] = None
+
+    @field_validator("name", "owner", "description")
+    def must_not_be_empty_if_provided(cls, v, info):
+        if v is not None and not v.strip():
+            raise ValueError(f"{info.field_name} cannot be empty")
+        return v.strip() if v else v
+
+    @field_validator("github_stars", "github_open_issues", "github_forks")
+    def must_be_non_negative(cls, v, info):
+        if v is not None and v < 0:
+            raise ValueError(f"{info.field_name} cannot be negative")
+        return v
 
 class ReadProject(BaseModel):
     id: UUID
@@ -77,7 +101,7 @@ class ReadProject(BaseModel):
     topics: Optional[List[str]]
     tools: List[Tools]
     readme: bool
-    licence: bool
+    license: bool
     landing_page: bool
     landing_page_link: Optional[str]
     docs_page: bool
@@ -94,6 +118,9 @@ class ReadProject(BaseModel):
 
     class Config:
         from_attributes = True  
+
+class DeleteResponse(BaseModel):
+    detail: str
 
 class ReadProjectWithRelations(ReadProject):
     profile: Optional["ReadProfile"] = None

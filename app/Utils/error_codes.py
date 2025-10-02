@@ -269,3 +269,4 @@ class ErrorCodes:
 
     # Already exists errors
     USER_GITHUB_AE_A01 = "USER-GITHUB-AE-A01"  # GitHub username already exists
+    USER_VOLUNTEERING_NF_A01 = "USER-VOLUNTEERING-NF-A01"  # Volunteering entry not found

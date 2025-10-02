@@ -50,3 +50,8 @@ class VolunteeringNotFound(ServiceError):
     def __init__(self, volunteering_id):
         super().__init__(f"Volunteering entry with ID {volunteering_id} does not exist.")
         self.volunteering_id = volunteering_id
+        
+class ProjectsNotFound(ServiceError):
+    def __init__(self, project_id):
+        super().__init__(f"Project with ID {project_id} does not exist.")
+        self.project_id = project_id

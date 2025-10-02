@@ -86,8 +86,6 @@ class ReadVolunteering(BaseModel):
     class Config:
         orm_mode = True
 
-
-
 class ReadVolunteeringWithRelations(ReadVolunteering):
     profile: Optional["ReadProfile"] = None
 

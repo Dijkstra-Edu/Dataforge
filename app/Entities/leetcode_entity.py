@@ -1,13 +1,3 @@
-"""Pydantic DTOs for Leetcode related models.
-
-This file defines input (Create*/Update*) and output (Read*) schemas for:
- - Leetcode core profile/stats
- - Leetcode badges
- - Leetcode tags
-
-Follows the existing pattern used across the codebase (see other *entity.py files).
-"""
-
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime

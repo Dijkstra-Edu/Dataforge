@@ -3,7 +3,7 @@ from fastapi import Request
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
-from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, LocationNotFound, ProfileAlreadyExists, ProfileNotFound, UserNotFound, WorkExperienceNotFound, LinksNotFound, LinksAlreadyExists, VolunteeringNotFound, ProjectsNotFound
+from Utils.Exceptions.user_exceptions import EducationNotFound, GitHubUsernameAlreadyExists, GitHubUsernameNotFound, LocationNotFound, ProfileAlreadyExists, ProfileNotFound, UserNotFound, WorkExperienceNotFound, LinksNotFound, LinksAlreadyExists, VolunteeringNotFound, ProjectsNotFound
 import logging
 
 logger = logging.getLogger(__name__)
@@ -189,4 +189,14 @@ def register_exception_handlers(app):
             error="Volunteering not found",
             detail=str(exc),
             status=404
+        )
+        
+    @app.exception_handler(EducationNotFound)  
+    async def education_not_found_handler(request: Request, exc: EducationNotFound):
+        logger.warning(f"Education not found: {exc.education_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_EDUCATION_NF_A01,
+            error="Education not found",
+            detail=str(exc),
+            status=404,
         )

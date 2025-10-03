@@ -120,8 +120,6 @@ def register_exception_handlers(app):
             status=404
         )
 
-    # Unified: No certifications found also maps to CertificationNotFound with id None
-
     @app.exception_handler(Exception)
     async def generic_handler(request: Request, exc: Exception):
         logger.error(f"Unhandled error: {str(exc)}")

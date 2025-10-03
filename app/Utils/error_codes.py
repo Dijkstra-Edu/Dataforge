@@ -242,5 +242,4 @@ class ErrorCodes:
     USER_CERTIFICATION_VAL_A01 = "USER_CERTIFICATION-VAL-A01"  # Invalid certification payload
     USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATION-VAL-A02"  # Required field missing
 
-    # Not found errors (single unified code for individual or list absence)
     USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATION-NF-A01"  # Certification not found / No certifications found

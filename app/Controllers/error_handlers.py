@@ -3,7 +3,7 @@ from fastapi import Request
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
-from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, UserNotFound, WorkExperienceNotFound, CertificationNotFound
+from Utils.Exceptions.user_exceptions import EducationNotFound, GitHubUsernameAlreadyExists, GitHubUsernameNotFound, LocationNotFound, ProfileAlreadyExists, ProfileNotFound, UserNotFound, WorkExperienceNotFound, LinksNotFound, LinksAlreadyExists, VolunteeringNotFound, ProjectsNotFound, LocationNotFound, ProfileNotFound, UserNotFound, WorkExperienceNotFound,  CertificationNotFound
 import logging
 
 logger = logging.getLogger(__name__)
@@ -128,4 +128,85 @@ def register_exception_handlers(app):
             error="Internal server error",
             detail="An unexpected error occurred",
             status=500
+        )
+        
+    @app.exception_handler(LinksNotFound)
+    async def links_not_found_handler(request: Request, exc: LinksNotFound):
+        logger.warning(f"Links not found: {exc.identifier}")
+        raise_api_error(
+            code=ErrorCodes.USER_LINKS_NF_A01,
+            error="Links not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(ProjectsNotFound)
+    async def project_not_found_handler(request: Request, exc: ProjectsNotFound):
+        logger.warning(f"Project not found: {exc.project_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_PROJECT_NF_A01,
+            error="Project not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(LinksAlreadyExists)
+    async def links_already_exists_handler(request: Request, exc: LinksAlreadyExists):
+        logger.warning(f"Links already exist for user: {exc.user_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_LINKS_AE_A01,
+            error="Links already exist",
+            detail=str(exc),
+            status=409
+        )
+
+    @app.exception_handler(ProfileAlreadyExists)
+    async def profile_already_exists_handler(request: Request, exc: ProfileAlreadyExists):
+        logger.warning(f"Profile already exists for user: {exc.user_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_PROFILE_AE_A01,
+            error="Profile already exists",
+            detail=str(exc),
+            status=409
+        )
+
+    @app.exception_handler(GitHubUsernameNotFound)
+    async def github_not_found_handler(request: Request, exc: GitHubUsernameNotFound):
+        logger.warning(f"GitHub username not found: {exc.github_username}")
+        raise_api_error(
+            code=ErrorCodes.USER_GITHUB_NF_A01,
+            error="GitHub username not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(GitHubUsernameAlreadyExists)
+    async def github_already_exists_handler(request: Request, exc: GitHubUsernameAlreadyExists):
+        logger.warning(f"GitHub username already exists: {exc.github_username}")
+        raise_api_error(
+            code=ErrorCodes.USER_GITHUB_AE_A01,
+            error="GitHub username already exists",
+            detail=str(exc),
+            status=409
+        )
+
+
+    @app.exception_handler(VolunteeringNotFound)
+    async def volunteering_not_found_handler(request: Request, exc: VolunteeringNotFound):
+        logger.warning(f"Volunteering not found: {exc.volunteering_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_VOLUNTEERING_NF_A01,
+            error="Volunteering not found",
+            detail=str(exc),
+            status=404
+        )
+        
+    @app.exception_handler(EducationNotFound)  
+    async def education_not_found_handler(request: Request, exc: EducationNotFound):
+        logger.warning(f"Education not found: {exc.education_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_EDUCATION_NF_A01,
+            error="Education not found",
+            detail=str(exc),
+            status=404,
         )

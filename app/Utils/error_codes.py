@@ -219,9 +219,9 @@ class ErrorCodes:
     USER_WORKEXP_VAL_A02 = "USER-WORKEXP-VAL-A02"  # Required field missing
 
     # Not found errors
-    USER_WORK_EXPERIENCE_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
-
-    # -----------------------------
+    USER_WORKEXP_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
+    
+     # -----------------------------
     # Users → Certificate
     # -----------------------------
 
@@ -243,3 +243,73 @@ class ErrorCodes:
     USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATION-VAL-A02"  # Required field missing
 
     USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATION-NF-A01"  # Certification not found / No certifications found
+     # -----------------------------
+    # Users → Links
+    # -----------------------------
+
+    # Database errors
+    USER_LINKS_DB_A01 = "USER-LINKS-DB-A01"  # Failure inserting links
+    USER_LINKS_DB_A02 = "USER-LINKS-DB-A02"  # Failure updating links
+    USER_LINKS_DB_A03 = "USER-LINKS-DB-A03"  # Failure deleting links
+
+    # Server / Unexpected errors
+    USER_LINKS_SRV_A01 = "USER-LINKS-SRV-A01"  # Generic server error
+    USER_LINKS_SRV_A02 = "USER-LINKS-SRV-A02"  # Error fetching links list
+
+    # Validation / Input errors
+    USER_LINKS_VAL_A01 = "USER-LINKS-VAL-A01"  # Invalid links payload
+    USER_LINKS_VAL_A02 = "USER-LINKS-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_LINKS_NF_A01 = "USER-LINKS-NF-A01"  # Links not found
+
+    # Already exists errors
+    USER_LINKS_AE_A01 = "USER-LINKS-AE-A01"  # Links already exist
+
+
+
+    # -----------------------------
+    # Users → GitHub
+    # -----------------------------
+
+    # Database errors
+    USER_GITHUB_DB_A01 = "USER-GITHUB-DB-A01"  # Failure inserting GitHub entry
+    USER_GITHUB_DB_A02 = "USER-GITHUB-DB-A02"  # Failure updating GitHub entry
+    USER_GITHUB_DB_A03 = "USER-GITHUB-DB-A03"  # Failure deleting GitHub entry
+
+    # Server / Unexpected errors
+    USER_GITHUB_SRV_A01 = "USER-GITHUB-SRV-A01"  # Generic server error
+    USER_GITHUB_SRV_A02 = "USER-GITHUB-SRV-A02"  # Error fetching GitHub entry
+
+    # Validation / Input errors
+    USER_GITHUB_VAL_A01 = "USER-GITHUB-VAL-A01"  # Invalid GitHub payload
+    USER_GITHUB_VAL_A02 = "USER-GITHUB-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_GITHUB_NF_A01 = "USER-GITHUB-NF-A01"  # GitHub username not found
+
+    # Already exists errors
+    USER_GITHUB_AE_A01 = "USER-GITHUB-AE-A01"  # GitHub username already exists
+    USER_VOLUNTEERING_NF_A01 = "USER-VOLUNTEERING-NF-A01"  # Volunteering entry not found
+    # Users → Projects
+    # -----------------------------
+
+    # Database errors
+    USER_PROJECT_DB_A01 = "USER-PROJECT-DB-A01"  # Failure inserting project
+    USER_PROJECT_DB_A02 = "USER-PROJECT-DB-A02"  # Failure updating project
+    USER_PROJECT_DB_A03 = "USER-PROJECT-DB-A03"  # Failure deleting project
+
+    # Server / Unexpected errors
+    USER_PROJECT_SRV_A01 = "USER-PROJECT-SRV-A01"  # Generic server error
+    USER_PROJECT_SRV_A02 = "USER-PROJECT-SRV-A02"  # Error fetching projects list
+
+    # Authentication / Permission errors
+    USER_PROJECT_AUTH_A01 = "USER-PROJECT-AUTH-A01"  # User not authorized
+    USER_PROJECT_AUTH_A02 = "USER-PROJECT-AUTH-A02"  # Session expired / invalid token
+
+    # Validation / Input errors
+    USER_PROJECT_VAL_A01 = "USER-PROJECT-VAL-A01"  # Invalid project payload
+    USER_PROJECT_VAL_A02 = "USER-PROJECT-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_PROJECT_NF_A01 = "USER-PROJECT-NF-A01"  # Project not found

@@ -7,7 +7,7 @@ from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteg
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 
 from Schema.SQL.Enums.enums import (
-    Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
+    Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
     LeetcodeTagCategory, Status, TestScoreType
 )
@@ -88,7 +88,9 @@ class Education(UUIDBaseTable, table=True):
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     school: str = Field(nullable=False)
-    school_type: str = Field(nullable=False)  # Should be an enum if defined
+    school_type: SchoolType = Field(
+        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"))
+    )
     degree: str = Field(nullable=False)
     field: str = Field(nullable=False)
     currently_studying: bool = Field(nullable=False)
@@ -387,7 +389,7 @@ class Github(UUIDBaseTable, table=True):
 class Links(UUIDBaseTable, table=True):
     __tablename__ = "Links"
 
-    user_id: Optional[UUID] = Field(foreign_key="User.id", nullable=True)
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
     portfolio_link: Optional[str] = None
     github_user_name: str = Field(nullable=False, unique=True)
     github_link: str = Field(nullable=False)
@@ -399,7 +401,7 @@ class Links(UUIDBaseTable, table=True):
     orcid_link: str = Field(nullable=False)
 
     # Relationships
-    user_rel: Optional[User] = Relationship(back_populates="links")
+    user_rel: User = Relationship(back_populates="links")
 
 # -------------------------------------------------------------------------
 # Blog model

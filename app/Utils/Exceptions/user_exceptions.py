@@ -39,16 +39,22 @@ class GitHubUsernameAlreadyExists(ServiceError):
         self.github_username = github_username
         
 class CertificationNotFound(ServiceError):
-    def __init__(self, certification_id):
-        super().__init__(f"Certificate with ID '{certification_id}' does not exist.")
+    """Raised when a specific certification or any certifications (list) are not found.
+
+    If certification_id is None, it represents the absence of certifications matching
+    the search/filter criteria (previously CertificationUnAvailable).
+    """
+    def __init__(self, certification_id=None):
+        if certification_id is None:
+            message = "No certifications found."
+        else:
+            message = f"Certificate with ID '{certification_id}' does not exist."
+        super().__init__(message)
         self.certificate_id = certification_id
 
 class CertificationAlreadyExists(ServiceError):
     def __init__( self, certification_id):
         super().__init__(f"Certificate with ID '{certification_id}' already exits.")
         
-class CertificationUnAvailable(ServiceError):
-    def __init__( self):
-        super().__init__(f"No certifications exist.")
-        
+"""Deprecated: CertificationUnAvailable merged into CertificationNotFound"""
         

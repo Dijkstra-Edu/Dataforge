@@ -3,7 +3,7 @@ from fastapi import Request
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
-from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, UserNotFound, WorkExperienceNotFound, CertificationNotFound, CertificationUnAvailable
+from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, UserNotFound, WorkExperienceNotFound, CertificationNotFound
 import logging
 
 logger = logging.getLogger(__name__)
@@ -120,15 +120,7 @@ def register_exception_handlers(app):
             status=404
         )
 
-    @app.exception_handler(CertificationUnAvailable)
-    async def certifications_unavailable_handler(request: Request, exc: CertificationUnAvailable):
-        logger.info("No certifications available")
-        raise_api_error(
-            code=ErrorCodes.USER_CERTIFICATION_NF_A02,
-            error="No certifications found",
-            detail=str(exc),
-            status=404
-        )
+    # Unified: No certifications found also maps to CertificationNotFound with id None
 
     @app.exception_handler(Exception)
     async def generic_handler(request: Request, exc: Exception):

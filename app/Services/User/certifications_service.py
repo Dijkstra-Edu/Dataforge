@@ -4,7 +4,7 @@ from typing import List, Optional
 from sqlmodel import Session
 from Repository.User.certifications_repository import CertificationsRepository
 from Schema.SQL.Models.models import Certifications
-from Utils.Exceptions.user_exceptions import CertificationNotFound , CertificationUnAvailable
+from Utils.Exceptions.user_exceptions import CertificationNotFound
 from Entities.UserDTOs.certification_entity import CreateCertification, UpdateCertification
 
 
@@ -23,7 +23,8 @@ class CertificationService:
         def list_all_certifications(self, skip: int =0, limit: int =2, sort_by: str = "created_at",issuing_organization: Optional[str]= None, order: str = "desc", user_id: Optional[UUID] = None ) -> List[Certifications]:
             certifications =  self.repo.list( skip=skip, limit=limit, sort_by=sort_by, order=order, user_id=user_id, issuing_organization=issuing_organization)
             if not certifications:
-                raise CertificationUnAvailable
+                
+                raise CertificationNotFound()
             return certifications
         
         def get_certification( self, certification_id: UUID) -> Optional[Certifications]:

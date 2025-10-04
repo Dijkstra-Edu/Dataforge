@@ -220,9 +220,30 @@ class ErrorCodes:
 
     # Not found errors
     USER_WORKEXP_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
-
-
+    
+     # -----------------------------
+    # Users → Certificate
     # -----------------------------
+
+    # Database errors
+    USER_CERTIFICATION_DB_A01 = "USER_CERTIFICATION-DB-A01"  # Failure inserting certificate
+    USER_CERTIFICATION_DB_A02 = "USER_CERTIFICATION-DB-A02"  # Failure updating certificate
+    USER_CERTIFICATION_DB_A03 = "USER_CERTIFICATION-DB-A03"  # Failure deleting certificate
+
+    # Server / Unexpected errors
+    USER_CERTIFICATION_SRV_A01 = "USER_CERTIFICATION-SRV-A01"  # Generic server error
+    USER_CERTIFICATION_SRV_A02 = "USER_CERTIFICATION-SRV-A02"  # Error fetching certifications list
+
+    # Authentication / Permission errors
+    USER_CERTIFICATION_AUTH_A01 = "USER_CERTIFICATION-AUTH-A01"  # User not authorized
+    USER_CERTIFICATION_AUTH_A02 = "USER_CERTIFICATION-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_CERTIFICATION_VAL_A01 = "USER_CERTIFICATION-VAL-A01"  # Invalid certification payload
+    USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATION-VAL-A02"  # Required field missing
+
+    USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATION-NF-A01"  # Certification not found / No certifications found
+     # -----------------------------
     # Users → Links
     # -----------------------------
 

@@ -19,7 +19,7 @@ logger = setup_logging()
 @app.on_event("startup")
 def on_startup():
     logger.info("Starting up the application...")
-    init_db()
+    # init_db()
     logger.info("Database initialized successfully.")
 
 @app.on_event("shutdown")

@@ -2,16 +2,14 @@ from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
 
-from Schema.SQL.Models.models import User, Github, Links
+from Schema.SQL.Models.models import User, Links
 from Repository.User.links_repository import LinksRepository
 from Entities.UserDTOs.links_entity import CreateLinks, UpdateLinks
 from Utils.Exceptions.user_exceptions import (
     UserNotFound,
-    GitHubUsernameNotFound,
     LinksNotFound,
     LinksAlreadyExists,
 )
-from sqlalchemy import select
 
 
 class LinksService:
@@ -27,12 +25,6 @@ class LinksService:
         existing = self.repo.get_by_user_id(links_create.user_id)
         if existing:
             raise LinksAlreadyExists(links_create.user_id)
-
-
-        statement = select(User).where(User.github_user_name == links_create.github_user_name)
-        github_entry = self.session.exec(statement).first()
-        if not github_entry:
-            raise GitHubUsernameNotFound(links_create.github_user_name)
 
         links = Links(**links_create.dict(exclude_unset=True))
         return self.repo.create(links)

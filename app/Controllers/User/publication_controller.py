@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from uuid import UUID
 from sqlmodel import Session
 
@@ -54,14 +54,8 @@ def list_publications(
     service = PublicationService(session)
     logger.info(f"Listing publications: skip={skip}, limit={limit}")
     publications = service.list_publications(skip=skip, limit=limit)
-
-    if not publications:
-        logger.info("No publications found")
-        return []
-
     logger.info(f"Returned {len(publications)} publications")
     return publications
-
 
 
 @router.put("/{publication_id}", response_model=ReadPublication)

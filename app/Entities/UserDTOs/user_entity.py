@@ -10,13 +10,13 @@ from Schema.SQL.Enums.enums import Rank, Domain
 # ----------------------
 class CreateUser(BaseModel):
     github_user_name: str
-    first_name: str
+    first_name: Optional[str] = None
     middle_name: Optional[str] = None
-    last_name: str
+    last_name: Optional[str] = None
     rank: Rank = Rank.UNRANKED
     streak: Optional[int] = None
-    primary_specialization: Optional[Domain] = None
-    secondary_specializations: Optional[List[Domain]] = None
+    primary_specialization: Domain
+    secondary_specializations: List[Domain]
     expected_salary_bucket: Rank
     time_left: int
     onboarding_complete: bool = False
@@ -30,15 +30,15 @@ class CreateUser(BaseModel):
 
     @field_validator('first_name')
     def first_name_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('first_name cannot be empty')
-        return v.strip()
+        if v is not None and not v.strip():
+            raise ValueError('first_name cannot be empty string')
+        return v.strip() if v else v
 
     @field_validator('last_name')
     def last_name_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('last_name cannot be empty')
-        return v.strip()
+        if v is not None and not v.strip():
+            raise ValueError('last_name cannot be empty string')
+        return v.strip() if v else v
 
 
 class UpdateUser(BaseModel):
@@ -64,13 +64,13 @@ class UpdateUser(BaseModel):
     @field_validator('first_name')
     def first_name_must_not_be_empty(cls, v):
         if v is not None and not v.strip():
-            raise ValueError('first_name cannot be empty')
+            raise ValueError('first_name cannot be empty string')
         return v.strip() if v else v
 
     @field_validator('last_name')
     def last_name_must_not_be_empty(cls, v):
         if v is not None and not v.strip():
-            raise ValueError('last_name cannot be empty')
+            raise ValueError('last_name cannot be empty string')
         return v.strip() if v else v
 
 
@@ -80,13 +80,13 @@ class UpdateUser(BaseModel):
 class ReadUser(BaseModel):
     id: UUID
     github_user_name: str
-    first_name: str
+    first_name: Optional[str]
     middle_name: Optional[str]
-    last_name: str
+    last_name: Optional[str]
     rank: Rank
     streak: Optional[int]
-    primary_specialization: Optional[Domain]
-    secondary_specializations: Optional[List[Domain]]
+    primary_specialization: Domain
+    secondary_specializations: List[Domain]
     expected_salary_bucket: Rank
     time_left: int
     onboarding_complete: bool
@@ -96,3 +96,44 @@ class ReadUser(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# ----------------------
+# Onboarding DTOs
+# ----------------------
+class OnboardUser(BaseModel):
+    github_user_name: str
+    linkedin_user_name: str
+    leetcode_user_name: str
+    first_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    last_name: Optional[str] = None
+    rank: Rank = Rank.UNRANKED
+    streak: int = 0
+    primary_specialization: Domain
+    secondary_specializations: List[Domain]
+    expected_salary_bucket: Rank
+    time_left: int
+
+    @field_validator('github_user_name', 'linkedin_user_name', 'leetcode_user_name')
+    def usernames_must_not_be_empty(cls, v):
+        if not v.strip():
+            raise ValueError('username cannot be empty')
+        return v.strip()
+
+    @field_validator('first_name')
+    def first_name_must_not_be_empty(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('first_name cannot be empty string')
+        return v.strip() if v else v
+
+    @field_validator('last_name')
+    def last_name_must_not_be_empty(cls, v):
+        if v is not None and not v.strip():
+            raise ValueError('last_name cannot be empty string')
+        return v.strip() if v else v
+
+
+class OnboardCheckResponse(BaseModel):
+    onboarded: bool
+    user_id: Optional[UUID] = None

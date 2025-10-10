@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, ReadUser
+from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, ReadUser, OnboardUser, OnboardCheckResponse
 from Services.User.user_service import UserService
 from Settings.logging_config import setup_logging
 from db import get_session
@@ -21,6 +21,39 @@ def create_user(user_create: CreateUser, session: Session = Depends(get_session)
     logger.info(f"Creating User: {user_create.github_user_name}")
     user = service.create_user(user_create)
     logger.info(f"Created User with ID: {user.id}")
+    return user
+
+
+@router.get("/onboard", response_model=OnboardCheckResponse)
+def check_onboarding(
+    username: str = Query(..., description="GitHub username to check"),
+    check: bool = Query(False, description="Check onboarding status"),
+    session: Session = Depends(get_session)
+):
+    """
+    Check if a user has completed onboarding by GitHub username.
+    Use ?check=true to activate this endpoint.
+    """
+    if not check:
+        logger.warning("Onboard check endpoint called without check=true parameter")
+        return OnboardCheckResponse(onboarded=False, user_id=None)
+    
+    service = UserService(session)
+    logger.info(f"Checking onboarding status for GitHub username: {username}")
+    result = service.check_onboarding_status(username)
+    logger.info(f"Onboarding status for {username}: onboarded={result.onboarded}, user_id={result.user_id}")
+    return result
+
+
+@router.post("/onboard", response_model=ReadUser)
+def onboard_user(onboard_data: OnboardUser, session: Session = Depends(get_session)):
+    """
+    Onboard a new user - creates User with Profile and Links, and marks onboarding as complete.
+    """
+    service = UserService(session)
+    logger.info(f"Onboarding User: {onboard_data.github_user_name}")
+    user = service.onboard_user(onboard_data)
+    logger.info(f"Successfully onboarded User with ID: {user.id}")
     return user
 
 

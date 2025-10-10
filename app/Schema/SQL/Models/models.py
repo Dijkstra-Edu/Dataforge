@@ -28,21 +28,19 @@ class User(UUIDBaseTable, table=True):
     __tablename__ = "User"
 
     github_user_name: str = Field(nullable=False, unique=True)
-    first_name: str = Field(nullable=False)
+    first_name: Optional[str] = None
     middle_name: Optional[str] = None
-    last_name: str = Field(nullable=False)
+    last_name: Optional[str] = None
     rank: Rank = Field(
         default=Rank.UNRANKED,
         sa_column=Column(SQLEnum(Rank, name="RANK"))
     )
     streak: Optional[int] = None
-    primary_specialization: Optional[Domain] = Field(
-        default=None,
-        sa_column=Column(SQLEnum(Domain, name="DOMAIN"))
+    primary_specialization: Domain = Field(
+        sa_column=Column(SQLEnum(Domain, name="DOMAIN"), nullable=False)
     )
-    secondary_specializations: Optional[List[Domain]] = Field(
-        default=None,
-        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
+    secondary_specializations: List[Domain] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")), nullable=False)
     )
     expected_salary_bucket: Rank = Field(
         sa_column=Column(SQLEnum(Rank, name="RANK"), nullable=False)
@@ -402,7 +400,6 @@ class Github(UUIDBaseTable, table=True):
     # Relationships
     projects: List["Projects"] = Relationship(back_populates="owner_rel")
     profile_rel: Optional["Profile"] = Relationship(back_populates="github")
-    links: Optional["Links"] = Relationship(back_populates="github_rel")
 
 # -------------------------------------------------------------------------
 # Links model
@@ -412,18 +409,17 @@ class Links(UUIDBaseTable, table=True):
 
     user_id: UUID = Field(foreign_key="User.id", nullable=False)
     portfolio_link: Optional[str] = None
-    github_user_name: str = Field(foreign_key="Github.user_name", nullable=False, unique=True)
-    github_link: str = Field(nullable=False)
+    github_user_name: str = Field(nullable=False, unique=True)
+    github_link: Optional[str] = None
     linkedin_user_name: str = Field(nullable=False, unique=True)
-    linkedin_link: str = Field(nullable=False)
+    linkedin_link: Optional[str] = None
     leetcode_user_name: str = Field(nullable=False, unique=True)
-    leetcode_link: str = Field(nullable=False)
-    orcid_id: str = Field(nullable=False, unique=True)
-    orcid_link: str = Field(nullable=False)
+    leetcode_link: Optional[str] = None
+    orcid_id: Optional[str] = Field(default=None, unique=True)
+    orcid_link: Optional[str] = None
 
     # Relationships
     user_rel: User = Relationship(back_populates="links")
-    github_rel: "Github" = Relationship(back_populates="links")
 
 # -------------------------------------------------------------------------
 # Blog model

@@ -94,13 +94,13 @@ class ReadPublication(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ReadPublicationWithRelations(ReadPublication):
     profile: Optional["ReadProfile"] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 from Entities.UserDTOs.profile_entity import ReadProfile

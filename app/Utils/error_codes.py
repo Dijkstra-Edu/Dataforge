@@ -11,6 +11,13 @@ class ErrorCodes:
     """
 
     GENERIC_ERROR = "GEN-ERR-000"  # Generic error code for uncategorized errors
+    GENERIC_VALIDATION_ERROR = "GEN-VAL-001"  # Generic validation error for request payloads
+    
+    # Database errors
+    DATABASE_ERROR = "DB-ERR-001"  # Generic database error
+    DATABASE_RLS_ERROR = "DB-RLS-001"  # Row-Level Security policy violation
+    DATABASE_UNIQUE_VIOLATION = "DB-UNQ-001"  # Unique constraint violation
+    DATABASE_FK_VIOLATION = "DB-FK-001"  # Foreign key constraint violation
 
     # -----------------------------
     # Opportunities → Project Opportunities

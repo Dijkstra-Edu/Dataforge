@@ -55,8 +55,8 @@ class WorkExperienceService:
         location: Optional[UUID] = None,
         location_type: Optional[WorkLocationType] = None,
         currently_working: Optional[bool] = None,
-        start_date_after: Optional[str] = None,
-        start_date_before: Optional[str] = None,
+        start_year_after: Optional[int] = None,
+        start_year_before: Optional[int] = None,
     ) -> List[WorkExperience]:
         """
         Supports pagination, filtering, and sorting.
@@ -74,8 +74,8 @@ class WorkExperienceService:
             location=location,
             location_type=location_type,
             currently_working=currently_working,
-            start_date_after=start_date_after,
-            start_date_before=start_date_before,
+            start_year_after=start_year_after,
+            start_year_before=start_year_before,
         )
 
     def autocomplete_work_experiences(

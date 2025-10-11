@@ -1,5 +1,8 @@
 # controllers/error_handlers.py
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+from psycopg2.errors import InsufficientPrivilege, UniqueViolation, ForeignKeyViolation
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
@@ -166,6 +169,99 @@ def register_exception_handlers(app):
             error="Certificate not found",
             detail=str(exc),
             status=404
+        )
+
+    @app.exception_handler(ProgrammingError)
+    async def database_programming_error_handler(request: Request, exc: ProgrammingError):
+        """
+        Handle database programming errors including RLS violations
+        """
+        error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
+        
+        # Check if it's an RLS violation
+        if isinstance(exc.orig, InsufficientPrivilege):
+            logger.error(f"Row-Level Security violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_RLS_ERROR,
+                error="Permission Denied",
+                detail="You don't have permission to perform this operation. This may be due to database row-level security policies.",
+                status=403
+            )
+        
+        # Generic programming error
+        logger.error(f"Database programming error: {error_msg}")
+        raise_api_error(
+            code=ErrorCodes.DATABASE_ERROR,
+            error="Database Error",
+            detail="A database operation failed. Please check your data and try again.",
+            status=500
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def database_integrity_error_handler(request: Request, exc: IntegrityError):
+        """
+        Handle database integrity constraint violations (unique, foreign key, etc.)
+        """
+        error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
+        
+        # Check specific constraint violations
+        if isinstance(exc.orig, UniqueViolation):
+            logger.warning(f"Unique constraint violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_UNIQUE_VIOLATION,
+                error="Duplicate Entry",
+                detail="This record already exists. Please use a unique value.",
+                status=409
+            )
+        
+        if isinstance(exc.orig, ForeignKeyViolation):
+            logger.warning(f"Foreign key violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_FK_VIOLATION,
+                error="Invalid Reference",
+                detail="The referenced record does not exist. Please check the related IDs.",
+                status=400
+            )
+        
+        # Generic integrity error
+        logger.error(f"Database integrity error: {error_msg}")
+        raise_api_error(
+            code=ErrorCodes.DATABASE_ERROR,
+            error="Database Constraint Violation",
+            detail="A database constraint was violated. Please check your data.",
+            status=400
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        """
+        Handle Pydantic validation errors (422 errors) and provide clear feedback
+        """
+        errors = []
+        for error in exc.errors():
+            field = " -> ".join(str(loc) for loc in error["loc"])
+            message = error["msg"]
+            error_type = error["type"]
+            
+            # Format error message
+            if error_type == "value_error":
+                # Custom validation error (like our month validator)
+                errors.append(f"{field}: {message}")
+            elif error_type == "missing":
+                errors.append(f"{field}: This field is required")
+            elif error_type == "type_error":
+                errors.append(f"{field}: Invalid type - {message}")
+            else:
+                errors.append(f"{field}: {message}")
+        
+        error_detail = "; ".join(errors)
+        logger.warning(f"Validation error: {error_detail}")
+        
+        raise_api_error(
+            code=ErrorCodes.GENERIC_VALIDATION_ERROR,
+            error="Validation Error",
+            detail=error_detail,
+            status=422
         )
 
     @app.exception_handler(Exception)

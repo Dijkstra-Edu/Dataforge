@@ -36,7 +36,7 @@ class ReadProfile(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ----------------------
@@ -46,7 +46,7 @@ class ReadProfileWithUser(ReadProfile):
     user: Optional['ReadUser'] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # Import here to avoid circular imports

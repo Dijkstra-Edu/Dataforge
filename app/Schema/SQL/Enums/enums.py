@@ -232,3 +232,24 @@ class TestScoreType(str, Enum):
     TENTH = "TENTH"
     TWELFTH = "TWELFTH"
 
+# DEGREE
+class Degree(str, Enum):
+    BTECH = "BTECH"
+    BSC = "BSC"
+    BE = "BE"
+    BCA = "BCA"
+    BSCHONS = "BSCHONS"
+    BDES = "BDES"
+    BPHIL = "BPHIL"
+    MTECH = "MTECH"
+    MSC = "MSC"
+    ME = "ME"
+    MCA = "MCA"
+    MSR = "MSR"
+    MBA = "MBA"
+    MDES = "MDES"
+    MPHIL = "MPHIL"
+    PGDM = "PGDM"
+    PHD = "PHD"
+    DENG = "DENG"
+

@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
-    LeetcodeTagCategory, Status, TestScoreType
+    LeetcodeTagCategory, Status, TestScoreType, Degree
 )
 
 # Base class with UUID PK and timestamps
@@ -103,24 +103,30 @@ class Education(UUIDBaseTable, table=True):
     __tablename__ = "Education"
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
-    school: str = Field(nullable=False)
+    school_name: str = Field(nullable=False)
+    school_logo_url: Optional[str] = None
     school_type: SchoolType = Field(
-        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"))
+        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"), nullable=False)
     )
-    degree: str = Field(nullable=False)
-    field: str = Field(nullable=False)
+    degree: Degree = Field(
+        sa_column=Column(SQLEnum(Degree, name="DEGREE"), nullable=False)
+    )
+    course_field_name: str = Field(nullable=False)
     currently_studying: bool = Field(nullable=False)
     location: UUID = Field(foreign_key="Location.id", nullable=False)
     location_type: WorkLocationType = Field(
-        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"))
+        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"), nullable=False)
     )
-    start_date: date = Field(nullable=False)
-    end_date: Optional[date] = None
+    start_date_month: int = Field(nullable=False)
+    start_date_year: int = Field(nullable=False)
+    end_date_month: Optional[int] = None
+    end_date_year: Optional[int] = None
     description_general: str = Field(nullable=False)
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
     work_done: Optional[str] = None
     school_score_multiplier: Optional[float] = None
+    cgpa: Optional[float] = None
     tools_used: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
@@ -138,25 +144,26 @@ class WorkExperience(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     title: str = Field(nullable=False)
     employment_type: EmploymentType = Field(
-        sa_column=Column(SQLEnum(EmploymentType, name="EMPLOYMENT_TYPE"))
+        sa_column=Column(SQLEnum(EmploymentType, name="EMPLOYMENT_TYPE"), nullable=False)
     )
     domain: Optional[List[Domain]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
     )
     company_name: str = Field(nullable=False)
+    company_logo: Optional[str] = None
     currently_working: bool = Field(nullable=False)
-    location: UUID = Field(foreign_key="Location.id", nullable=False)
+    location: Optional[UUID] = Field(default=None, foreign_key="Location.id", nullable=True)
     location_type: WorkLocationType = Field(
-        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"))
+        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"), nullable=False)
     )
-    start_date: date = Field(nullable=False)
-    end_date: Optional[date] = None
+    start_date_month: int = Field(nullable=False)
+    start_date_year: int = Field(nullable=False)
+    end_date_month: Optional[int] = None
+    end_date_year: Optional[int] = None
     description_general: str = Field(nullable=False)
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
-    work_done: List[str] = Field(
-        sa_column=Column(ARRAY(String))
-    )
+    work_done: Optional[str] = None
     company_score: Optional[float] = None
     time_spent_multiplier: Optional[float] = None
     work_done_multiplier: Optional[float] = None
@@ -166,7 +173,7 @@ class WorkExperience(UUIDBaseTable, table=True):
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="work_experience")
-    location_rel: Location = Relationship(back_populates="work_experience")
+    location_rel: Optional[Location] = Relationship(back_populates="work_experience")
 
 # -------------------------------------------------------------------------
 # Certifications model
@@ -485,7 +492,7 @@ class PostComments(UUIDBaseTable, table=True):
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
-    parent_comment_id: Optional[UUID] = None
+    parent_comment_id: UUID = Field(nullable=False)
     content: str = Field(nullable=False)
 
     # Relationships

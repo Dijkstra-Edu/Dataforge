@@ -5,8 +5,9 @@ from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+
 from Schema.SQL.Enums.enums import (
-    Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
+    Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
     LeetcodeTagCategory, Status, TestScoreType
 )
@@ -35,6 +36,20 @@ class User(UUIDBaseTable, table=True):
         sa_column=Column(SQLEnum(Rank, name="RANK"))
     )
     streak: Optional[int] = None
+    primary_specialization: Optional[Domain] = Field(
+        default=None,
+        sa_column=Column(SQLEnum(Domain, name="DOMAIN"))
+    )
+    secondary_specializations: Optional[List[Domain]] = Field(
+        default=None,
+        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
+    )
+    expected_salary_bucket: Rank = Field(
+        sa_column=Column(SQLEnum(Rank, name="RANK"), nullable=False)
+    )
+    time_left: int = Field(nullable=False)
+    onboarding_complete: bool = Field(default=False, nullable=False)
+    data_loaded: bool = Field(default=False, nullable=False)
 
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
@@ -42,6 +57,7 @@ class User(UUIDBaseTable, table=True):
     links: Optional["Links"] = Relationship(back_populates="user_rel")
     created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
     assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
+    posts: List["Posts"] = Relationship(back_populates="user_rel")
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -61,7 +77,10 @@ class Profile(UUIDBaseTable, table=True):
     publications: List["Publications"] = Relationship(back_populates="profile_rel")
     projects: List["Projects"] = Relationship(back_populates="profile_rel")
     leetcode: Optional["Leetcode"] = Relationship(back_populates="profile_rel")
-    resume: Optional["Resume"] = Relationship(back_populates="profile_rel")
+    documents: List["Document"] = Relationship(back_populates="profile_rel")
+    github: Optional["Github"] = Relationship(back_populates="profile_rel")
+    posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
+    post_comments: List["PostComments"] = Relationship(back_populates="profile_rel")
 
 # -------------------------------------------------------------------------
 # Location model
@@ -87,7 +106,9 @@ class Education(UUIDBaseTable, table=True):
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     school: str = Field(nullable=False)
-    school_type: str = Field(nullable=False)  # Should be an enum if defined
+    school_type: SchoolType = Field(
+        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"))
+    )
     degree: str = Field(nullable=False)
     field: str = Field(nullable=False)
     currently_studying: bool = Field(nullable=False)
@@ -375,9 +396,12 @@ class Github(UUIDBaseTable, table=True):
     total_repos: Optional[int] = None
     total_commits: Optional[int] = None
     contribution_graph_link: Optional[str] = None
+    profile_id: Optional[UUID] = Field(default=None, foreign_key="Profile.id", nullable=True)
 
     # Relationships
     projects: List["Projects"] = Relationship(back_populates="owner_rel")
+    profile_rel: Optional["Profile"] = Relationship(back_populates="github")
+    links: Optional["Links"] = Relationship(back_populates="github_rel")
 
 # -------------------------------------------------------------------------
 # Links model
@@ -385,9 +409,9 @@ class Github(UUIDBaseTable, table=True):
 class Links(UUIDBaseTable, table=True):
     __tablename__ = "Links"
 
-    user_id: Optional[UUID] = Field(foreign_key="User.id", nullable=True)
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
     portfolio_link: Optional[str] = None
-    github_user_name: str = Field(nullable=False, unique=True)
+    github_user_name: str = Field(foreign_key="Github.user_name", nullable=False, unique=True)
     github_link: str = Field(nullable=False)
     linkedin_user_name: str = Field(nullable=False, unique=True)
     linkedin_link: str = Field(nullable=False)
@@ -397,7 +421,8 @@ class Links(UUIDBaseTable, table=True):
     orcid_link: str = Field(nullable=False)
 
     # Relationships
-    user_rel: Optional[User] = Relationship(back_populates="links")
+    user_rel: User = Relationship(back_populates="links")
+    github_rel: "Github" = Relationship(back_populates="links")
 
 # -------------------------------------------------------------------------
 # Blog model
@@ -422,15 +447,80 @@ class Blog(UUIDBaseTable, table=True):
     user_rel: User = Relationship(back_populates="blog_posts")
 
 # -------------------------------------------------------------------------
-# Resume model (updated to make profile_id optional)
+# Document model
 # -------------------------------------------------------------------------
-class Resume(UUIDBaseTable, table=True):
-    __tablename__ = "Resume"
+class Document(UUIDBaseTable, table=True):
+    __tablename__ = "Document"
 
-    profile_id: Optional[UUID] = Field(foreign_key="Profile.id", nullable=True)
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    latex: Optional[str] = None
+    base_structure: Optional[dict] = Field(
+        default=None,
+        sa_column=Column(JSONB)
+    )
 
     # Relationships
-    profile_rel: Optional[Profile] = Relationship(back_populates="resume")
+    profile_rel: Profile = Relationship(back_populates="documents")
+
+# -------------------------------------------------------------------------
+# Posts model
+# -------------------------------------------------------------------------
+class Posts(UUIDBaseTable, table=True):
+    __tablename__ = "Posts"
+
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
+    parent_post: Optional[UUID] = None
+    content: str = Field(nullable=False)
+    likes_count: int = Field(default=0, nullable=False)
+    comments_count: int = Field(default=0, nullable=False)
+    repost_count: int = Field(default=0, nullable=False)
+
+    # Relationships
+    user_rel: User = Relationship(back_populates="posts")
+    images: List["PostImages"] = Relationship(back_populates="post_rel")
+    comments: List["PostComments"] = Relationship(back_populates="post_rel")
+    saved_by: List["PostsSaved"] = Relationship(back_populates="post_rel")
+
+# -------------------------------------------------------------------------
+# PostComments model
+# -------------------------------------------------------------------------
+class PostComments(UUIDBaseTable, table=True):
+    __tablename__ = "PostComments"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+    parent_comment_id: Optional[UUID] = None
+    content: str = Field(nullable=False)
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="post_comments")
+    post_rel: Posts = Relationship(back_populates="comments")
+
+# -------------------------------------------------------------------------
+# PostImages model
+# -------------------------------------------------------------------------
+class PostImages(UUIDBaseTable, table=True):
+    __tablename__ = "PostImages"
+
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+    image_url: str = Field(nullable=False)
+    position: int = Field(nullable=False)
+
+    # Relationships
+    post_rel: Posts = Relationship(back_populates="images")
+
+# -------------------------------------------------------------------------
+# PostsSaved model
+# -------------------------------------------------------------------------
+class PostsSaved(UUIDBaseTable, table=True):
+    __tablename__ = "PostsSaved"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="posts_saved")
+    post_rel: Posts = Relationship(back_populates="saved_by")
 
 # -------------------------------------------------------------------------
 # ProjectTask model
@@ -531,10 +621,10 @@ class Job(UUIDBaseTable, table=True):
     )
 
     # Foreign key to Organization
-    organization: Optional[UUID] = Field(
-        default=None, foreign_key="Organizations.id", nullable=True
+    organization: UUID = Field(
+        foreign_key="Organizations.id", nullable=False
     )
-    organization_rel: Optional[Organization] = Relationship(back_populates="jobs")
+    organization_rel: Organization = Relationship(back_populates="jobs")
 
     technologies: Optional[List[str]] = Field(
         default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))

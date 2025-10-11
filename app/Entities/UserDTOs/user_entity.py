@@ -1,9 +1,9 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
-from Schema.SQL.Models.models import Rank
+from Schema.SQL.Enums.enums import Rank, Domain
 
 # ----------------------
 # Input DTOs
@@ -15,6 +15,12 @@ class CreateUser(BaseModel):
     last_name: str
     rank: Rank = Rank.UNRANKED
     streak: Optional[int] = None
+    primary_specialization: Optional[Domain] = None
+    secondary_specializations: Optional[List[Domain]] = None
+    expected_salary_bucket: Rank
+    time_left: int
+    onboarding_complete: bool = False
+    data_loaded: bool = False
 
     @field_validator('github_user_name')
     def github_user_name_must_not_be_empty(cls, v):
@@ -42,6 +48,12 @@ class UpdateUser(BaseModel):
     last_name: Optional[str] = None
     rank: Optional[Rank] = None
     streak: Optional[int] = None
+    primary_specialization: Optional[Domain] = None
+    secondary_specializations: Optional[List[Domain]] = None
+    expected_salary_bucket: Optional[Rank] = None
+    time_left: Optional[int] = None
+    onboarding_complete: Optional[bool] = None
+    data_loaded: Optional[bool] = None
 
     @field_validator('github_user_name')
     def github_user_name_must_not_be_empty(cls, v):
@@ -73,6 +85,12 @@ class ReadUser(BaseModel):
     last_name: str
     rank: Rank
     streak: Optional[int]
+    primary_specialization: Optional[Domain]
+    secondary_specializations: Optional[List[Domain]]
+    expected_salary_bucket: Rank
+    time_left: int
+    onboarding_complete: bool
+    data_loaded: bool
     created_at: datetime
     updated_at: datetime
 

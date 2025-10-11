@@ -4,7 +4,7 @@ from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel
 
-from Schema.SQL.Models.models import WorkLocationType, EmploymentType, Currency, Tools
+from Schema.SQL.Enums.enums import WorkLocationType, EmploymentType, Currency, Tools
 
 # ----------------------
 # Input DTOs

@@ -313,3 +313,5 @@ class ErrorCodes:
 
     # Not found errors
     USER_PROJECT_NF_A01 = "USER-PROJECT-NF-A01"  # Project not found
+
+    USER_PUBLICATION_NF_A01 = "USER_PUBLICATION_NF_A01"  # Publication not found

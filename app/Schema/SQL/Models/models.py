@@ -312,8 +312,9 @@ class Leetcode(UUIDBaseTable, table=True):
     country: Optional[str] = None
     company: Optional[str] = None
     job_title: Optional[str] = None
-    skill_tags: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
+    
+    skill_tags: Optional[List[Tools]] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
     ranking: Optional[int] = None
     avatar: Optional[str] = None
@@ -323,9 +324,7 @@ class Leetcode(UUIDBaseTable, table=True):
     easy_problems_solved: Optional[int] = None
     medium_problems_solved: Optional[int] = None
     hard_problems_solved: Optional[int] = None
-    language_problem_count: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
-    )
+    language_problem_count: Optional[List[dict]] = Field(sa_column=Column(ARRAY(JSONB)))
     attended_contests: Optional[int] = None
     competition_rating: Optional[float] = None
     global_ranking: Optional[int] = None

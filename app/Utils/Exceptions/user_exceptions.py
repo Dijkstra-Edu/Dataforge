@@ -73,3 +73,8 @@ class EducationNotFound(ServiceError):
     def __init__(self, education_id):
         super().__init__(f"Education with ID {education_id} does not exist.")
         self.education_id = education_id
+
+class PublicationNotFound(ServiceError):
+    def __init__(self, publication_id):
+        super().__init__(f"Publication with ID {publication_id} does not exist.")
+        self.publication_id = publication_id

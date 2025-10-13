@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile, ReadProfileWithUser
+from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile
+from Entities.UserDTOs.extended_entities import ReadProfileFull, ReadProfileWithUser
 
 from Settings.logging_config import setup_logging
 from Services.User.profile_service import ProfileService
@@ -22,6 +23,13 @@ def create_profile(profile_create: CreateProfile, session: Session = Depends(get
     logger.info(f"Created Profile with ID: {profile.id}")
     return profile
 
+
+@router.get("/github/{github_username}", response_model=ReadProfileFull)
+def get_profile_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = ProfileService(session)
+    logger.info(f"Fetching Profile for GitHub username: {github_username}")
+    profile = service.get_profile_full_data_by_github_username(github_username)
+    return profile
 
 @router.get("/{profile_id}", response_model=ReadProfileWithUser)
 def get_profile(profile_id: UUID, session: Session = Depends(get_session)):

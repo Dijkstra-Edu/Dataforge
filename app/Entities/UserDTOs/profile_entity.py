@@ -1,16 +1,7 @@
-from typing import Optional, List, Dict, TYPE_CHECKING
+from typing import Optional
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, validator
-
-if TYPE_CHECKING:
-    from Entities.UserDTOs.user_entity import ReadUser
-    from Entities.UserDTOs.education_entity import ReadEducationWithLocation
-    from Entities.UserDTOs.workexperience_entity import ReadWorkExperienceWithLocation
-    from Entities.UserDTOs.certification_entity import ReadCertification
-    from Entities.UserDTOs.publication_entity import ReadPublication
-    from Entities.UserDTOs.volunteering_entity import ReadVolunteering
-    from Entities.UserDTOs.projects_entity import ReadProject
 
 # ----------------------
 # Input DTOs
@@ -48,28 +39,5 @@ class ReadProfile(BaseModel):
         from_attributes = True
 
 
-# ----------------------
-# Extended Output DTO with User details
-# ----------------------
-class ReadProfileWithUser(ReadProfile):
-    user: Optional['ReadUser'] = None
-
-    class Config:
-        from_attributes = True
-
-
-# ----------------------
-# Extended Output DTO with full nested data
-# ----------------------
-class ReadProfileFull(ReadProfile):
-    education: List['ReadEducationWithLocation'] = []
-    work_experience: List['ReadWorkExperienceWithLocation'] = []
-    certifications: List['ReadCertification'] = []
-    publications: List['ReadPublication'] = []
-    volunteering: List['ReadVolunteering'] = []
-    projects: List['ReadProject'] = []
-    leetcode: Optional[Dict] = None  # Excluded for now
-    
-    class Config:
-        from_attributes = True
-
+# Note: Extended DTOs (ReadProfileWithUser, ReadProfileFull) are in extended_entities.py
+# to avoid circular import issues

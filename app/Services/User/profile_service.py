@@ -161,3 +161,28 @@ class ProfileService:
         profile_dict['leetcode'] = None
         
         return profile_dict
+
+    
+    def get_profile_full_data_by_github_username(self, github_username: str) -> dict:
+        """
+        Get full profile data by GitHub username.
+        This method looks up the user by GitHub username, then calls 
+        get_profile_full_data_by_user_id to retrieve the full profile data,
+        and adds GitHub data to the response.
+        
+        Args:
+            github_username: GitHub username of the user
+            
+        Returns:
+            dict: Full profile data with all nested relationships
+        """
+        from Services.User.user_service import UserService
+        
+        # Get user by GitHub username
+        user_service = UserService(self.session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+
+        print("TestUser:", user_id)
+        
+        # Call the existing method with user_id
+        return self.get_profile_full_data_by_user_id(user_id)

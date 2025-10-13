@@ -39,6 +39,12 @@ class UserService:
             return GitHubUsernameNotFound(github_user_name)
         return user
 
+    def get_user_id_by_github_username(self, github_user_name: str) -> Optional[UUID]:
+        user = self.repo.get_by_github_username(github_user_name)
+        if not user:
+            return GitHubUsernameNotFound(github_user_name)
+        return user.id
+
     def list_users(
         self,
         skip: int = 0,
@@ -161,7 +167,8 @@ class UserService:
         If full_data=False, returns basic user data only.
         """
         from Services.User.profile_service import ProfileService
-        from Entities.UserDTOs.user_entity import ReadUser, ReadUserFull
+        from Entities.UserDTOs.user_entity import ReadUser
+        from Entities.UserDTOs.extended_entities import ReadUserFull
         from Entities.UserDTOs.links_entity import ReadLinks
         
         # Get the base user

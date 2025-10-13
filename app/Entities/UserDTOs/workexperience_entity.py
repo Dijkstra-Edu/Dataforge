@@ -1,13 +1,11 @@
-from typing import Optional, List, TYPE_CHECKING
+from __future__ import annotations
+
+from typing import Optional, List
 from uuid import UUID
 from datetime import date, datetime
 from pydantic import BaseModel, field_validator
 
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
-
-if TYPE_CHECKING:
-    from Entities.UserDTOs.profile_entity import ReadProfile
-    from Entities.UserDTOs.location_entity import ReadLocation
 
 # ----------------------
 # Input DTOs
@@ -177,19 +175,24 @@ class ReadWorkExperience(BaseModel):
         from_attributes = True
 
 
+# Import at the end to avoid circular imports
+from Entities.UserDTOs.profile_entity import ReadProfile
+from Entities.UserDTOs.location_entity import ReadLocation
+
+
 # ----------------------
 # Extended Output DTO with related entities
 # ----------------------
 class ReadWorkExperienceWithRelations(ReadWorkExperience):
-    profile: Optional['ReadProfile'] = None
-    location_rel: Optional['ReadLocation'] = None
+    profile: Optional[ReadProfile] = None
+    location_rel: Optional[ReadLocation] = None
 
     class Config:
         from_attributes = True
 
 
 class ReadWorkExperienceWithLocation(ReadWorkExperience):
-    location_rel: Optional['ReadLocation'] = None
+    location_rel: Optional[ReadLocation] = None
     
     class Config:
         from_attributes = True

@@ -25,7 +25,7 @@ def create_links(
     return links
 
 # Get by ID
-@router.get("/{link_id}", response_model=ReadLinks)
+@router.get("/id/{link_id}", response_model=ReadLinks)
 def get_links(
     link_id: UUID,
     session: Session = Depends(get_session),
@@ -34,6 +34,19 @@ def get_links(
     logger.info(f"Fetching Links with ID: {link_id}")
     links = service.get_links(link_id)
     return links
+
+
+# Get by GitHub username
+@router.get("/{github_username}", response_model=ReadLinks)
+def get_links_by_github_username(
+    github_username: str,
+    session: Session = Depends(get_session),
+):
+    service = LinksService(session)
+    logger.info(f"Fetching Links for GitHub username: {github_username}")
+    links = service.get_links_by_github_username(github_username)
+    return links
+
 
 # Get by User ID
 @router.get("/user/{user_id}", response_model=ReadLinks)

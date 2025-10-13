@@ -24,19 +24,53 @@ def create_profile(profile_create: CreateProfile, session: Session = Depends(get
     return profile
 
 
-@router.get("/github/{github_username}", response_model=ReadProfileFull)
-def get_profile_by_github_username(github_username: str, session: Session = Depends(get_session)):
+@router.get("/id/{profile_id}")
+def get_profile_by_id(
+    profile_id: UUID,
+    all_data: bool = Query(False, description="Include user details"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get profile by ID.
+    
+    - If all_data=False: Returns basic profile data only
+    - If all_data=True: Returns profile with user details
+    """
     service = ProfileService(session)
-    logger.info(f"Fetching Profile for GitHub username: {github_username}")
-    profile = service.get_profile_full_data_by_github_username(github_username)
-    return profile
+    logger.info(f"Fetching Profile with ID: {profile_id}, all_data={all_data}")
+    
+    if all_data:
+        profile = service.get_profile_with_user_details(profile_id)
+        return profile
+    else:
+        profile = service.get_profile(profile_id)
+        return profile
 
-@router.get("/{profile_id}", response_model=ReadProfileWithUser)
-def get_profile(profile_id: UUID, session: Session = Depends(get_session)):
+
+@router.get("/{github_username}")
+def get_profile_by_github_username(
+    github_username: str,
+    all_data: bool = Query(False, description="Include all nested data (education, work experience, certifications, etc.)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get profile by GitHub username.
+    
+    - If all_data=False: Returns basic profile data only
+    - If all_data=True: Returns full profile with all nested relationships
+    """
     service = ProfileService(session)
-    logger.info(f"Fetching Profile with ID: {profile_id}")
-    profile = service.get_profile(profile_id)
-    return profile
+    logger.info(f"Fetching Profile for GitHub username: {github_username}, all_data={all_data}")
+    
+    if all_data:
+        profile = service.get_profile_full_data_by_github_username(github_username)
+        return profile
+    else:
+        from Services.User.user_service import UserService
+        user_service = UserService(session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        profile = service.get_profile_by_user_id(user_id)
+        return profile
 
 
 @router.get("/user/{user_id}", response_model=ReadProfileWithUser)

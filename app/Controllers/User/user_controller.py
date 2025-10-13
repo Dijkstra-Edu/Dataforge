@@ -57,33 +57,40 @@ def onboard_user(onboard_data: OnboardUser, session: Session = Depends(get_sessi
     return user
 
 
-@router.get("/{user_id}", response_model=ReadUser)
-def get_user(user_id: UUID, session: Session = Depends(get_session)):
-    service = UserService(session)
-    logger.info(f"Fetching User with ID: {user_id}")
-    user = service.get_user(user_id)
-    return user
-
-
-@router.get("/github/{github_user_name}", response_model=ReadUser)
-def get_user_by_github_username(github_user_name: str, session: Session = Depends(get_session)):
-    service = UserService(session)
-    logger.info(f"Fetching User with GitHub username: {github_user_name}")
-    user = service.get_user_by_github_username(github_user_name)
-    return user
-
-
-@router.get("/github/{github_user_name}/data")
-def get_user_data_by_github_username(
-    github_user_name: str,
-    full_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
+@router.get("/id/{user_id}")
+def get_user_by_id(
+    user_id: UUID,
+    all_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
     session: Session = Depends(get_session)
 ):
     """
-    Get user data by GitHub username.
+    Get user by ID.
     
-    - If full_data=False: Returns basic user data only
-    - If full_data=True: Returns user with links and full profile including:
+    - If all_data=False: Returns basic user data only
+    - If all_data=True: Returns user with links and full profile including all nested entities
+    """
+    service = UserService(session)
+    logger.info(f"Fetching User with ID: {user_id}, all_data={all_data}")
+    
+    if all_data:
+        user_data = service.get_user_data_by_user_id(user_id, full_data=True)
+        return user_data
+    else:
+        user = service.get_user(user_id)
+        return user
+
+
+@router.get("/{github_username}")
+def get_user_by_github_username(
+    github_username: str,
+    all_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get user by GitHub username.
+    
+    - If all_data=False: Returns basic user data only
+    - If all_data=True: Returns user with links and full profile including:
       - Education (with locations)
       - Work Experience (with locations)
       - Certifications
@@ -93,9 +100,14 @@ def get_user_data_by_github_username(
       - Leetcode (excluded for now, returns None)
     """
     service = UserService(session)
-    logger.info(f"Fetching user data for: {github_user_name}, full_data={full_data}")
-    user_data = service.get_user_data_by_github_username(github_user_name, full_data)
-    return user_data
+    logger.info(f"Fetching User with GitHub username: {github_username}, all_data={all_data}")
+    
+    if all_data:
+        user_data = service.get_user_data_by_github_username(github_username, full_data=True)
+        return user_data
+    else:
+        user = service.get_user_by_github_username(github_username)
+        return user
 
 
 @router.get("/", response_model=List[ReadUser])

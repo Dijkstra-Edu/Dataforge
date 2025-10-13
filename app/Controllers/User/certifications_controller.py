@@ -33,12 +33,20 @@ def list_certifications(
     certificates = service.list_all_certifications(skip=skip, limit=limit, sort_by=sort_by,order=order,issuing_organization=issuing_organization)
     return certificates
 
-@router.get("/{certification_id}", response_model= ReadCertification )
+@router.get("/id/{certification_id}", response_model=ReadCertification)
 def get_certification(certification_id: UUID, session: Session = Depends(get_session)):
-    service  = CertificationService(session)
+    service = CertificationService(session)
     logger.info(f"Fetching Certificate with ID: {certification_id}")
     certificate = service.get_certification(certification_id)
     return certificate
+
+
+@router.get("/{github_username}", response_model=List[ReadCertification])
+def get_certifications_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = CertificationService(session)
+    logger.info(f"Fetching Certifications for GitHub username: {github_username}")
+    certifications = service.get_certifications_by_github_username(github_username)
+    return certifications
 
 @router.put("/{certification_id}", response_model=ReadCertification)
 def update_certification(certification_id: UUID,  certification_update: UpdateCertification, session: Session = Depends(get_session)):

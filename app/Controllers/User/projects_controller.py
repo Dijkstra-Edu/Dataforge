@@ -26,13 +26,21 @@ def create_project(project_create: CreateProject, session: Session = Depends(get
     logger.info(f"Created project with ID: {project.id}")
     return project
 
-@router.get("/{project_id}", response_model=ReadProject)
+@router.get("/id/{project_id}", response_model=ReadProject)
 def get_project(project_id: UUID, session: Session = Depends(get_session)):
     service = ProjectsService(session)
     logger.info(f"Fetching project with ID: {project_id}")
     project = service.get_project(project_id)
     logger.info(f"Fetched project with ID: {project.id}")
     return project
+
+
+@router.get("/{github_username}", response_model=List[ReadProject])
+def get_projects_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = ProjectsService(session)
+    logger.info(f"Fetching Projects for GitHub username: {github_username}")
+    projects = service.get_projects_by_github_username(github_username)
+    return projects
 
 @router.get("/profile/{profile_id}", response_model=List[ReadProject])
 def get_projects_by_profile(profile_id: UUID, session: Session = Depends(get_session)):

@@ -23,13 +23,21 @@ def create_work_experience(work_experience_create: CreateWorkExperience, session
     return work_experience
 
 
-@router.get("/{work_experience_id}", response_model=ReadWorkExperienceWithRelations)
+@router.get("/id/{work_experience_id}", response_model=ReadWorkExperienceWithRelations)
 def get_work_experience(work_experience_id: UUID, session: Session = Depends(get_session)):
     service = WorkExperienceService(session)
     logger.info(f"Fetching Work Experience with ID: {work_experience_id}")
     work_experience = service.get_work_experience(work_experience_id)
     logger.info(f"Fetched Work Experience: {work_experience.title} at {work_experience.company_name}")
     return work_experience
+
+
+@router.get("/{github_username}", response_model=List[ReadWorkExperience])
+def get_work_experiences_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = WorkExperienceService(session)
+    logger.info(f"Fetching Work Experiences for GitHub username: {github_username}")
+    work_experiences = service.get_work_experiences_by_github_username(github_username)
+    return work_experiences
 
 
 @router.get("/profile/{profile_id}", response_model=List[ReadWorkExperience])

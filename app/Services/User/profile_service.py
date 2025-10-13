@@ -113,11 +113,6 @@ class ProfileService:
             return profile
         return None
 
-    def get_profile_id_by_github_username(self, github_user_name: str) -> Optional[UUID]:
-        profile = self.repo.get_by_github_username(github_user_name)
-        if not profile:
-            return GitHubUsernameNotFound(github_user_name)
-        return profile.id
 
     def get_profile_full_data_by_user_id(self, user_id: UUID) -> dict:
         """

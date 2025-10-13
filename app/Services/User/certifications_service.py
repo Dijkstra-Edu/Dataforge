@@ -48,3 +48,11 @@ class CertificationService:
                 raise CertificationNotFound(certification_id)
             self.repo.delete(certification)
             return f"Certification {certification_id} deleted successfully."
+        
+        def get_certifications_by_profile(self, profile_id: UUID) -> List[Certifications]:
+            """
+            Get all certifications for a specific profile.
+            Returns empty list if no certifications found.
+            """
+            certifications = self.repo.get_by_profile_id(profile_id)
+            return certifications if certifications else []

@@ -153,3 +153,39 @@ class UserService:
         except Exception as e:
             # If anything fails, rollback will happen in repository layer
             raise
+
+    def get_user_data_by_github_username(self, github_user_name: str, full_data: bool = False):
+        """
+        Get user data by GitHub username.
+        If full_data=True, returns user with all nested relationships (links, profile with all sub-entities).
+        If full_data=False, returns basic user data only.
+        """
+        from Services.User.profile_service import ProfileService
+        from Entities.UserDTOs.user_entity import ReadUser, ReadUserFull
+        from Entities.UserDTOs.links_entity import ReadLinks
+        
+        # Get the base user
+        user = self.get_user_by_github_username(github_user_name)
+        
+        if not full_data:
+            # Return basic user data
+            return ReadUser.model_validate(user)
+        
+        # Get full data
+        user_dict = ReadUser.model_validate(user).model_dump()
+        
+        # Get links
+        try:
+            links = self.links_repo.get_by_user_id(user.id)
+            user_dict['links'] = ReadLinks.model_validate(links).model_dump() if links else None
+        except:
+            user_dict['links'] = None
+        
+        # Get full profile data
+        try:
+            profile_service = ProfileService(self.session)
+            user_dict['profile'] = profile_service.get_profile_full_data_by_user_id(user.id)
+        except:
+            user_dict['profile'] = None
+        
+        return user_dict

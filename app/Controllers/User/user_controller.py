@@ -73,6 +73,31 @@ def get_user_by_github_username(github_user_name: str, session: Session = Depend
     return user
 
 
+@router.get("/github/{github_user_name}/data")
+def get_user_data_by_github_username(
+    github_user_name: str,
+    full_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get user data by GitHub username.
+    
+    - If full_data=False: Returns basic user data only
+    - If full_data=True: Returns user with links and full profile including:
+      - Education (with locations)
+      - Work Experience (with locations)
+      - Certifications
+      - Publications
+      - Volunteering
+      - Projects
+      - Leetcode (excluded for now, returns None)
+    """
+    service = UserService(session)
+    logger.info(f"Fetching user data for: {github_user_name}, full_data={full_data}")
+    user_data = service.get_user_data_by_github_username(github_user_name, full_data)
+    return user_data
+
+
 @router.get("/", response_model=List[ReadUser])
 def list_users(
     skip: int = 0,

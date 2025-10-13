@@ -66,3 +66,35 @@ class EducationService:
             raise EducationNotFound(education_id)
         self.repo.delete(education)
         return f"Education {education_id} deleted successfully"
+
+    def get_educations_by_profile_with_locations(self, profile_id: UUID) -> List[dict]:
+        """
+        Get all educations for a profile with their associated locations populated.
+        Returns empty list if no educations found.
+        """
+        from Services.User.location_service import LocationService
+        from Entities.UserDTOs.education_entity import ReadEducation
+        from Entities.UserDTOs.location_entity import ReadLocation
+        
+        location_service = LocationService(self.session)
+        
+        try:
+            educations = self.repo.get_by_profile_id(profile_id)
+        except:
+            # If no educations found, return empty list
+            return []
+        
+        result = []
+        for education in educations:
+            education_dict = ReadEducation.model_validate(education).model_dump()
+            
+            # Fetch and populate location
+            try:
+                location = location_service.get_location(education.location)
+                education_dict['location_rel'] = ReadLocation.model_validate(location).model_dump()
+            except:
+                education_dict['location_rel'] = None
+            
+            result.append(education_dict)
+        
+        return result

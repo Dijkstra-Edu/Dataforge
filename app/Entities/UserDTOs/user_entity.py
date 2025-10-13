@@ -1,9 +1,13 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 from Schema.SQL.Enums.enums import Rank, Domain
+
+if TYPE_CHECKING:
+    from Entities.UserDTOs.links_entity import ReadLinks
+    from Entities.UserDTOs.profile_entity import ReadProfileFull
 
 # ----------------------
 # Input DTOs
@@ -137,3 +141,14 @@ class OnboardUser(BaseModel):
 class OnboardCheckResponse(BaseModel):
     onboarded: bool
     user_id: Optional[UUID] = None
+
+
+# ----------------------
+# Extended Output DTO with full nested data
+# ----------------------
+class ReadUserFull(ReadUser):
+    links: Optional['ReadLinks'] = None
+    profile: Optional['ReadProfileFull'] = None
+    
+    class Config:
+        from_attributes = True

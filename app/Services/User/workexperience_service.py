@@ -117,3 +117,38 @@ class WorkExperienceService:
             raise WorkExperienceNotFound(work_experience_id)
         self.repo.delete(work_experience)
         return f"Work Experience {work_experience_id} deleted successfully"
+
+    def get_work_experiences_by_profile_with_locations(self, profile_id: UUID) -> List[dict]:
+        """
+        Get all work experiences for a profile with their associated locations populated.
+        Returns empty list if no work experiences found.
+        """
+        from Services.User.location_service import LocationService
+        from Entities.UserDTOs.workexperience_entity import ReadWorkExperience
+        from Entities.UserDTOs.location_entity import ReadLocation
+        
+        location_service = LocationService(self.session)
+        
+        try:
+            work_experiences = self.repo.get_by_profile_id(profile_id)
+        except:
+            # If no work experiences found, return empty list
+            return []
+        
+        result = []
+        for work_exp in work_experiences:
+            work_exp_dict = ReadWorkExperience.model_validate(work_exp).model_dump()
+            
+            # Fetch and populate location if it exists
+            if work_exp.location:
+                try:
+                    location = location_service.get_location(work_exp.location)
+                    work_exp_dict['location_rel'] = ReadLocation.model_validate(location).model_dump()
+                except:
+                    work_exp_dict['location_rel'] = None
+            else:
+                work_exp_dict['location_rel'] = None
+            
+            result.append(work_exp_dict)
+        
+        return result

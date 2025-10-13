@@ -1,9 +1,12 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 from Schema.SQL.Enums.enums import SchoolType, WorkLocationType, Tools, Degree
+
+if TYPE_CHECKING:
+    from Entities.UserDTOs.location_entity import ReadLocation
 
 class CreateEducation(BaseModel):
     profile_id: UUID
@@ -110,5 +113,12 @@ class ReadEducation(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        from_attributes = True
+
+
+class ReadEducationWithLocation(ReadEducation):
+    location_rel: Optional['ReadLocation'] = None
+    
     class Config:
         from_attributes = True

@@ -94,3 +94,70 @@ class ProfileService:
             # You might need to adjust this based on your actual relationship setup
             return profile
         return None
+
+    def get_profile_full_data_by_user_id(self, user_id: UUID) -> dict:
+        """
+        Get full profile data with all nested relationships populated.
+        Returns profile with education, work experience, certifications, 
+        publications, volunteering, projects, and leetcode (None for now).
+        """
+        from Services.User.education_service import EducationService
+        from Services.User.workexperience_service import WorkExperienceService
+        from Services.User.certifications_service import CertificationService
+        from Services.User.publication_service import PublicationService
+        from Services.User.volunteering_service import VolunteeringService
+        from Services.User.projects_service import ProjectsService
+        from Entities.UserDTOs.profile_entity import ReadProfile
+        from Entities.UserDTOs.certification_entity import ReadCertification
+        from Entities.UserDTOs.publication_entity import ReadPublication
+        from Entities.UserDTOs.volunteering_entity import ReadVolunteering
+        from Entities.UserDTOs.projects_entity import ReadProject
+        
+        # Get the base profile
+        profile = self.get_profile_by_user_id(user_id)
+        profile_dict = ReadProfile.model_validate(profile).model_dump()
+        
+        # Initialize all sub-services
+        education_service = EducationService(self.session)
+        work_exp_service = WorkExperienceService(self.session)
+        cert_service = CertificationService(self.session)
+        pub_service = PublicationService(self.session)
+        vol_service = VolunteeringService(self.session)
+        proj_service = ProjectsService(self.session)
+        
+        # Get all related data
+        profile_dict['education'] = education_service.get_educations_by_profile_with_locations(profile.id)
+        profile_dict['work_experience'] = work_exp_service.get_work_experiences_by_profile_with_locations(profile.id)
+        
+        # Get certifications
+        try:
+            certifications = cert_service.get_certifications_by_profile(profile.id)
+            profile_dict['certifications'] = [ReadCertification.model_validate(cert).model_dump() for cert in certifications]
+        except:
+            profile_dict['certifications'] = []
+        
+        # Get publications
+        try:
+            publications = pub_service.get_publications_by_profile_id(profile.id)
+            profile_dict['publications'] = [ReadPublication.model_validate(pub).model_dump() for pub in publications]
+        except:
+            profile_dict['publications'] = []
+        
+        # Get volunteering
+        try:
+            volunteering = vol_service.get_volunteering_by_profile_id(profile.id)
+            profile_dict['volunteering'] = [ReadVolunteering.model_validate(vol).model_dump() for vol in volunteering]
+        except:
+            profile_dict['volunteering'] = []
+        
+        # Get projects
+        try:
+            projects = proj_service.get_projects_by_profile(profile.id)
+            profile_dict['projects'] = [proj.model_dump() if hasattr(proj, 'model_dump') else proj for proj in projects]
+        except:
+            profile_dict['projects'] = []
+        
+        # Leetcode excluded for now
+        profile_dict['leetcode'] = None
+        
+        return profile_dict

@@ -152,3 +152,19 @@ class WorkExperienceService:
             result.append(work_exp_dict)
         
         return result
+
+    def get_work_experiences_by_github_username(self, github_username: str):
+        """Get all work experiences by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_work_experiences_by_profile_id(profile_id)
+    
+    def get_work_experiences_by_github_username_with_locations(self, github_username: str):
+        """Get all work experiences with locations by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_work_experiences_by_profile_with_locations(profile_id)

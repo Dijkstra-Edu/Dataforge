@@ -41,6 +41,14 @@ class LinksService:
             raise LinksNotFound(user_id)
         return links
 
+    def get_links_by_github_username(self, github_username: str) -> Links:
+        """Get links by GitHub username"""
+        from Services.User.user_service import UserService
+        
+        user_service = UserService(self.session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        return self.get_links_by_user_id(user_id)
+
     def list_links(
         self,
         skip: int = 0,

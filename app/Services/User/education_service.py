@@ -98,3 +98,19 @@ class EducationService:
             result.append(education_dict)
         
         return result
+
+    def get_educations_by_github_username(self, github_username: str) -> List[Education]:
+        """Get all educations by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_educations_by_profile(profile_id)
+    
+    def get_educations_by_github_username_with_locations(self, github_username: str) -> List[dict]:
+        """Get all educations with locations by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_educations_by_profile_with_locations(profile_id)

@@ -43,6 +43,14 @@ class LeetCodeService:
 
     def get_by_profile(self, profile_id: UUID) -> Optional[Leetcode]:
         return self.repo.get_by_profile_id(profile_id)
+    
+    def get_by_github_username(self, github_username: str) -> Optional[Leetcode]:
+        """Get Leetcode data by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_by_profile(profile_id)
 
     def delete(self, leetcode_id: UUID) -> bool:
         deleted = self.repo.delete_by_id(leetcode_id)

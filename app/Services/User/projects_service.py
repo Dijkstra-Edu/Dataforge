@@ -43,6 +43,14 @@ class ProjectsService:
     def get_projects_by_profile(self, profile_id: UUID) -> List[ReadProject]:
         projects = self.repo.get_by_profile(profile_id)
         return [ReadProject.model_validate(proj) for proj in projects]
+    
+    def get_projects_by_github_username(self, github_username: str) -> List[ReadProject]:
+        """Get all projects by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_projects_by_profile(profile_id)
 
     def update_project(
         self, project_id: UUID, project_update: UpdateProject

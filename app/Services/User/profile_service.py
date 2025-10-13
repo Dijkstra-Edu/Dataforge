@@ -6,7 +6,7 @@ from typing import List, Optional
 from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile
 from Schema.SQL.Models.models import Profile, User
 from Repository.User.profile_repository import ProfileRepository
-from Utils.Exceptions.user_exceptions import ProfileAlreadyExists, ProfileNotFound, ProfileNotFound, UserNotFound
+from Utils.Exceptions.user_exceptions import GitHubUsernameNotFound, ProfileAlreadyExists, ProfileNotFound, ProfileNotFound, UserNotFound
 
 class ProfileService:
     def __init__(self, session: Session):
@@ -38,6 +38,24 @@ class ProfileService:
         if not profile:
             return ProfileNotFound(user_id)
         return profile
+
+    def get_profile_id_by_github_username(self, github_username: str) -> UUID:
+        """
+        Get profile ID by GitHub username.
+        This is a helper method to simplify getting profile_id from github_username.
+        
+        Args:
+            github_username: GitHub username of the user
+            
+        Returns:
+            UUID: Profile ID
+        """
+        from Services.User.user_service import UserService
+        
+        user_service = UserService(self.session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        profile = self.get_profile_by_user_id(user_id)
+        return profile.id
 
     def list_profiles(
         self,
@@ -94,6 +112,12 @@ class ProfileService:
             # You might need to adjust this based on your actual relationship setup
             return profile
         return None
+
+    def get_profile_id_by_github_username(self, github_user_name: str) -> Optional[UUID]:
+        profile = self.repo.get_by_github_username(github_user_name)
+        if not profile:
+            return GitHubUsernameNotFound(github_user_name)
+        return profile.id
 
     def get_profile_full_data_by_user_id(self, user_id: UUID) -> dict:
         """

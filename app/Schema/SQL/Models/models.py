@@ -194,6 +194,7 @@ class Certifications(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    issuing_organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="certifications")
@@ -235,6 +236,7 @@ class Volunteering(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="volunteering")
@@ -257,6 +259,7 @@ class Publications(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    publisher_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="publications")
@@ -299,6 +302,7 @@ class Projects(UUIDBaseTable, table=True):
     complexity_rating: Optional[float] = None
     testing_framework_present: bool = Field(nullable=False)
     testing_framework: Optional[str] = None
+    project_organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="projects")

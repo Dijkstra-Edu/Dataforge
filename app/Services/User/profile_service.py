@@ -205,3 +205,37 @@ class ProfileService:
         
         # Call the existing method with user_id
         return self.get_profile_full_data_by_user_id(user_id)
+
+    def update_profile_by_github_username(self, github_username: str, profile_update: UpdateProfile) -> Profile:
+        """
+        Update profile by GitHub username.
+        Resolves GitHub username to user_id, then to profile_id, then updates.
+        """
+        from Services.User.user_service import UserService
+        
+        # Get user by GitHub username to validate it exists and get user_id
+        user_service = UserService(self.session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        
+        # Get profile by user_id to get profile_id
+        profile = self.get_profile_by_user_id(user_id)
+        
+        # Update the profile using the existing method
+        return self.update_profile(profile.id, profile_update)
+
+    def delete_profile_by_github_username(self, github_username: str) -> str:
+        """
+        Delete profile by GitHub username.
+        Resolves GitHub username to user_id, then to profile_id, then deletes.
+        """
+        from Services.User.user_service import UserService
+        
+        # Get user by GitHub username to validate it exists and get user_id
+        user_service = UserService(self.session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        
+        # Get profile by user_id to get profile_id
+        profile = self.get_profile_by_user_id(user_id)
+        
+        # Delete the profile using the existing method
+        return self.delete_profile(profile.id)

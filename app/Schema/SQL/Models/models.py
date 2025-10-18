@@ -48,6 +48,15 @@ class User(UUIDBaseTable, table=True):
     time_left: int = Field(nullable=False)
     onboarding_complete: bool = Field(default=False, nullable=False)
     data_loaded: bool = Field(default=False, nullable=False)
+    bio: Optional[str] = None
+    location: Optional[UUID] = Field(default=None, foreign_key="Location.id", nullable=True)
+    dream_company: Optional[str] = None
+    dream_company_logo: Optional[str] = None
+    dream_position: Optional[str] = None
+    tools_to_learn: Optional[List[Tools]] = Field(
+        default_factory=list,
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
+    )
 
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
@@ -56,6 +65,7 @@ class User(UUIDBaseTable, table=True):
     created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
     assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
     posts: List["Posts"] = Relationship(back_populates="user_rel")
+    location_rel: Optional["Location"] = Relationship(back_populates="users")
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -95,6 +105,7 @@ class Location(UUIDBaseTable, table=True):
     # Relationships
     education: List["Education"] = Relationship(back_populates="location_rel")
     work_experience: List["WorkExperience"] = Relationship(back_populates="location_rel")
+    users: List["User"] = Relationship(back_populates="location_rel")
 
 # -------------------------------------------------------------------------
 # Education model
@@ -427,6 +438,10 @@ class Links(UUIDBaseTable, table=True):
     leetcode_link: Optional[str] = None
     orcid_id: Optional[str] = Field(default=None, unique=True)
     orcid_link: Optional[str] = None
+    primary_email: Optional[str] = None
+    secondary_email: Optional[str] = None
+    school_email: Optional[str] = None
+    work_email: Optional[str] = None
 
     # Relationships
     user_rel: User = Relationship(back_populates="links")

@@ -128,7 +128,7 @@ class UserService:
         
         try:
             # Create user with onboarding_complete=True
-            user_dict = onboard_data.dict(exclude_unset=True, exclude={'linkedin_user_name', 'leetcode_user_name'})
+            user_dict = onboard_data.dict(exclude_unset=True, exclude={'linkedin_user_name', 'leetcode_user_name', 'primary_email'})
             user_dict['onboarding_complete'] = True
             user_dict['data_loaded'] = False
             user = User(**user_dict)
@@ -140,7 +140,7 @@ class UserService:
             profile = Profile(user_id=created_user.id)
             self.profile_repo.create(profile)
             
-            # Create links for the user with auto-generated URLs
+            # Create links for the user with auto-generated URLs and primary_email
             links = Links(
                 user_id=created_user.id,
                 github_user_name=onboard_data.github_user_name,
@@ -149,6 +149,7 @@ class UserService:
                 linkedin_link=None,
                 leetcode_user_name=onboard_data.leetcode_user_name,
                 leetcode_link=f"https://leetcode.com/u/{onboard_data.leetcode_user_name}",
+                primary_email=onboard_data.primary_email,
             )
             self.links_repo.create(links)
             
@@ -233,3 +234,21 @@ class UserService:
             user_dict['profile'] = None
         
         return user_dict
+
+    def update_user_by_github_username(self, github_username: str, user_update: UpdateUser) -> User:
+        """
+        Update user by GitHub username.
+        Resolves GitHub username to user_id, then calls update_user.
+        """
+        # Get user by GitHub username to validate it exists and get user_id
+        user = self.get_user_by_github_username(github_username)
+        return self.update_user(user.id, user_update)
+
+    def delete_user_by_github_username(self, github_username: str) -> str:
+        """
+        Delete user by GitHub username.
+        Resolves GitHub username to user_id, then calls delete_user.
+        """
+        # Get user by GitHub username to validate it exists and get user_id
+        user = self.get_user_by_github_username(github_username)
+        return self.delete_user(user.id)

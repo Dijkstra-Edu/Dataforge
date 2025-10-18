@@ -160,8 +160,8 @@ def autocomplete_users(
     return results
 
 
-@router.put("/{user_id}", response_model=ReadUser)
-def update_user(
+@router.put("/id/{user_id}", response_model=ReadUser)
+def update_user_by_id(
     user_id: UUID, user_update: UpdateUser, session: Session = Depends(get_session)
 ):
     service = UserService(session)
@@ -171,10 +171,30 @@ def update_user(
     return user
 
 
-@router.delete("/{user_id}", response_model=ReadUser)
-def delete_user(user_id: UUID, session: Session = Depends(get_session)):
+@router.put("/{github_username}", response_model=ReadUser)
+def update_user_by_github_username(
+    github_username: str, user_update: UpdateUser, session: Session = Depends(get_session)
+):
+    service = UserService(session)
+    logger.info(f"Updating User with GitHub username: {github_username} with data: {user_update.dict(exclude_unset=True)}")
+    user = service.update_user_by_github_username(github_username, user_update)
+    logger.info(f"Updated User ID: {user.id}")
+    return user
+
+
+@router.delete("/id/{user_id}", response_model=dict)
+def delete_user_by_id(user_id: UUID, session: Session = Depends(get_session)):
     service = UserService(session)
     logger.info(f"Deleting User ID: {user_id}")
     message = service.delete_user(user_id)
+    logger.info(message)
+    return {"detail": message}
+
+
+@router.delete("/{github_username}", response_model=dict)
+def delete_user_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = UserService(session)
+    logger.info(f"Deleting User with GitHub username: {github_username}")
+    message = service.delete_user_by_github_username(github_username)
     logger.info(message)
     return {"detail": message}

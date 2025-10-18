@@ -106,8 +106,8 @@ def list_profiles(
     return profiles
 
 
-@router.put("/{profile_id}", response_model=ReadProfile)
-def update_profile(
+@router.put("/id/{profile_id}", response_model=ReadProfile)
+def update_profile_by_id(
     profile_id: UUID, profile_update: UpdateProfile, session: Session = Depends(get_session)
 ):
     service = ProfileService(session)
@@ -117,10 +117,30 @@ def update_profile(
     return profile
 
 
-@router.delete("/{profile_id}", response_model=ReadProfile)
-def delete_profile(profile_id: UUID, session: Session = Depends(get_session)):
+@router.put("/{github_username}", response_model=ReadProfile)
+def update_profile_by_github_username(
+    github_username: str, profile_update: UpdateProfile, session: Session = Depends(get_session)
+):
+    service = ProfileService(session)
+    logger.info(f"Updating Profile for GitHub username: {github_username} with data: {profile_update.dict(exclude_unset=True)}")
+    profile = service.update_profile_by_github_username(github_username, profile_update)
+    logger.info(f"Updated Profile ID: {profile.id}")
+    return profile
+
+
+@router.delete("/id/{profile_id}", response_model=dict)
+def delete_profile_by_id(profile_id: UUID, session: Session = Depends(get_session)):
     service = ProfileService(session)
     logger.info(f"Deleting Profile ID: {profile_id}")
     message = service.delete_profile(profile_id)
+    logger.info(message)
+    return {"detail": message}
+
+
+@router.delete("/{github_username}", response_model=dict)
+def delete_profile_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = ProfileService(session)
+    logger.info(f"Deleting Profile for GitHub username: {github_username}")
+    message = service.delete_profile_by_github_username(github_username)
     logger.info(message)
     return {"detail": message}

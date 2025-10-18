@@ -14,6 +14,10 @@ class CreateLinks(BaseModel):
     leetcode_link: Optional[str] = None
     orcid_id: Optional[str] = None
     orcid_link: Optional[str] = None
+    primary_email: Optional[str] = None
+    secondary_email: Optional[str] = None
+    school_email: Optional[str] = None
+    work_email: Optional[str] = None
 
     @field_validator("github_user_name", "linkedin_user_name", "leetcode_user_name")
     def validate_not_empty(cls, v: str):
@@ -37,6 +41,10 @@ class UpdateLinks(BaseModel):
     leetcode_link: Optional[str] = None
     orcid_id: Optional[str] = None
     orcid_link: Optional[str] = None
+    primary_email: Optional[str] = None
+    secondary_email: Optional[str] = None
+    school_email: Optional[str] = None
+    work_email: Optional[str] = None
 
     @field_validator("github_user_name", "linkedin_user_name", "leetcode_user_name", "orcid_id")
     def validate_not_empty_if_present(cls, v: Optional[str]):
@@ -56,6 +64,10 @@ class ReadLinks(BaseModel):
     leetcode_link: Optional[str]
     orcid_id: Optional[str]
     orcid_link: Optional[str]
+    primary_email: Optional[str]
+    secondary_email: Optional[str]
+    school_email: Optional[str]
+    work_email: Optional[str]
     created_at: datetime
     updated_at: datetime
 

@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
-    LeetcodeTagCategory, Status, TestScoreType, Degree
+    LeetcodeTagCategory, Status, TestScoreType, Degree, SkillCategory
 )
 
 # Base class with UUID PK and timestamps
@@ -57,6 +57,7 @@ class User(UUIDBaseTable, table=True):
         default_factory=list,
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    onboarding_journey_completed: bool = Field(default=False, nullable=False)
 
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
@@ -66,6 +67,7 @@ class User(UUIDBaseTable, table=True):
     assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
     posts: List["Posts"] = Relationship(back_populates="user_rel")
     location_rel: Optional["Location"] = Relationship(back_populates="users")
+    github_profile: Optional["Github"] = Relationship(back_populates="user_rel")
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -89,6 +91,7 @@ class Profile(UUIDBaseTable, table=True):
     github: Optional["Github"] = Relationship(back_populates="profile_rel")
     posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
     post_comments: List["PostComments"] = Relationship(back_populates="profile_rel")
+    skills: List["Skills"] = Relationship(back_populates="profile_rel")
 
 # -------------------------------------------------------------------------
 # Location model
@@ -276,6 +279,37 @@ class Publications(UUIDBaseTable, table=True):
     profile_rel: Profile = Relationship(back_populates="publications")
 
 # -------------------------------------------------------------------------
+# Skills model
+# -------------------------------------------------------------------------
+class Skills(UUIDBaseTable, table=True):
+    __tablename__ = "Skills"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    skill: Tools = Field(
+        sa_column=Column(SQLEnum(Tools, name="TOOLS"), nullable=False)
+    )
+    proficiency: Optional[float] = None
+    years_of_experience: Optional[float] = None
+    associated_experience: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    associated_certifications: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    associated_educations: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    domain: Optional[List[Domain]] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
+    )
+    category: Optional[SkillCategory] = Field(
+        sa_column=Column(SQLEnum(SkillCategory, name="SKILL_CATEGORY"))
+    )
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="skills")
+
+# -------------------------------------------------------------------------
 # Projects model
 # -------------------------------------------------------------------------
 class Projects(UUIDBaseTable, table=True):
@@ -395,7 +429,7 @@ class LeetcodeTags(UUIDBaseTable, table=True):
 class Github(UUIDBaseTable, table=True):
     __tablename__ = "Github"
 
-    user_name: str = Field(nullable=False, unique=True)
+    user_name: str = Field(foreign_key="User.github_user_name", nullable=False, unique=True)
     github_bio: Optional[str] = None
     followers: Optional[int] = None
     following: Optional[int] = None
@@ -421,6 +455,7 @@ class Github(UUIDBaseTable, table=True):
     # Relationships
     projects: List["Projects"] = Relationship(back_populates="owner_rel")
     profile_rel: Optional["Profile"] = Relationship(back_populates="github")
+    user_rel: Optional["User"] = Relationship(back_populates="github_profile")
 
 # -------------------------------------------------------------------------
 # Links model
@@ -438,7 +473,7 @@ class Links(UUIDBaseTable, table=True):
     leetcode_link: Optional[str] = None
     orcid_id: Optional[str] = Field(default=None, unique=True)
     orcid_link: Optional[str] = None
-    primary_email: Optional[str] = None
+    primary_email: Optional[str] = Field(default="")
     secondary_email: Optional[str] = None
     school_email: Optional[str] = None
     work_email: Optional[str] = None

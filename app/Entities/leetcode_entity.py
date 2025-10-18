@@ -112,7 +112,7 @@ class ReadLeetcode(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # -------------------------------------------------------------------------
@@ -147,7 +147,7 @@ class ReadLeetcodeBadge(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # -------------------------------------------------------------------------
@@ -182,7 +182,7 @@ class ReadLeetcodeTag(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # -------------------------------------------------------------------------
@@ -193,4 +193,4 @@ class ReadLeetcodeWithRelations(ReadLeetcode):
     tags: Optional[List[ReadLeetcodeTag]] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

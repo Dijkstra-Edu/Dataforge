@@ -39,6 +39,10 @@ class LinksRepository:
         linkedin_user_name: Optional[str] = None,
         leetcode_user_name: Optional[str] = None,
         orcid_id: Optional[str] = None,
+        primary_email: Optional[str] = None,
+        secondary_email: Optional[str] = None,
+        school_email: Optional[str] = None,
+        work_email: Optional[str] = None,
     ) -> List[Links]:
         """
         List links with pagination, filtering, and sorting.
@@ -55,6 +59,14 @@ class LinksRepository:
             statement = statement.where(Links.leetcode_user_name.ilike(f"%{leetcode_user_name}%"))
         if orcid_id:
             statement = statement.where(Links.orcid_id.ilike(f"%{orcid_id}%"))
+        if primary_email:
+            statement = statement.where(Links.primary_email.ilike(f"%{primary_email}%"))
+        if secondary_email:
+            statement = statement.where(Links.secondary_email.ilike(f"%{secondary_email}%"))
+        if school_email:
+            statement = statement.where(Links.school_email.ilike(f"%{school_email}%"))
+        if work_email:
+            statement = statement.where(Links.work_email.ilike(f"%{work_email}%"))
 
 
         # Sorting

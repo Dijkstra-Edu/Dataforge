@@ -26,12 +26,22 @@ def sync_leetcode(profile_id: UUID, lc_username: str, session: Session = Depends
     return service.create_or_update_from_api(profile_id, lc_username)
 
 
-@router.get("/{leetcode_id}", response_model=ReadLeetcode)
+@router.get("/id/{leetcode_id}", response_model=ReadLeetcode)
 def get_leetcode(leetcode_id: UUID, session: Session = Depends(get_session)):
     service = LeetCodeService(session)
     model = service.get(leetcode_id)
     if not model:
         raise HTTPException(status_code=404, detail="LeetCode record not found")
+    return model
+
+
+@router.get("/{github_username}", response_model=ReadLeetcode)
+def get_leetcode_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = LeetCodeService(session)
+    logger.info(f"Fetching LeetCode data for GitHub username: {github_username}")
+    model = service.get_by_github_username(github_username)
+    if not model:
+        raise HTTPException(status_code=404, detail="LeetCode record not found for user")
     return model
 
 

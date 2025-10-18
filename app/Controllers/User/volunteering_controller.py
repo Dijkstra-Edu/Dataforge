@@ -22,12 +22,20 @@ def create_volunteering(volunteering_create: CreateVolunteering, session: Sessio
     return volunteering
 
 
-@router.get("/{volunteering_id}", response_model=ReadVolunteeringWithRelations)
+@router.get("/id/{volunteering_id}", response_model=ReadVolunteeringWithRelations)
 def get_volunteering(volunteering_id: UUID, session: Session = Depends(get_session)):
     service = VolunteeringService(session)
     logger.info(f"Fetching volunteering with ID: {volunteering_id}")
     volunteering = service.get_volunteering(volunteering_id)
     logger.info(f"Fetched volunteering with ID: {volunteering.id}")
+    return volunteering
+
+
+@router.get("/{github_username}", response_model=List[ReadVolunteering])
+def get_volunteering_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = VolunteeringService(session)
+    logger.info(f"Fetching Volunteering entries for GitHub username: {github_username}")
+    volunteering = service.get_volunteering_by_github_username(github_username)
     return volunteering
 
 

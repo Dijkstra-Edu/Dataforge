@@ -13,6 +13,7 @@ class CreateCertification(BaseModel):
     credential_id: str
     credential_url:str
     tools:Optional[List[Tools]]
+    issuing_organization_logo: Optional[str] = None
     
     @field_validator('name')
     def name_must_not_be_empty(cls ,v):
@@ -55,6 +56,7 @@ class UpdateCertification(BaseModel):
     credential_id: Optional[str] = None
     credential_url: Optional[str] = None
     tools: Optional[List[Tools]] = None
+    issuing_organization_logo: Optional[str] = None
     
     @field_validator('name')
     def name_must_not_be_empty(cls ,v):
@@ -88,6 +90,7 @@ class UpdateCertification(BaseModel):
     
     
 class ReadCertification(BaseModel):
+    id: UUID
     profile_id: UUID
     name: str
     type: CertificationType
@@ -97,6 +100,7 @@ class ReadCertification(BaseModel):
     credential_id: str
     credential_url:str
     tools:Optional[List[Tools]]
+    issuing_organization_logo: Optional[str]
     created_at: datetime
     updated_at: datetime
     

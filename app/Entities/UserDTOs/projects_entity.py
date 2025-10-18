@@ -31,6 +31,7 @@ class CreateProject(BaseModel):
     complexity_rating: Optional[float] = None
     testing_framework_present: bool
     testing_framework: Optional[str] = None
+    project_organization_logo: Optional[str] = None
 
     @field_validator("name", "owner", "description")
     def must_not_be_empty(cls, v, info):
@@ -72,6 +73,7 @@ class UpdateProject(BaseModel):
     complexity_rating: Optional[float] = None
     testing_framework_present: Optional[bool] = None
     testing_framework: Optional[str] = None
+    project_organization_logo: Optional[str] = None
 
     @field_validator("name", "owner", "description")
     def must_not_be_empty_if_provided(cls, v, info):
@@ -113,6 +115,7 @@ class ReadProject(BaseModel):
     complexity_rating: Optional[float]
     testing_framework_present: bool
     testing_framework: Optional[str]
+    project_organization_logo: Optional[str]
     created_at: datetime
     updated_at: datetime
 

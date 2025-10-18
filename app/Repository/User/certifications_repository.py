@@ -88,5 +88,9 @@ class CertificationsRepository:
             self.session.commit()
         except SQLAlchemyError:
             raise
-        
+    
+    def get_by_profile_id(self, profile_id: UUID) -> List[Certifications]:
+        """Get all certifications for a specific profile."""
+        statement = select(Certifications).where(Certifications.profile_id == profile_id)
+        return self.session.exec(statement).all()
     

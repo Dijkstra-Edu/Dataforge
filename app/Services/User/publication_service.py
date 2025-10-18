@@ -53,6 +53,14 @@ class PublicationService:
         Returns an empty list if no publications are found.
         """
         return self.repo.get_by_profile_id(profile_id)
+    
+    def get_publications_by_github_username(self, github_username: str) -> List[Publications]:
+        """Get all publications by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_publications_by_profile_id(profile_id)
 
     def update_publication(self, publication_id: UUID, publication_update: UpdatePublication) -> Publications:
         """

@@ -25,7 +25,7 @@ def create_links(
     return links
 
 # Get by ID
-@router.get("/{link_id}", response_model=ReadLinks)
+@router.get("/id/{link_id}", response_model=ReadLinks)
 def get_links(
     link_id: UUID,
     session: Session = Depends(get_session),
@@ -34,6 +34,19 @@ def get_links(
     logger.info(f"Fetching Links with ID: {link_id}")
     links = service.get_links(link_id)
     return links
+
+
+# Get by GitHub username
+@router.get("/{github_username}", response_model=ReadLinks)
+def get_links_by_github_username(
+    github_username: str,
+    session: Session = Depends(get_session),
+):
+    service = LinksService(session)
+    logger.info(f"Fetching Links for GitHub username: {github_username}")
+    links = service.get_links_by_github_username(github_username)
+    return links
+
 
 # Get by User ID
 @router.get("/user/{user_id}", response_model=ReadLinks)
@@ -57,13 +70,19 @@ def list_links(
     linkedin_user_name: Optional[str] = None,
     leetcode_user_name: Optional[str] = None,
     orcid_id: Optional[str] = None,
+    primary_email: Optional[str] = None,
+    secondary_email: Optional[str] = None,
+    school_email: Optional[str] = None,
+    work_email: Optional[str] = None,
     session: Session = Depends(get_session),
 ):
     service = LinksService(session)
     logger.info(
         f"Listing Links: skip={skip}, limit={limit}, sort_by={sort_by}, order={order}, "
         f"github_user_name={github_user_name}, linkedin_user_name={linkedin_user_name}, "
-        f"leetcode_user_name={leetcode_user_name}, orcid_id={orcid_id}"
+        f"leetcode_user_name={leetcode_user_name}, orcid_id={orcid_id}, "
+        f"primary_email={primary_email}, secondary_email={secondary_email}, "
+        f"school_email={school_email}, work_email={work_email}"
     )
     links = service.list_links(
         skip=skip,
@@ -74,6 +93,10 @@ def list_links(
         linkedin_user_name=linkedin_user_name,
         leetcode_user_name=leetcode_user_name,
         orcid_id=orcid_id,
+        primary_email=primary_email,
+        secondary_email=secondary_email,
+        school_email=school_email,
+        work_email=work_email,
     )
     logger.info(f"Returned {len(links)} links")
     return links

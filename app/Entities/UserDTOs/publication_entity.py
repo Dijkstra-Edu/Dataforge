@@ -14,6 +14,7 @@ class CreatePublication(BaseModel):
     publication_url: str
     description: str
     tools: Optional[List[Tools]] = None
+    publisher_logo: Optional[str] = None
 
     @field_validator("title")
     def title_must_not_be_empty(cls, v):
@@ -55,6 +56,7 @@ class UpdatePublication(BaseModel):
     publication_url: Optional[str] = None
     description: Optional[str] = None
     tools: Optional[List[Tools]] = None
+    publisher_logo: Optional[str] = None
 
     @field_validator("title")
     def title_must_not_be_empty(cls, v):
@@ -90,17 +92,18 @@ class ReadPublication(BaseModel):
     publication_url: str
     description: str
     tools: Optional[List[Tools]]
+    publisher_logo: Optional[str]
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ReadPublicationWithRelations(ReadPublication):
     profile: Optional["ReadProfile"] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 from Entities.UserDTOs.profile_entity import ReadProfile

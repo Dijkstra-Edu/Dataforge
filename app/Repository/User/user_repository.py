@@ -99,3 +99,16 @@ class UserRepository:
         except SQLAlchemyError:
             self.session.rollback()
             raise
+
+    def check_onboarding_by_github_username(self, github_user_name: str) -> tuple[bool, Optional[UUID]]:
+        """
+        Check if a user has completed onboarding by github username.
+        Returns (onboarded_status, user_id)
+        """
+        statement = select(User.id, User.onboarding_complete).where(User.github_user_name == github_user_name)
+        result = self.session.exec(statement).first()
+        
+        if result:
+            user_id, onboarding_complete = result
+            return (onboarding_complete, user_id)
+        return (False, None)

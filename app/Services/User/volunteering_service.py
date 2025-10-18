@@ -36,6 +36,14 @@ class VolunteeringService:
         if not volunteering_entries:
             raise VolunteeringNotFound(profile_id)
         return volunteering_entries
+    
+    def get_volunteering_by_github_username(self, github_username: str) -> List[Volunteering]:
+        """Get all volunteering by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_volunteering_by_profile_id(profile_id)
 
     def update_volunteering(self, volunteering_id: UUID, volunteering_update: UpdateVolunteering) -> Volunteering:
         volunteering = self.repo.get(volunteering_id)

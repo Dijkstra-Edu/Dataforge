@@ -4,14 +4,19 @@ from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
 from Repository.User.user_repository import UserRepository
-from Entities.UserDTOs.user_entity import CreateUser, UpdateUser
-from Schema.SQL.Models.models import User
+from Repository.User.profile_repository import ProfileRepository
+from Repository.User.links_repository import LinksRepository
+from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, OnboardUser, OnboardCheckResponse
+from Schema.SQL.Models.models import User, Profile, Links
 from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, UserNotFound
 
 
 class UserService:
     def __init__(self, session: Session):
         self.repo = UserRepository(session)
+        self.profile_repo = ProfileRepository(session)
+        self.links_repo = LinksRepository(session)
+        self.session = session
 
     def create_user(self, user_create: CreateUser) -> User:
         # Check if github username already exists
@@ -33,6 +38,12 @@ class UserService:
         if not user:
             return GitHubUsernameNotFound(github_user_name)
         return user
+
+    def get_user_id_by_github_username(self, github_user_name: str) -> Optional[UUID]:
+        user = self.repo.get_by_github_username(github_user_name)
+        if not user:
+            return GitHubUsernameNotFound(github_user_name)
+        return user.id
 
     def list_users(
         self,
@@ -96,3 +107,148 @@ class UserService:
             return UserNotFound(user_id)
         self.repo.delete(user)
         return f"User {user_id} deleted successfully"
+
+    def check_onboarding_status(self, github_user_name: str) -> OnboardCheckResponse:
+        """
+        Check if a user has completed onboarding by github username.
+        Returns OnboardCheckResponse with onboarded status and user_id if found.
+        """
+        onboarded, user_id = self.repo.check_onboarding_by_github_username(github_user_name)
+        return OnboardCheckResponse(onboarded=onboarded, user_id=user_id)
+
+    def onboard_user(self, onboard_data: OnboardUser) -> User:
+        """
+        Create a new user with onboarding_complete=True, an empty Profile, and Links.
+        This is an atomic operation - User, Profile, and Links are created together.
+        """
+        # Check if github username already exists
+        existing_user = self.repo.get_by_github_username(onboard_data.github_user_name)
+        if existing_user:
+            raise GitHubUsernameAlreadyExists(onboard_data.github_user_name)
+        
+        try:
+            # Create user with onboarding_complete=True
+            user_dict = onboard_data.dict(exclude_unset=True, exclude={'linkedin_user_name', 'leetcode_user_name', 'primary_email'})
+            user_dict['onboarding_complete'] = True
+            user_dict['data_loaded'] = False
+            user = User(**user_dict)
+            
+            # Create user in database
+            created_user = self.repo.create(user)
+            
+            # Create empty profile for the user
+            profile = Profile(user_id=created_user.id)
+            self.profile_repo.create(profile)
+            
+            # Create links for the user with auto-generated URLs and primary_email
+            links = Links(
+                user_id=created_user.id,
+                github_user_name=onboard_data.github_user_name,
+                github_link=f"https://github.com/{onboard_data.github_user_name}",
+                linkedin_user_name=onboard_data.linkedin_user_name,
+                linkedin_link=None,
+                leetcode_user_name=onboard_data.leetcode_user_name,
+                leetcode_link=f"https://leetcode.com/u/{onboard_data.leetcode_user_name}",
+                primary_email=onboard_data.primary_email,
+            )
+            self.links_repo.create(links)
+            
+            # Refresh to get the updated user with relationships
+            self.session.refresh(created_user)
+            
+            return created_user
+        except Exception as e:
+            # If anything fails, rollback will happen in repository layer
+            raise
+
+    def get_user_data_by_user_id(self, user_id: UUID, full_data: bool = False):
+        """
+        Get user data by user ID.
+        If full_data=True, returns user with all nested relationships (links, profile with all sub-entities).
+        If full_data=False, returns basic user data only.
+        """
+        from Services.User.profile_service import ProfileService
+        from Entities.UserDTOs.user_entity import ReadUser
+        from Entities.UserDTOs.extended_entities import ReadUserFull
+        from Entities.UserDTOs.links_entity import ReadLinks
+        
+        # Get the base user
+        user = self.get_user(user_id)
+        
+        if not full_data:
+            # Return basic user data
+            return ReadUser.model_validate(user)
+        
+        # Get full data
+        user_dict = ReadUser.model_validate(user).model_dump()
+        
+        # Get links
+        try:
+            links = self.links_repo.get_by_user_id(user.id)
+            user_dict['links'] = ReadLinks.model_validate(links).model_dump() if links else None
+        except:
+            user_dict['links'] = None
+        
+        # Get full profile data
+        try:
+            profile_service = ProfileService(self.session)
+            user_dict['profile'] = profile_service.get_profile_full_data_by_user_id(user.id)
+        except:
+            user_dict['profile'] = None
+        
+        return user_dict
+
+    def get_user_data_by_github_username(self, github_user_name: str, full_data: bool = False):
+        """
+        Get user data by GitHub username.
+        If full_data=True, returns user with all nested relationships (links, profile with all sub-entities).
+        If full_data=False, returns basic user data only.
+        """
+        from Services.User.profile_service import ProfileService
+        from Entities.UserDTOs.user_entity import ReadUser
+        from Entities.UserDTOs.extended_entities import ReadUserFull
+        from Entities.UserDTOs.links_entity import ReadLinks
+        
+        # Get the base user
+        user = self.get_user_by_github_username(github_user_name)
+        
+        if not full_data:
+            # Return basic user data
+            return ReadUser.model_validate(user)
+        
+        # Get full data
+        user_dict = ReadUser.model_validate(user).model_dump()
+        
+        # Get links
+        try:
+            links = self.links_repo.get_by_user_id(user.id)
+            user_dict['links'] = ReadLinks.model_validate(links).model_dump() if links else None
+        except:
+            user_dict['links'] = None
+        
+        # Get full profile data
+        try:
+            profile_service = ProfileService(self.session)
+            user_dict['profile'] = profile_service.get_profile_full_data_by_user_id(user.id)
+        except:
+            user_dict['profile'] = None
+        
+        return user_dict
+
+    def update_user_by_github_username(self, github_username: str, user_update: UpdateUser) -> User:
+        """
+        Update user by GitHub username.
+        Resolves GitHub username to user_id, then calls update_user.
+        """
+        # Get user by GitHub username to validate it exists and get user_id
+        user = self.get_user_by_github_username(github_username)
+        return self.update_user(user.id, user_update)
+
+    def delete_user_by_github_username(self, github_username: str) -> str:
+        """
+        Delete user by GitHub username.
+        Resolves GitHub username to user_id, then calls delete_user.
+        """
+        # Get user by GitHub username to validate it exists and get user_id
+        user = self.get_user_by_github_username(github_username)
+        return self.delete_user(user.id)

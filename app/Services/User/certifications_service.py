@@ -14,6 +14,7 @@ class CertificationService:
        
         def __init__(self, session: Session):
             self.repo = CertificationsRepository(session)
+            self.session = session
         
         def create_certification(self, certification_create: CreateCertification):
             certitification = Certifications(**certification_create.dict(exclude_unset=True))
@@ -48,3 +49,19 @@ class CertificationService:
                 raise CertificationNotFound(certification_id)
             self.repo.delete(certification)
             return f"Certification {certification_id} deleted successfully."
+        
+        def get_certifications_by_profile(self, profile_id: UUID) -> List[Certifications]:
+            """
+            Get all certifications for a specific profile.
+            Returns empty list if no certifications found.
+            """
+            certifications = self.repo.get_by_profile_id(profile_id)
+            return certifications if certifications else []
+        
+        def get_certifications_by_github_username(self, github_username: str) -> List[Certifications]:
+            """Get all certifications by GitHub username"""
+            from Services.User.profile_service import ProfileService
+            
+            profile_service = ProfileService(self.session)
+            profile_id = profile_service.get_profile_id_by_github_username(github_username)
+            return self.get_certifications_by_profile(profile_id)

@@ -27,13 +27,21 @@ def create_publication(publication_create: CreatePublication, session: Session =
     return publication
 
 
-@router.get("/{publication_id}", response_model=ReadPublicationWithRelations)
+@router.get("/id/{publication_id}", response_model=ReadPublicationWithRelations)
 def get_publication(publication_id: UUID, session: Session = Depends(get_session)):
     service = PublicationService(session)
     logger.info(f"Fetching publication with ID: {publication_id}")
     publication = service.get_publication(publication_id)
     logger.info(f"Fetched publication with ID: {publication.id}")
     return publication
+
+
+@router.get("/{github_username}", response_model=List[ReadPublication])
+def get_publications_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = PublicationService(session)
+    logger.info(f"Fetching Publications for GitHub username: {github_username}")
+    publications = service.get_publications_by_github_username(github_username)
+    return publications
 
 
 @router.get("/profile/{profile_id}", response_model=List[ReadPublication])

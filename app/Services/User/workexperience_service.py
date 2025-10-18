@@ -55,8 +55,8 @@ class WorkExperienceService:
         location: Optional[UUID] = None,
         location_type: Optional[WorkLocationType] = None,
         currently_working: Optional[bool] = None,
-        start_date_after: Optional[str] = None,
-        start_date_before: Optional[str] = None,
+        start_year_after: Optional[int] = None,
+        start_year_before: Optional[int] = None,
     ) -> List[WorkExperience]:
         """
         Supports pagination, filtering, and sorting.
@@ -74,8 +74,8 @@ class WorkExperienceService:
             location=location,
             location_type=location_type,
             currently_working=currently_working,
-            start_date_after=start_date_after,
-            start_date_before=start_date_before,
+            start_year_after=start_year_after,
+            start_year_before=start_year_before,
         )
 
     def autocomplete_work_experiences(
@@ -117,3 +117,54 @@ class WorkExperienceService:
             raise WorkExperienceNotFound(work_experience_id)
         self.repo.delete(work_experience)
         return f"Work Experience {work_experience_id} deleted successfully"
+
+    def get_work_experiences_by_profile_with_locations(self, profile_id: UUID) -> List[dict]:
+        """
+        Get all work experiences for a profile with their associated locations populated.
+        Returns empty list if no work experiences found.
+        """
+        from Services.User.location_service import LocationService
+        from Entities.UserDTOs.workexperience_entity import ReadWorkExperience
+        from Entities.UserDTOs.location_entity import ReadLocation
+        
+        location_service = LocationService(self.session)
+        
+        try:
+            work_experiences = self.repo.get_by_profile_id(profile_id)
+        except:
+            # If no work experiences found, return empty list
+            return []
+        
+        result = []
+        for work_exp in work_experiences:
+            work_exp_dict = ReadWorkExperience.model_validate(work_exp).model_dump()
+            
+            # Fetch and populate location if it exists
+            if work_exp.location:
+                try:
+                    location = location_service.get_location(work_exp.location)
+                    work_exp_dict['location_rel'] = ReadLocation.model_validate(location).model_dump()
+                except:
+                    work_exp_dict['location_rel'] = None
+            else:
+                work_exp_dict['location_rel'] = None
+            
+            result.append(work_exp_dict)
+        
+        return result
+
+    def get_work_experiences_by_github_username(self, github_username: str):
+        """Get all work experiences by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_work_experiences_by_profile_id(profile_id)
+    
+    def get_work_experiences_by_github_username_with_locations(self, github_username: str):
+        """Get all work experiences with locations by GitHub username"""
+        from Services.User.profile_service import ProfileService
+        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_work_experiences_by_profile_with_locations(profile_id)

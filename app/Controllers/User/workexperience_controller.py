@@ -23,13 +23,21 @@ def create_work_experience(work_experience_create: CreateWorkExperience, session
     return work_experience
 
 
-@router.get("/{work_experience_id}", response_model=ReadWorkExperienceWithRelations)
+@router.get("/id/{work_experience_id}", response_model=ReadWorkExperienceWithRelations)
 def get_work_experience(work_experience_id: UUID, session: Session = Depends(get_session)):
     service = WorkExperienceService(session)
     logger.info(f"Fetching Work Experience with ID: {work_experience_id}")
     work_experience = service.get_work_experience(work_experience_id)
     logger.info(f"Fetched Work Experience: {work_experience.title} at {work_experience.company_name}")
     return work_experience
+
+
+@router.get("/{github_username}", response_model=List[ReadWorkExperience])
+def get_work_experiences_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = WorkExperienceService(session)
+    logger.info(f"Fetching Work Experiences for GitHub username: {github_username}")
+    work_experiences = service.get_work_experiences_by_github_username(github_username)
+    return work_experiences
 
 
 @router.get("/profile/{profile_id}", response_model=List[ReadWorkExperience])
@@ -55,8 +63,8 @@ def list_work_experiences(
     location: Optional[UUID] = None,
     location_type: Optional[WorkLocationType] = None,
     currently_working: Optional[bool] = None,
-    start_date_after: Optional[str] = None,
-    start_date_before: Optional[str] = None,
+    start_year_after: Optional[int] = None,
+    start_year_before: Optional[int] = None,
     session: Session = Depends(get_session),
 ):
     service = WorkExperienceService(session)
@@ -65,7 +73,7 @@ def list_work_experiences(
         f"profile_id={profile_id}, title={title}, company_name={company_name}, "
         f"employment_type={employment_type}, domain={domain}, location={location}, "
         f"location_type={location_type}, currently_working={currently_working}, "
-        f"start_date_after={start_date_after}, start_date_before={start_date_before}"
+        f"start_year_after={start_year_after}, start_year_before={start_year_before}"
     )
     work_experiences = service.list_work_experiences(
         skip,
@@ -80,8 +88,8 @@ def list_work_experiences(
         location,
         location_type,
         currently_working,
-        start_date_after,
-        start_date_before,
+        start_year_after,
+        start_year_before,
     )
     logger.info(f"Returned {len(work_experiences)} work experiences")
     return work_experiences

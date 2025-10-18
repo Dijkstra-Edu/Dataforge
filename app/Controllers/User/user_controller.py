@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, ReadUser
+from Entities.UserDTOs.user_entity import CreateUser, UpdateUser, ReadUser, OnboardUser, OnboardCheckResponse
 from Services.User.user_service import UserService
 from Settings.logging_config import setup_logging
 from db import get_session
@@ -24,20 +24,90 @@ def create_user(user_create: CreateUser, session: Session = Depends(get_session)
     return user
 
 
-@router.get("/{user_id}", response_model=ReadUser)
-def get_user(user_id: UUID, session: Session = Depends(get_session)):
+@router.get("/onboard", response_model=OnboardCheckResponse)
+def check_onboarding(
+    username: str = Query(..., description="GitHub username to check"),
+    check: bool = Query(False, description="Check onboarding status"),
+    session: Session = Depends(get_session)
+):
+    """
+    Check if a user has completed onboarding by GitHub username.
+    Use ?check=true to activate this endpoint.
+    """
+    if not check:
+        logger.warning("Onboard check endpoint called without check=true parameter")
+        return OnboardCheckResponse(onboarded=False, user_id=None)
+    
     service = UserService(session)
-    logger.info(f"Fetching User with ID: {user_id}")
-    user = service.get_user(user_id)
+    logger.info(f"Checking onboarding status for GitHub username: {username}")
+    result = service.check_onboarding_status(username)
+    logger.info(f"Onboarding status for {username}: onboarded={result.onboarded}, user_id={result.user_id}")
+    return result
+
+
+@router.post("/onboard", response_model=ReadUser)
+def onboard_user(onboard_data: OnboardUser, session: Session = Depends(get_session)):
+    """
+    Onboard a new user - creates User with Profile and Links, and marks onboarding as complete.
+    """
+    service = UserService(session)
+    logger.info(f"Onboarding User: {onboard_data.github_user_name}")
+    user = service.onboard_user(onboard_data)
+    logger.info(f"Successfully onboarded User with ID: {user.id}")
     return user
 
 
-@router.get("/github/{github_user_name}", response_model=ReadUser)
-def get_user_by_github_username(github_user_name: str, session: Session = Depends(get_session)):
+@router.get("/id/{user_id}")
+def get_user_by_id(
+    user_id: UUID,
+    all_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get user by ID.
+    
+    - If all_data=False: Returns basic user data only
+    - If all_data=True: Returns user with links and full profile including all nested entities
+    """
     service = UserService(session)
-    logger.info(f"Fetching User with GitHub username: {github_user_name}")
-    user = service.get_user_by_github_username(github_user_name)
-    return user
+    logger.info(f"Fetching User with ID: {user_id}, all_data={all_data}")
+    
+    if all_data:
+        user_data = service.get_user_data_by_user_id(user_id, full_data=True)
+        return user_data
+    else:
+        user = service.get_user(user_id)
+        return user
+
+
+@router.get("/{github_username}")
+def get_user_by_github_username(
+    github_username: str,
+    all_data: bool = Query(False, description="Include all related data (links, profile with nested entities)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get user by GitHub username.
+    
+    - If all_data=False: Returns basic user data only
+    - If all_data=True: Returns user with links and full profile including:
+      - Education (with locations)
+      - Work Experience (with locations)
+      - Certifications
+      - Publications
+      - Volunteering
+      - Projects
+      - Leetcode (excluded for now, returns None)
+    """
+    service = UserService(session)
+    logger.info(f"Fetching User with GitHub username: {github_username}, all_data={all_data}")
+    
+    if all_data:
+        user_data = service.get_user_data_by_github_username(github_username, full_data=True)
+        return user_data
+    else:
+        user = service.get_user_by_github_username(github_username)
+        return user
 
 
 @router.get("/", response_model=List[ReadUser])
@@ -90,8 +160,8 @@ def autocomplete_users(
     return results
 
 
-@router.put("/{user_id}", response_model=ReadUser)
-def update_user(
+@router.put("/id/{user_id}", response_model=ReadUser)
+def update_user_by_id(
     user_id: UUID, user_update: UpdateUser, session: Session = Depends(get_session)
 ):
     service = UserService(session)
@@ -101,10 +171,30 @@ def update_user(
     return user
 
 
-@router.delete("/{user_id}", response_model=ReadUser)
-def delete_user(user_id: UUID, session: Session = Depends(get_session)):
+@router.put("/{github_username}", response_model=ReadUser)
+def update_user_by_github_username(
+    github_username: str, user_update: UpdateUser, session: Session = Depends(get_session)
+):
+    service = UserService(session)
+    logger.info(f"Updating User with GitHub username: {github_username} with data: {user_update.dict(exclude_unset=True)}")
+    user = service.update_user_by_github_username(github_username, user_update)
+    logger.info(f"Updated User ID: {user.id}")
+    return user
+
+
+@router.delete("/id/{user_id}", response_model=dict)
+def delete_user_by_id(user_id: UUID, session: Session = Depends(get_session)):
     service = UserService(session)
     logger.info(f"Deleting User ID: {user_id}")
     message = service.delete_user(user_id)
+    logger.info(message)
+    return {"detail": message}
+
+
+@router.delete("/{github_username}", response_model=dict)
+def delete_user_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = UserService(session)
+    logger.info(f"Deleting User with GitHub username: {github_username}")
+    message = service.delete_user_by_github_username(github_username)
     logger.info(message)
     return {"detail": message}

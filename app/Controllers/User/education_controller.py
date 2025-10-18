@@ -22,12 +22,20 @@ def create_education(education_create: CreateEducation, session: Session = Depen
     return education
 
 
-@router.get("/{education_id}", response_model=ReadEducation)
+@router.get("/id/{education_id}", response_model=ReadEducation)
 def get_education(education_id: UUID, session: Session = Depends(get_session)):
     service = EducationService(session)
     logger.info(f"Fetching Education with ID: {education_id}")
     education = service.get_education(education_id)
     return education
+
+
+@router.get("/{github_username}", response_model=List[ReadEducation])
+def get_educations_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = EducationService(session)
+    logger.info(f"Fetching Education entries for GitHub username: {github_username}")
+    educations = service.get_educations_by_github_username(github_username)
+    return educations
 
 
 @router.get("/", response_model=List[ReadEducation])

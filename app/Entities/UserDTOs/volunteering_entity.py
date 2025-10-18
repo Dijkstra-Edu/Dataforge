@@ -17,6 +17,7 @@ class CreateVolunteering(BaseModel):
     currently_volunteering: bool
     description: Optional[str] = None
     tools: Optional[List[Tools]] = None
+    organization_logo: Optional[str] = None
 
     @field_validator("organization")
     def organization_must_not_be_empty(cls, v):
@@ -48,6 +49,7 @@ class UpdateVolunteering(BaseModel):
     currently_volunteering: Optional[bool] = None
     description: Optional[str] = None
     tools: Optional[List[Tools]] = None
+    organization_logo: Optional[str] = None
 
     @field_validator("organization")
     def organization_must_not_be_empty(cls, v):
@@ -80,17 +82,18 @@ class ReadVolunteering(BaseModel):
     currently_volunteering: bool
     description: Optional[str]
     tools: Optional[List[Tools]]
+    organization_logo: Optional[str]
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ReadVolunteeringWithRelations(ReadVolunteering):
     profile: Optional["ReadProfile"] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 from Entities.UserDTOs.profile_entity import ReadProfile
 ReadVolunteeringWithRelations.model_rebuild()

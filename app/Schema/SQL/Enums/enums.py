@@ -150,9 +150,12 @@ class Rank(str, Enum):
 
 # ROLE
 class Role(str, Enum):
-    OWNER = "OWNER"
-    ADMIN = "ADMIN"
+    GLOBAL_ADMIN = "GLOBAL_ADMIN"
+    LOCAL_ADMIN = "LOCAL_ADMIN"
     TEAM_LEAD = "TEAM_LEAD"
+    ORGANIZATION_READ = "ORGANIZATION_READ"
+    PERSONAL_READ = "PERSONAL_READ"
+    PERSONAL_WRITE = "PERSONAL_WRITE"
 
 # STATUS
 class Status(str, Enum):

@@ -12,7 +12,14 @@ class ErrorCodes:
 
     GENERIC_ERROR = "GEN-ERR-000"  # Generic error code for uncategorized errors
     GENERIC_VALIDATION_ERROR = "GEN-VAL-001"  # Generic validation error for request payloads
-    
+        
+    # Authentication errors
+    AUTH_ERROR = "AUTH-ERR-001"  # Authentication error
+    AUTH_ERROR_A01 = "AUTH-ERR-A01"  # JWT_SECRET is not set
+    AUTH_ERROR_A02 = "AUTH-ERR-A02"  # JWT_ALGORITHMS is not set
+    AUTH_ERROR_A03 = "AUTH-ERR-A03"  # JWT_ISSUER is not set
+    AUTH_ERROR_A04 = "AUTH-ERR-A04"  # JWT_AUDIENCE is not set
+
     # Database errors
     DATABASE_ERROR = "DB-ERR-001"  # Generic database error
     DATABASE_RLS_ERROR = "DB-RLS-001"  # Row-Level Security policy violation

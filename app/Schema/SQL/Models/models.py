@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
-    LeetcodeTagCategory, Status, TestScoreType, Degree, SkillCategory
+    LeetcodeTagCategory, Status, TestScoreType, Degree, SkillCategory, Role
 )
 
 # Base class with UUID PK and timestamps
@@ -58,6 +58,10 @@ class User(UUIDBaseTable, table=True):
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
     onboarding_journey_completed: bool = Field(default=False, nullable=False)
+    roles: Optional[List[Role]] = Field(
+        default_factory=list,
+        sa_column=Column(ARRAY(SQLEnum(Role, name="ROLE")))
+    )
 
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")

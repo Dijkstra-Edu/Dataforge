@@ -1,92 +1,34 @@
-from typing import Optional,List
+from typing import Optional, List, Annotated
 from uuid import UUID
 from datetime import datetime, date
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field
 from Schema.SQL.Enums.enums import (CertificationType, Tools)
+
+
 class CreateCertification(BaseModel):
     profile_id: UUID
-    name: str
+    name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     type: CertificationType
-    issuing_organization: str
+    issuing_organization: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     issue_date: date
     expiry_date: Optional[date] = None
-    credential_id: str
-    credential_url:str
-    tools:Optional[List[Tools]]
+    credential_id: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    credential_url: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    tools: Optional[List[Tools]] = None
     issuing_organization_logo: Optional[str] = None
-    
-    @field_validator('name')
-    def name_must_not_be_empty(cls ,v):
-        if not v.strip():
-            raise ValueError("Name cannot be empty.")
-        return v.strip()
-    
-    @field_validator('issuing_organization')
-    def issuing_organization_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError("Issuing Organization cannot be empty.")
-        return v.strip()
-    
-    @field_validator('issue_date')
-    def issue_date_must_not_be_empty(cls, v):
-        if v is None:
-            raise ValueError("Issue Date cannot be empty.")
-        return v
-    
-    @field_validator('credential_id')
-    def credential_id_must_not_be_empty(cls,v):
-        if not v.strip():
-            raise ValueError("Credential id cannot be empty.")
-        return v.strip()
-    
-    @field_validator('credential_url')
-    def credential_url_must_not_be_empty(cls,v):
-        if not v.strip():
-            raise ValueError("Credential url cannot be empty.")
-        return v.strip()
     
 
 class UpdateCertification(BaseModel):
     profile_id: Optional[UUID] = None
-    name: Optional[str] = None
+    name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     type: Optional[CertificationType] = None
-    issuing_organization: Optional[str] = None
+    issuing_organization: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     issue_date: Optional[date] = None
     expiry_date: Optional[date] = None
-    credential_id: Optional[str] = None
-    credential_url: Optional[str] = None
+    credential_id: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    credential_url: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     tools: Optional[List[Tools]] = None
     issuing_organization_logo: Optional[str] = None
-    
-    @field_validator('name')
-    def name_must_not_be_empty(cls ,v):
-        if v is not None and not v.strip():
-            raise ValueError("Name cannot be empty.")
-        return v.strip() if v else v
-    
-    @field_validator('issuing_organization')
-    def issuing_organization_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("Issuing Organization cannot be empty.")
-        return v.strip() if v else v
-    
-    @field_validator('issue_date')
-    def issue_date_must_not_be_empty(cls, v):
-        # For optional updates, v can be None, which is valid
-        # If v is provided, it should be a valid date (validated by pydantic automatically)
-        return v
-    
-    @field_validator('credential_id')
-    def credential_id_must_not_be_empty(cls,v):
-        if v is not None and not v.strip():
-            raise ValueError("Credential id cannot be empty.")
-        return v.strip() if v else v
-    
-    @field_validator('credential_url')
-    def credential_url_must_not_be_empty(cls,v):
-        if v is not None and not v.strip():
-            raise ValueError("Credential url cannot be empty.")
-        return v.strip() if v else v
     
     
 class ReadCertification(BaseModel):

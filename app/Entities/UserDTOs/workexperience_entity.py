@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from uuid import UUID
 from datetime import date, datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
@@ -13,19 +13,19 @@ from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 # ----------------------
 class CreateWorkExperience(BaseModel):
     profile_id: UUID
-    title: str
+    title: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     employment_type: EmploymentType
     domain: Optional[List[Domain]] = None
-    company_name: str
+    company_name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     company_logo: Optional[str] = None
     currently_working: bool
     location: Optional[CreateLocation] = None
     location_type: WorkLocationType
-    start_date_month: int
+    start_date_month: Annotated[int, Field(ge=1, le=12)]
     start_date_year: int
-    end_date_month: Optional[int] = None
+    end_date_month: Optional[Annotated[int, Field(ge=1, le=12)]] = None
     end_date_year: Optional[int] = None
-    description_general: str
+    description_general: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
     work_done: Optional[str] = None
@@ -33,36 +33,6 @@ class CreateWorkExperience(BaseModel):
     time_spent_multiplier: Optional[float] = None
     work_done_multiplier: Optional[float] = None
     tools_used: Optional[List[Tools]] = None
-
-    @field_validator('title')
-    def title_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('title cannot be empty')
-        return v.strip()
-
-    @field_validator('company_name')
-    def company_name_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('company_name cannot be empty')
-        return v.strip()
-
-    @field_validator('description_general')
-    def description_general_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('description_general cannot be empty')
-        return v.strip()
-
-    @field_validator('start_date_month')
-    def validate_start_month(cls, v):
-        if v < 1 or v > 12:
-            raise ValueError('start_date_month must be between 1 and 12')
-        return v
-
-    @field_validator('end_date_month')
-    def validate_end_month(cls, v):
-        if v is not None and (v < 1 or v > 12):
-            raise ValueError('end_date_month must be between 1 and 12')
-        return v
 
     @field_validator('end_date_year')
     def validate_end_date(cls, v, values):
@@ -79,19 +49,19 @@ class CreateWorkExperience(BaseModel):
 
 class UpdateWorkExperience(BaseModel):
     profile_id: Optional[UUID] = None
-    title: Optional[str] = None
+    title: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     employment_type: Optional[EmploymentType] = None
     domain: Optional[List[Domain]] = None
-    company_name: Optional[str] = None
+    company_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     company_logo: Optional[str] = None
     currently_working: Optional[bool] = None
     location: Optional[CreateLocation] = None
     location_type: Optional[WorkLocationType] = None
-    start_date_month: Optional[int] = None
+    start_date_month: Optional[Annotated[int, Field(ge=1, le=12)]] = None
     start_date_year: Optional[int] = None
-    end_date_month: Optional[int] = None
+    end_date_month: Optional[Annotated[int, Field(ge=1, le=12)]] = None
     end_date_year: Optional[int] = None
-    description_general: Optional[str] = None
+    description_general: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
     work_done: Optional[str] = None
@@ -99,36 +69,6 @@ class UpdateWorkExperience(BaseModel):
     time_spent_multiplier: Optional[float] = None
     work_done_multiplier: Optional[float] = None
     tools_used: Optional[List[Tools]] = None
-
-    @field_validator('title')
-    def title_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('title cannot be empty')
-        return v.strip() if v else v
-
-    @field_validator('company_name')
-    def company_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('company_name cannot be empty')
-        return v.strip() if v else v
-
-    @field_validator('description_general')
-    def description_general_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('description_general cannot be empty')
-        return v.strip() if v else v
-
-    @field_validator('start_date_month')
-    def validate_start_month(cls, v):
-        if v is not None and (v < 1 or v > 12):
-            raise ValueError('start_date_month must be between 1 and 12')
-        return v
-
-    @field_validator('end_date_month')
-    def validate_end_month(cls, v):
-        if v is not None and (v < 1 or v > 12):
-            raise ValueError('end_date_month must be between 1 and 12')
-        return v
 
     @field_validator('end_date_year')
     def validate_end_date(cls, v, values):

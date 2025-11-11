@@ -1,7 +1,7 @@
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field
 
 from Schema.SQL.Enums.enums import Rank, Domain, Tools
 
@@ -9,10 +9,10 @@ from Schema.SQL.Enums.enums import Rank, Domain, Tools
 # Input DTOs
 # ----------------------
 class CreateUser(BaseModel):
-    github_user_name: str
-    first_name: Optional[str] = None
+    github_user_name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    first_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     middle_name: Optional[str] = None
-    last_name: Optional[str] = None
+    last_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     rank: Rank = Rank.UNRANKED
     streak: Optional[int] = None
     primary_specialization: Domain
@@ -28,30 +28,12 @@ class CreateUser(BaseModel):
     dream_position: Optional[str] = None
     tools_to_learn: Optional[List[Tools]] = []
 
-    @field_validator('github_user_name')
-    def github_user_name_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('github_user_name cannot be empty')
-        return v.strip()
-
-    @field_validator('first_name')
-    def first_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('first_name cannot be empty string')
-        return v.strip() if v else v
-
-    @field_validator('last_name')
-    def last_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('last_name cannot be empty string')
-        return v.strip() if v else v
-
 
 class UpdateUser(BaseModel):
-    github_user_name: Optional[str] = None
-    first_name: Optional[str] = None
+    github_user_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    first_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     middle_name: Optional[str] = None
-    last_name: Optional[str] = None
+    last_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     rank: Optional[Rank] = None
     streak: Optional[int] = None
     primary_specialization: Optional[Domain] = None
@@ -66,24 +48,6 @@ class UpdateUser(BaseModel):
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
     tools_to_learn: Optional[List[Tools]] = None
-
-    @field_validator('github_user_name')
-    def github_user_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('github_user_name cannot be empty')
-        return v.strip() if v else v
-
-    @field_validator('first_name')
-    def first_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('first_name cannot be empty string')
-        return v.strip() if v else v
-
-    @field_validator('last_name')
-    def last_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('last_name cannot be empty string')
-        return v.strip() if v else v
 
 
 # ----------------------
@@ -120,12 +84,12 @@ class ReadUser(BaseModel):
 # Onboarding DTOs
 # ----------------------
 class OnboardUser(BaseModel):
-    github_user_name: str
-    linkedin_user_name: str
-    leetcode_user_name: str
-    first_name: Optional[str] = None
+    github_user_name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    linkedin_user_name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    leetcode_user_name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    first_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     middle_name: Optional[str] = None
-    last_name: Optional[str] = None
+    last_name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     rank: Rank = Rank.UNRANKED
     streak: int = 0
     primary_specialization: Domain
@@ -135,32 +99,8 @@ class OnboardUser(BaseModel):
     dream_company: Optional[str] = None
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
-    primary_email: str
+    primary_email: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     tools_to_learn: Optional[List[Tools]] = []
-
-    @field_validator('github_user_name', 'linkedin_user_name', 'leetcode_user_name')
-    def usernames_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('username cannot be empty')
-        return v.strip()
-
-    @field_validator('first_name')
-    def first_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('first_name cannot be empty string')
-        return v.strip() if v else v
-
-    @field_validator('last_name')
-    def last_name_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('last_name cannot be empty string')
-        return v.strip() if v else v
-
-    @field_validator('primary_email')
-    def primary_email_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('primary_email cannot be empty')
-        return v.strip()
 
 
 class OnboardCheckResponse(BaseModel):

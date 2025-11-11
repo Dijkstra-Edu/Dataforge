@@ -9,5 +9,5 @@ def raise_api_error(
     detail: str,
     status: int = HTTP_500_INTERNAL_SERVER_ERROR
 ):
-    error = APIError(code=code, error=error, detail=detail, status=status)
-    raise HTTPException(status_code=status, detail=error.dict())
+    api_error = APIError(code=code, error=error, detail=detail, status=status)
+    raise HTTPException(status_code=status, detail=api_error.dict())

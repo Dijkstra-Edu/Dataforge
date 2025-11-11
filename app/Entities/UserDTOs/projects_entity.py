@@ -1,20 +1,20 @@
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from Schema.SQL.Enums.enums import Domain, Tools
 
 class CreateProject(BaseModel):
     profile_id: UUID
-    name: str = Field(..., min_length=1)
+    name: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     organization: Optional[str] = None
-    owner: str = Field(..., min_length=1)  
+    owner: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     private: bool
-    github_stars: int = 0
+    github_stars: Annotated[int, Field(ge=0)] = 0
     github_about: Optional[str] = None
-    github_open_issues: int = 0
-    github_forks: int = 0
-    description: str = Field(..., min_length=1)
+    github_open_issues: Annotated[int, Field(ge=0)] = 0
+    github_forks: Annotated[int, Field(ge=0)] = 0
+    description: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     domain: Domain
     topics: Optional[List[str]] = None
     tools: List[Tools]
@@ -26,37 +26,25 @@ class CreateProject(BaseModel):
     docs_page_link: Optional[str] = None
     own_domain_name: bool
     domain_name: Optional[str] = None
-    total_lines_contributed: Optional[int] = 0
+    total_lines_contributed: Optional[Annotated[int, Field(ge=0)]] = 0
     improper_uploads: Optional[bool] = False
     complexity_rating: Optional[float] = None
     testing_framework_present: bool
     testing_framework: Optional[str] = None
     project_organization_logo: Optional[str] = None
 
-    @field_validator("name", "owner", "description")
-    def must_not_be_empty(cls, v, info):
-        if not v.strip():
-            raise ValueError(f"{info.field_name} cannot be empty")
-        return v.strip()
-
-    @field_validator("github_stars", "github_open_issues", "github_forks", "total_lines_contributed")
-    def must_be_non_negative(cls, v, info):
-        if v is not None and v < 0:
-            raise ValueError(f"{info.field_name} cannot be negative")
-        return v
-
 
 class UpdateProject(BaseModel):
     profile_id: Optional[UUID] = None
-    name: Optional[str] = None
+    name: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     organization: Optional[str] = None
-    owner: Optional[str] = None
+    owner: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     private: Optional[bool] = None
-    github_stars: Optional[int] = None
+    github_stars: Optional[Annotated[int, Field(ge=0)]] = None
     github_about: Optional[str] = None
-    github_open_issues: Optional[int] = None
-    github_forks: Optional[int] = None
-    description: Optional[str] = None
+    github_open_issues: Optional[Annotated[int, Field(ge=0)]] = None
+    github_forks: Optional[Annotated[int, Field(ge=0)]] = None
+    description: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     domain: Optional[Domain] = None
     topics: Optional[List[str]] = None
     tools: Optional[List[Tools]] = None
@@ -74,18 +62,6 @@ class UpdateProject(BaseModel):
     testing_framework_present: Optional[bool] = None
     testing_framework: Optional[str] = None
     project_organization_logo: Optional[str] = None
-
-    @field_validator("name", "owner", "description")
-    def must_not_be_empty_if_provided(cls, v, info):
-        if v is not None and not v.strip():
-            raise ValueError(f"{info.field_name} cannot be empty")
-        return v.strip() if v else v
-
-    @field_validator("github_stars", "github_open_issues", "github_forks")
-    def must_be_non_negative(cls, v, info):
-        if v is not None and v < 0:
-            raise ValueError(f"{info.field_name} cannot be negative")
-        return v
 
 class ReadProject(BaseModel):
     id: UUID

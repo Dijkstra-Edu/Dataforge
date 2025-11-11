@@ -1,7 +1,7 @@
-from typing import Optional, List
+from typing import Optional, List, Annotated
 from uuid import UUID
 from datetime import date, datetime
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel, ValidationInfo, field_validator, Field
 from Schema.SQL.Enums.enums import (
     Cause,
     Tools,
@@ -9,8 +9,8 @@ from Schema.SQL.Enums.enums import (
 
 class CreateVolunteering(BaseModel):
     profile_id: UUID
-    organization: str
-    role: str
+    organization: Annotated[str, Field(min_length=1, strip_whitespace=True)]
+    role: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     cause: Cause
     start_date: date
     end_date: Optional[date] = None
@@ -18,18 +18,6 @@ class CreateVolunteering(BaseModel):
     description: Optional[str] = None
     tools: Optional[List[Tools]] = None
     organization_logo: Optional[str] = None
-
-    @field_validator("organization")
-    def organization_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError("organization cannot be empty")
-        return v.strip()
-
-    @field_validator("role")
-    def role_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError("role cannot be empty")
-        return v.strip()
 
     @field_validator("end_date")
     def validate_end_date(cls, v, info: ValidationInfo):
@@ -41,8 +29,8 @@ class CreateVolunteering(BaseModel):
 
 class UpdateVolunteering(BaseModel):
     profile_id: Optional[UUID] = None
-    organization: Optional[str] = None
-    role: Optional[str] = None
+    organization: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    role: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     cause: Optional[Cause] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
@@ -50,18 +38,6 @@ class UpdateVolunteering(BaseModel):
     description: Optional[str] = None
     tools: Optional[List[Tools]] = None
     organization_logo: Optional[str] = None
-
-    @field_validator("organization")
-    def organization_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("organization cannot be empty")
-        return v.strip() if v else v
-
-    @field_validator("role")
-    def role_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("role cannot be empty")
-        return v.strip() if v else v
 
     @field_validator("end_date")
     def validate_end_date(cls, v, info: ValidationInfo):

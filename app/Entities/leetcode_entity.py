@@ -1,7 +1,7 @@
-from typing import List, Optional
+from typing import List, Optional, Annotated
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field
 
 from Schema.SQL.Models.models import LeetcodeTagCategory
 from Schema.SQL.Enums.enums import Tools
@@ -12,7 +12,7 @@ from Schema.SQL.Enums.enums import Tools
 # -------------------------------------------------------------------------
 class CreateLeetcode(BaseModel):
     profile_id: UUID
-    lc_username: Optional[str] = None
+    lc_username: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     real_name: Optional[str] = None
     about_me: Optional[str] = None
     school: Optional[str] = None
@@ -36,20 +36,10 @@ class CreateLeetcode(BaseModel):
     total_participants: Optional[int] = None
     top_percentage: Optional[float] = None
     competition_badge: Optional[str] = None
-
-    @field_validator('profile_id')
-    def profile_id_must_be_present(cls, v):
-        if not v:
-            raise ValueError('profile_id is required')
-        return v
-
-    @field_validator('lc_username')
-    def lc_username_trim(cls, v):
-        return v.strip() if v else v
 
 
 class UpdateLeetcode(BaseModel):
-    lc_username: Optional[str] = None
+    lc_username: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     real_name: Optional[str] = None
     about_me: Optional[str] = None
     school: Optional[str] = None
@@ -73,12 +63,6 @@ class UpdateLeetcode(BaseModel):
     total_participants: Optional[int] = None
     top_percentage: Optional[float] = None
     competition_badge: Optional[str] = None
-
-    @field_validator('lc_username')
-    def lc_username_trim(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('lc_username cannot be empty')
-        return v.strip() if v else v
 
 
 class ReadLeetcode(BaseModel):
@@ -124,12 +108,6 @@ class CreateLeetcodeBadge(BaseModel):
     icon: Optional[str] = None
     hover_text: Optional[str] = None
 
-    @field_validator('leetcode_id')
-    def leetcode_id_must_be_present(cls, v):
-        if not v:
-            raise ValueError('leetcode_id is required')
-        return v
-
 
 class UpdateLeetcodeBadge(BaseModel):
     name: Optional[str] = None
@@ -158,12 +136,6 @@ class CreateLeetcodeTag(BaseModel):
     tag_category: Optional[LeetcodeTagCategory] = None
     tag_name: Optional[str] = None
     problems_solved: Optional[int] = None
-
-    @field_validator('leetcode_id')
-    def leetcode_id_must_be_present(cls, v):
-        if not v:
-            raise ValueError('leetcode_id is required')
-        return v
 
 
 class UpdateLeetcodeTag(BaseModel):

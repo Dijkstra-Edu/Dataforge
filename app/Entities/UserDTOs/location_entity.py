@@ -1,46 +1,22 @@
-from typing import Optional
+from typing import Optional, Annotated
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field
 
 class CreateLocation(BaseModel):
     id: Optional[UUID] = None
     city: str
     state: Optional[str] = None
-    country: str
+    country: Annotated[str, Field(min_length=1, strip_whitespace=True)]
     longitude: Optional[float] = None
     latitude: Optional[float] = None
-
-    @field_validator('city')
-    def city_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('city cannot be empty')
-        return v.strip()
-
-    @field_validator('country')
-    def country_must_not_be_empty(cls, v):
-        if not v.strip():
-            raise ValueError('country cannot be empty')
-        return v.strip()
 
 class UpdateLocation(BaseModel):
-    city: Optional[str] = None
+    city: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     state: Optional[str] = None
-    country: Optional[str] = None
+    country: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
-
-    @field_validator('city')
-    def city_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('city cannot be empty')
-        return v.strip() if v else v
-
-    @field_validator('country')
-    def country_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError('country cannot be empty')
-        return v.strip() if v else v
 
 class ReadLocation(BaseModel):
     id: UUID

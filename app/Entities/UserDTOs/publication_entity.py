@@ -49,38 +49,15 @@ class CreatePublication(BaseModel):
 
 class UpdatePublication(BaseModel):
     profile_id: Optional[UUID] = None
-    title: Optional[str] = None
-    publisher: Optional[str] = None
-    authors: Optional[List[str]] = None
+    title: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    publisher: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    authors: Optional[List[Annotated[str, Field(min_length=1, strip_whitespace=True)]]] = None
     publication_date: Optional[date] = None
-    publication_url: Optional[str] = None
-    description: Optional[str] = None
+    publication_url: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
+    description: Optional[Annotated[str, Field(min_length=1, strip_whitespace=True)]] = None
     tools: Optional[List[Tools]] = None
     publisher_logo: Optional[str] = None
 
-    @field_validator("title")
-    def title_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("title cannot be empty")
-        return v.strip() if v else v
-
-    @field_validator("publisher")
-    def publisher_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("publisher cannot be empty")
-        return v.strip() if v else v
-
-    @field_validator("publication_url")
-    def url_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("publication_url cannot be empty")
-        return v.strip() if v else v
-
-    @field_validator("description")
-    def description_must_not_be_empty(cls, v):
-        if v is not None and not v.strip():
-            raise ValueError("description cannot be empty")
-        return v.strip() if v else v
 
 class ReadPublication(BaseModel):
     id: UUID

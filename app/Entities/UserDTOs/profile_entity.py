@@ -1,7 +1,7 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 
 # ----------------------
 # Input DTOs
@@ -9,21 +9,9 @@ from pydantic import BaseModel, validator
 class CreateProfile(BaseModel):
     user_id: UUID
 
-    @validator('user_id')
-    def user_id_must_be_valid_uuid(cls, v):
-        if not v:
-            raise ValueError('user_id cannot be empty')
-        return v
-
 
 class UpdateProfile(BaseModel):
     user_id: Optional[UUID] = None
-
-    @validator('user_id')
-    def user_id_must_be_valid_uuid(cls, v):
-        if v is not None and not v:
-            raise ValueError('user_id cannot be empty')
-        return v
 
 
 # ----------------------

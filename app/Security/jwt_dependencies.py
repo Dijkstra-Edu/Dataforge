@@ -19,8 +19,8 @@ class TokenPayload(BaseModel):
 
     subject: Optional[str] = Field(default=None, alias="sub")
     github_username: str = Field(alias="githubUsername")
-    roles: List[Role] = Field(default_factory=list)
     expires_at: datetime = Field(alias="exp")
+    is_dev: Optional[bool] = Field(default=False, alias="isDev")
 
     @field_validator("expires_at", mode="before")
     @classmethod
@@ -30,28 +30,6 @@ class TokenPayload(BaseModel):
         if isinstance(value, (int, float)):
             return datetime.fromtimestamp(value, tz=timezone.utc)
         raise ValueError("Invalid expiration claim")
-
-    @field_validator("roles", mode="before")
-    @classmethod
-    def _parse_roles(cls, value: object) -> List[Role]:
-        if value is None:
-            return []
-        if isinstance(value, Role):
-            return [value]
-        if isinstance(value, str):
-            value = [value]
-        if not isinstance(value, Iterable):
-            raise ValueError("Roles must be iterable")
-        parsed: List[Role] = []
-        for raw_role in value:
-            if isinstance(raw_role, Role):
-                parsed.append(raw_role)
-                continue
-            try:
-                parsed.append(Role(raw_role))
-            except ValueError as exc:  # pragma: no cover - defensive
-                raise ValueError(f"Unknown role: {raw_role}") from exc
-        return parsed
 
 
 def _decode_authorization_header(
@@ -82,13 +60,11 @@ def _decode_authorization_header(
     return token
 
 
-def verify_nextauth_jwt(
-    authorization: Optional[str] = Header(default=None),
-    settings: JWTSettings = Depends(get_jwt_settings),
+def _verify_jwt_token(
+    token: str,
+    settings: JWTSettings,
 ) -> TokenPayload:
-    """Validate an incoming NextAuth JWT and return its payload."""
-
-    token = _decode_authorization_header(authorization)
+    """Core JWT verification logic without dependency injection."""
     options = {"verify_aud": settings.audience is not None}
     try:
         payload = jwt.decode(
@@ -115,6 +91,15 @@ def verify_nextauth_jwt(
     return token_payload
 
 
+def verify_nextauth_jwt(
+    authorization: Optional[str] = Header(default=None),
+    settings: JWTSettings = Depends(get_jwt_settings),
+) -> TokenPayload:
+    """Validate an incoming NextAuth JWT and return its payload."""
+    token = _decode_authorization_header(authorization)
+    return _verify_jwt_token(token, settings)
+
+
 def get_current_user(
     token_payload: TokenPayload = Depends(verify_nextauth_jwt),
     session: Session = Depends(get_session),
@@ -133,25 +118,21 @@ def get_current_user(
     return user
 
 
+def get_current_user_with_token(
+    token_payload: TokenPayload = Depends(verify_nextauth_jwt),
+    session: Session = Depends(get_session),
+) -> tuple[User, TokenPayload]:
+    """Fetch the authenticated user and return both user and token payload."""
+    user = get_current_user(token_payload, session)
+    return user, token_payload
+
+
 PRIVILEGED_ROLES = {Role.GLOBAL_ADMIN, Role.LOCAL_ADMIN}
 
 
-def require_roles(*required_roles: Role) -> Callable[[User], User]:
-    """Return a dependency enforcing that the user has the required role(s)."""
-
-    if not required_roles:
-        raise ValueError("At least one role must be provided")
-
-    def dependency(current_user: User = Depends(get_current_user)) -> User:
-        user_roles = set(current_user.roles or [])
-        if user_roles & PRIVILEGED_ROLES:
-            return current_user
-        if not any(role in user_roles for role in required_roles):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions",
-            )
-        return current_user
-
-    return dependency
+def auth_jwt_required(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """JWT-only authentication dependency."""
+    return current_user
 

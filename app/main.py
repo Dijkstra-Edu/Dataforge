@@ -19,6 +19,7 @@ from Controllers.User import (
 
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
 from Controllers.User import location_controller
+from Controllers import api_key_controller
 from Controllers.error_handlers import register_exception_handlers
 from db import init_db
 app = FastAPI()
@@ -70,3 +71,4 @@ app.include_router(volunteering_controller.router)
 app.include_router(projects_controller.router)
 app.include_router(education_controller.router)
 app.include_router(publication_controller.router)
+app.include_router(api_key_controller.router)

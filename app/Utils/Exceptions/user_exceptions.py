@@ -93,3 +93,26 @@ class PublicationNotFound(ServiceError):
     def __init__(self, publication_id):
         super().__init__(f"Publication with ID {publication_id} does not exist.")
         self.publication_id = publication_id
+
+class APIKeyNotFound(ServiceError):
+    def __init__(self, api_key_id=None):
+        if api_key_id is None:
+            message = "API key not found."
+        else:
+            message = f"API key with ID '{api_key_id}' does not exist."
+        super().__init__(message)
+        self.api_key_id = api_key_id
+
+class APIKeyExpired(ServiceError):
+    def __init__(self):
+        super().__init__("API key has expired.")
+
+class APIKeyInactive(ServiceError):
+    def __init__(self):
+        super().__init__("API key is inactive.")
+
+class InvalidAPIKeyRoles(ServiceError):
+    def __init__(self, requested_roles, user_roles):
+        super().__init__(f"Requested roles {requested_roles} are not a subset of user roles {user_roles}.")
+        self.requested_roles = requested_roles
+        self.user_roles = user_roles

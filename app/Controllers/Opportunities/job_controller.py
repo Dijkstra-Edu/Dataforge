@@ -7,7 +7,7 @@ from Services.Opportunities.jobs_service import JobService
 from Settings.logging_config import setup_logging
 from db import get_session
 from Schema.SQL.Enums.enums import Role
-from Security.dependencies import require_roles
+from Security.unified_dependencies import require_roles
 
 logger = setup_logging()
 
@@ -28,7 +28,7 @@ def create_job(
 
 
 @router.get("/{job_id}", response_model=ReadJob)
-def get_job(job_id: UUID, session: Session = Depends(get_session)):
+def get_job(job_id: UUID, session: Session = Depends(get_session), _: object = Depends(require_roles(Role.GLOBAL_ADMIN))):
     service = JobService(session)
     logger.info(f"Fetching Job with ID: {job_id}")
     return service.get_job(job_id)
@@ -82,7 +82,7 @@ def autocomplete_jobs(
     return service.autocomplete_jobs(query, field, limit)
 
 
-@router.put("/{job_id}", response_model=ReadJob)
+@router.put("/{job_id}", response_model=ReadJob, dependencies=[Depends(require_roles(Role.GLOBAL_ADMIN))])
 def update_job(
     job_id: UUID,
     job_update: UpdateJob,
@@ -94,7 +94,7 @@ def update_job(
     return service.update_job(job_id, job_update)
 
 
-@router.delete("/{job_id}", response_model=ReadJob)
+@router.delete("/{job_id}", response_model=ReadJob, dependencies=[Depends(require_roles(Role.GLOBAL_ADMIN))])
 def delete_job(
     job_id: UUID,
     session: Session = Depends(get_session),

@@ -265,3 +265,4 @@ class ReadUserAuthDetails(BaseModel):
     github_user_name: str
     user_id: UUID
     profile_id: UUID
+    roles: List[Role]

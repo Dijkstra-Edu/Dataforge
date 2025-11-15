@@ -780,3 +780,19 @@ class Fellowship(UUIDBaseTable, table=True):
     organization_rel: Optional[Organization] = Relationship(
         back_populates="fellowships"
     )
+
+# -------------------------------------------------------------------------
+# APIKey model
+# -------------------------------------------------------------------------
+class APIKey(UUIDBaseTable, table=True):
+    __tablename__ = "APIKeys"
+
+    key_hash: str = Field(nullable=False, unique=True, index=True)
+    github_username: str = Field(nullable=False)
+    description: Optional[str] = None
+    active: bool = Field(default=True, nullable=False)
+    expires_in: Optional[datetime] = None
+    roles: Optional[List[Role]] = Field(
+        default_factory=list,
+        sa_column=Column(ARRAY(SQLEnum(Role, name="ROLE")))
+    )

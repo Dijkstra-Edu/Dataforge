@@ -16,6 +16,7 @@ from Controllers.User import (
     user_controller,
     volunteering_controller,
     workexperience_controller,
+    test_scores_controller,
 )
 
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
@@ -72,3 +73,4 @@ app.include_router(volunteering_controller.router)
 app.include_router(projects_controller.router)
 app.include_router(education_controller.router)
 app.include_router(publication_controller.router)
+app.include_router(test_scores_controller.router)

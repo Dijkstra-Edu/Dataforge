@@ -102,3 +102,8 @@ class TestScoreNotFound(ServiceError):
             message = f"Test score with ID '{test_score_id}' does not exist."
         super().__init__(message)
         self.test_score_id = test_score_id
+        
+class DocumentNotFound(ServiceError):
+    def __init__(self, document_id):
+        super().__init__(f"Document with ID {document_id} does not exist.")
+        self.document_id = document_id

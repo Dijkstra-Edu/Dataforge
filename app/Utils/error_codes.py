@@ -361,3 +361,27 @@ class ErrorCodes:
 
     # Not found errors
     USER_EDUCATION_NF_A01 = "USER-EDUCATION-NF-A01"  # Education not found
+
+    # -----------------------------
+    # Users → Document
+    # -----------------------------
+
+    # Database errors
+    USER_DOCUMENT_DB_A01 = "USER-DOCUMENT-DB-A01"  # Failure inserting document
+    USER_DOCUMENT_DB_A02 = "USER-DOCUMENT-DB-A02"  # Failure updating document
+    USER_DOCUMENT_DB_A03 = "USER-DOCUMENT-DB-A03"  # Failure deleting document
+
+    # Server / Unexpected errors
+    USER_DOCUMENT_SRV_A01 = "USER-DOCUMENT-SRV-A01"  # Generic server error
+    USER_DOCUMENT_SRV_A02 = "USER-DOCUMENT-SRV-A02"  # Error fetching documents list
+
+    # Authentication / Permission errors
+    USER_DOCUMENT_AUTH_A01 = "USER-DOCUMENT-AUTH-A01"  # User not authorized
+    USER_DOCUMENT_AUTH_A02 = "USER-DOCUMENT-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_DOCUMENT_VAL_A01 = "USER-DOCUMENT-VAL-A01"  # Invalid document payload
+    USER_DOCUMENT_VAL_A02 = "USER-DOCUMENT-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_DOCUMENT_NF_A01 = "USER-DOCUMENT-NF-A01"  # Document not found

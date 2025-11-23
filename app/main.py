@@ -6,6 +6,7 @@ from Controllers.Opportunities import job_controller
 from Controllers.User import (
     certifications_controller,
     dijkstra_certificate_controller,
+    document_controller,
     education_controller,
     leetcode_controller,
     links_controller,
@@ -61,6 +62,7 @@ app.include_router(profile_controller.router)
 app.include_router(leetcode_controller.router)
 app.include_router(dijkstra_certificate_controller.router)
 app.include_router(certifications_controller.router)
+app.include_router(document_controller.router)
 app.include_router(job_controller.router)
 app.include_router(fellowships_controller.router)
 app.include_router(organization_controller.router)

@@ -93,3 +93,8 @@ class PublicationNotFound(ServiceError):
     def __init__(self, publication_id):
         super().__init__(f"Publication with ID {publication_id} does not exist.")
         self.publication_id = publication_id
+
+class DocumentNotFound(ServiceError):
+    def __init__(self, document_id):
+        super().__init__(f"Document with ID {document_id} does not exist.")
+        self.document_id = document_id

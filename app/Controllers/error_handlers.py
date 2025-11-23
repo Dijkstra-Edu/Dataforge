@@ -8,6 +8,7 @@ from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, Invali
 from Utils.errors import raise_api_error
 from Utils.Exceptions.user_exceptions import (
     CertificationNotFound,
+    DocumentNotFound,
     EducationNotFound,
     GitHubUsernameAlreadyExists,
     GitHubUsernameNotFound,
@@ -351,6 +352,16 @@ def register_exception_handlers(app):
         raise_api_error(
             code=ErrorCodes.USER_EDUCATION_NF_A01,
             error="Education not found",
+            detail=str(exc),
+            status=404,
+        )
+
+    @app.exception_handler(DocumentNotFound)
+    async def document_not_found_handler(request: Request, exc: DocumentNotFound):
+        logger.warning(f"Document not found: {exc.document_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_DOCUMENT_NF_A01,
+            error="Document not found",
             detail=str(exc),
             status=404,
         )

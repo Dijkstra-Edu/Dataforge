@@ -8,6 +8,8 @@ from sqlmodel import Session
 from Entities.UserDTOs.user_entity import CreateUser, ReadUserAuthDetails, UpdateUser, ReadUser, OnboardUser, OnboardCheckResponse, ReadUserCardDetails, ReadUserPersonalDetails, UpdateUserPersonalDetails
 from Services.User.user_service import UserService
 from Settings.logging_config import setup_logging
+from Schema.SQL.Enums.enums import Role
+from Security.unified_dependencies import require_roles
 from db import get_session
 
 logger = setup_logging()
@@ -27,7 +29,8 @@ def create_user(user_create: CreateUser, session: Session = Depends(get_session)
 @router.get("/onboard", response_model=OnboardCheckResponse)
 def check_onboarding(
     username: str = Query(..., description="GitHub username to check"),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    _: object = Depends(require_roles(Role.PERSONAL_WRITE))
 ):
     """
     Check if a user has completed onboarding by GitHub username.

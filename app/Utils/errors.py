@@ -1,5 +1,4 @@
 # utils/errors.py
-from turtle import title
 from fastapi import HTTPException
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
 from Entities.error_entity import APIError

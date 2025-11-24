@@ -6,6 +6,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, field_validator
 
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
+from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 
 # ----------------------
 # Input DTOs
@@ -18,7 +19,7 @@ class CreateWorkExperience(BaseModel):
     company_name: str
     company_logo: Optional[str] = None
     currently_working: bool
-    location: Optional[UUID] = None
+    location: Optional[CreateLocation] = None
     location_type: WorkLocationType
     start_date_month: int
     start_date_year: int
@@ -84,7 +85,7 @@ class UpdateWorkExperience(BaseModel):
     company_name: Optional[str] = None
     company_logo: Optional[str] = None
     currently_working: Optional[bool] = None
-    location: Optional[UUID] = None
+    location: Optional[CreateLocation] = None
     location_type: Optional[WorkLocationType] = None
     start_date_month: Optional[int] = None
     start_date_year: Optional[int] = None
@@ -154,7 +155,7 @@ class ReadWorkExperience(BaseModel):
     company_name: str
     company_logo: Optional[str]
     currently_working: bool
-    location: Optional[UUID]
+    location: Optional[ReadLocation]
     location_type: WorkLocationType
     start_date_month: int
     start_date_year: int

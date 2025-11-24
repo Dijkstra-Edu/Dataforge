@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 class CreateLocation(BaseModel):
+    id: Optional[UUID] = None
     city: str
     state: Optional[str] = None
     country: str

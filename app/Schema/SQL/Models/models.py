@@ -510,6 +510,9 @@ class Document(UUIDBaseTable, table=True):
     __tablename__ = "Document"
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    document_name: Optional[str] = None
+    document_type: Optional[str] = None
+    document_kind: Optional[str] = None
     latex: Optional[str] = None
     base_structure: Optional[dict] = Field(
         default=None,

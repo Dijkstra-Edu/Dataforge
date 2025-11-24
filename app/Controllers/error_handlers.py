@@ -8,6 +8,7 @@ from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, Invali
 from Utils.errors import raise_api_error
 from Utils.Exceptions.user_exceptions import (
     CertificationNotFound,
+    DocumentNotFound,
     EducationNotFound,
     GitHubUsernameAlreadyExists,
     GitHubUsernameNotFound,
@@ -125,7 +126,7 @@ def register_exception_handlers(app):
     async def work_experience_not_found_handler(request: Request, exc: WorkExperienceNotFound):
         logger.warning(f"Work experience not found: {exc.work_experience_id}")
         raise_api_error(
-            code=ErrorCodes.USER_WORK_EXPERIENCE_NF_A01,
+            code=ErrorCodes.USER_WORKEXP_NF_A01,
             error="Work experience not found",
             detail=str(exc),
             status=404
@@ -351,6 +352,16 @@ def register_exception_handlers(app):
         raise_api_error(
             code=ErrorCodes.USER_EDUCATION_NF_A01,
             error="Education not found",
+            detail=str(exc),
+            status=404,
+        )
+
+    @app.exception_handler(DocumentNotFound)
+    async def document_not_found_handler(request: Request, exc: DocumentNotFound):
+        logger.warning(f"Document not found: {exc.document_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_DOCUMENT_NF_A01,
+            error="Document not found",
             detail=str(exc),
             status=404,
         )

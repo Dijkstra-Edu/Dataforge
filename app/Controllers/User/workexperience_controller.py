@@ -119,7 +119,7 @@ def update_work_experience(
     logger.info(f"Updated Work Experience ID: {work_experience.id}")
     return work_experience
 
-@router.delete("/{work_experience_id}", response_model=ReadWorkExperience)
+@router.delete("/{work_experience_id}")
 def delete_work_experience(work_experience_id: UUID, session: Session = Depends(get_session)):
     service = WorkExperienceService(session)
     logger.info(f"Deleting Work Experience ID: {work_experience_id}")

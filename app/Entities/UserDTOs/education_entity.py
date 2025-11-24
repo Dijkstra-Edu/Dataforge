@@ -15,7 +15,7 @@ class CreateEducation(BaseModel):
     degree: Degree
     course_field_name: str
     currently_studying: bool
-    location: UUID
+    location: Optional[CreateLocation] = None
     location_type: WorkLocationType
     start_date_month: int
     start_date_year: int
@@ -55,7 +55,7 @@ class UpdateEducation(BaseModel):
     degree: Optional[Degree] = None
     course_field_name: Optional[str] = None
     currently_studying: Optional[bool] = None
-    location: Optional[UUID] = None
+    location: Optional[CreateLocation] = None
     location_type: Optional[WorkLocationType] = None
     start_date_month: Optional[int] = None
     start_date_year: Optional[int] = None
@@ -96,7 +96,7 @@ class ReadEducation(BaseModel):
     degree: Degree
     course_field_name: str
     currently_studying: bool
-    location: UUID
+    location: Optional[ReadLocation]
     location_type: WorkLocationType
     start_date_month: int
     start_date_year: int
@@ -117,7 +117,7 @@ class ReadEducation(BaseModel):
 
 
 # Import at the end to avoid circular imports
-from Entities.UserDTOs.location_entity import ReadLocation
+from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 
 
 class ReadEducationWithLocation(ReadEducation):

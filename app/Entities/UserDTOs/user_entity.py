@@ -136,6 +136,7 @@ class OnboardUser(BaseModel):
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
     primary_email: str
+    access_token: str
     tools_to_learn: Optional[List[Tools]] = []
 
     @field_validator('github_user_name', 'linkedin_user_name', 'leetcode_user_name')

@@ -159,15 +159,12 @@ class UserService:
             
             # Refresh to get the updated user with relationships
             self.session.refresh(created_user)
-            try:
-                GitRipperClient().sync_user(
-                    login_id=onboard_data.github_user_name,
-                    oauth_token=onboard_data.access_token,
-                    email=onboard_data.primary_email
-                )
-            except GitRipperClientError as e:
-                # Log, retry, or ignore depending on your design
-                print("User-service sync failed:", e)
+            GitRipperClient().sync_user(
+                login_id=onboard_data.github_user_name,
+                oauth_token=onboard_data.access_token,
+                email=onboard_data.primary_email
+            )
+           
             return created_user
         except Exception as e:
             # If anything fails, rollback will happen in repository layer

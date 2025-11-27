@@ -36,19 +36,8 @@ class ReadProfile(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
-# ----------------------
-# Extended Output DTO with User details
-# ----------------------
-class ReadProfileWithUser(ReadProfile):
-    user: Optional['ReadUser'] = None
-
-    class Config:
-        orm_mode = True
-
-
-# Import here to avoid circular imports
-from Entities.UserDTOs.user_entity import ReadUser
-ReadProfileWithUser.update_forward_refs()
+# Note: Extended DTOs (ReadProfileWithUser, ReadProfileFull) are in extended_entities.py
+# to avoid circular import issues

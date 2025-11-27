@@ -4,12 +4,12 @@ from datetime import date, datetime, timezone
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 
 from Schema.SQL.Enums.enums import (
-    Difficulty, ProjectLevel, Rank, Tools, WorkLocationType,
+    Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
-    LeetcodeTagCategory, Status, TestScoreType
+    LeetcodeTagCategory, Status, TestScoreType, Degree, SkillCategory
 )
 
 # Base class with UUID PK and timestamps
@@ -28,14 +28,36 @@ class User(UUIDBaseTable, table=True):
     __tablename__ = "User"
 
     github_user_name: str = Field(nullable=False, unique=True)
-    first_name: str = Field(nullable=False)
+    first_name: Optional[str] = None
     middle_name: Optional[str] = None
-    last_name: str = Field(nullable=False)
+    last_name: Optional[str] = None
     rank: Rank = Field(
         default=Rank.UNRANKED,
         sa_column=Column(SQLEnum(Rank, name="RANK"))
     )
     streak: Optional[int] = None
+    primary_specialization: Domain = Field(
+        sa_column=Column(SQLEnum(Domain, name="DOMAIN"), nullable=False)
+    )
+    secondary_specializations: List[Domain] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")), nullable=False)
+    )
+    expected_salary_bucket: Rank = Field(
+        sa_column=Column(SQLEnum(Rank, name="RANK"), nullable=False)
+    )
+    time_left: int = Field(nullable=False)
+    onboarding_complete: bool = Field(default=False, nullable=False)
+    data_loaded: bool = Field(default=False, nullable=False)
+    bio: Optional[str] = None
+    location: Optional[UUID] = Field(default=None, foreign_key="Location.id", nullable=True)
+    dream_company: Optional[str] = None
+    dream_company_logo: Optional[str] = None
+    dream_position: Optional[str] = None
+    tools_to_learn: Optional[List[Tools]] = Field(
+        default_factory=list,
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
+    )
+    onboarding_journey_completed: bool = Field(default=False, nullable=False)
 
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
@@ -43,6 +65,9 @@ class User(UUIDBaseTable, table=True):
     links: Optional["Links"] = Relationship(back_populates="user_rel")
     created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
     assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
+    posts: List["Posts"] = Relationship(back_populates="user_rel")
+    location_rel: Optional["Location"] = Relationship(back_populates="users")
+    github_profile: Optional["Github"] = Relationship(back_populates="user_rel")
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -62,7 +87,11 @@ class Profile(UUIDBaseTable, table=True):
     publications: List["Publications"] = Relationship(back_populates="profile_rel")
     projects: List["Projects"] = Relationship(back_populates="profile_rel")
     leetcode: Optional["Leetcode"] = Relationship(back_populates="profile_rel")
-    resume: Optional["Resume"] = Relationship(back_populates="profile_rel")
+    documents: List["Document"] = Relationship(back_populates="profile_rel")
+    github: Optional["Github"] = Relationship(back_populates="profile_rel")
+    posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
+    post_comments: List["PostComments"] = Relationship(back_populates="profile_rel")
+    skills: List["Skills"] = Relationship(back_populates="profile_rel")
 
 # -------------------------------------------------------------------------
 # Location model
@@ -79,6 +108,7 @@ class Location(UUIDBaseTable, table=True):
     # Relationships
     education: List["Education"] = Relationship(back_populates="location_rel")
     work_experience: List["WorkExperience"] = Relationship(back_populates="location_rel")
+    users: List["User"] = Relationship(back_populates="location_rel")
 
 # -------------------------------------------------------------------------
 # Education model
@@ -87,22 +117,30 @@ class Education(UUIDBaseTable, table=True):
     __tablename__ = "Education"
 
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
-    school: str = Field(nullable=False)
-    school_type: str = Field(nullable=False)  # Should be an enum if defined
-    degree: str = Field(nullable=False)
-    field: str = Field(nullable=False)
+    school_name: str = Field(nullable=False)
+    school_logo_url: Optional[str] = None
+    school_type: SchoolType = Field(
+        sa_column=Column(SQLEnum(SchoolType, name="SCHOOL_TYPE"), nullable=False)
+    )
+    degree: Degree = Field(
+        sa_column=Column(SQLEnum(Degree, name="DEGREE"), nullable=False)
+    )
+    course_field_name: str = Field(nullable=False)
     currently_studying: bool = Field(nullable=False)
     location: UUID = Field(foreign_key="Location.id", nullable=False)
     location_type: WorkLocationType = Field(
-        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"))
+        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"), nullable=False)
     )
-    start_date: date = Field(nullable=False)
-    end_date: Optional[date] = None
+    start_date_month: int = Field(nullable=False)
+    start_date_year: int = Field(nullable=False)
+    end_date_month: Optional[int] = None
+    end_date_year: Optional[int] = None
     description_general: str = Field(nullable=False)
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
     work_done: Optional[str] = None
     school_score_multiplier: Optional[float] = None
+    cgpa: Optional[float] = None
     tools_used: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
@@ -120,25 +158,26 @@ class WorkExperience(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     title: str = Field(nullable=False)
     employment_type: EmploymentType = Field(
-        sa_column=Column(SQLEnum(EmploymentType, name="EMPLOYMENT_TYPE"))
+        sa_column=Column(SQLEnum(EmploymentType, name="EMPLOYMENT_TYPE"), nullable=False)
     )
     domain: Optional[List[Domain]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
     )
     company_name: str = Field(nullable=False)
+    company_logo: Optional[str] = None
     currently_working: bool = Field(nullable=False)
-    location: UUID = Field(foreign_key="Location.id", nullable=False)
+    location: Optional[UUID] = Field(default=None, foreign_key="Location.id", nullable=True)
     location_type: WorkLocationType = Field(
-        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"))
+        sa_column=Column(SQLEnum(WorkLocationType, name="WORK_LOCATION_TYPE"), nullable=False)
     )
-    start_date: date = Field(nullable=False)
-    end_date: Optional[date] = None
+    start_date_month: int = Field(nullable=False)
+    start_date_year: int = Field(nullable=False)
+    end_date_month: Optional[int] = None
+    end_date_year: Optional[int] = None
     description_general: str = Field(nullable=False)
     description_detailed: Optional[str] = None
     description_less: Optional[str] = None
-    work_done: List[str] = Field(
-        sa_column=Column(ARRAY(String))
-    )
+    work_done: Optional[str] = None
     company_score: Optional[float] = None
     time_spent_multiplier: Optional[float] = None
     work_done_multiplier: Optional[float] = None
@@ -148,7 +187,7 @@ class WorkExperience(UUIDBaseTable, table=True):
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="work_experience")
-    location_rel: Location = Relationship(back_populates="work_experience")
+    location_rel: Optional[Location] = Relationship(back_populates="work_experience")
 
 # -------------------------------------------------------------------------
 # Certifications model
@@ -169,6 +208,7 @@ class Certifications(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    issuing_organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="certifications")
@@ -210,6 +250,7 @@ class Volunteering(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="volunteering")
@@ -232,9 +273,41 @@ class Publications(UUIDBaseTable, table=True):
     tools: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    publisher_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="publications")
+
+# -------------------------------------------------------------------------
+# Skills model
+# -------------------------------------------------------------------------
+class Skills(UUIDBaseTable, table=True):
+    __tablename__ = "Skills"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    skill: Tools = Field(
+        sa_column=Column(SQLEnum(Tools, name="TOOLS"), nullable=False)
+    )
+    proficiency: Optional[float] = None
+    years_of_experience: Optional[float] = None
+    associated_experience: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    associated_certifications: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    associated_educations: Optional[List[UUID]] = Field(
+        sa_column=Column(ARRAY(PG_UUID))
+    )
+    domain: Optional[List[Domain]] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Domain, name="DOMAIN")))
+    )
+    category: Optional[SkillCategory] = Field(
+        sa_column=Column(SQLEnum(SkillCategory, name="SKILL_CATEGORY"))
+    )
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="skills")
 
 # -------------------------------------------------------------------------
 # Projects model
@@ -274,6 +347,7 @@ class Projects(UUIDBaseTable, table=True):
     complexity_rating: Optional[float] = None
     testing_framework_present: bool = Field(nullable=False)
     testing_framework: Optional[str] = None
+    project_organization_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="projects")
@@ -294,8 +368,9 @@ class Leetcode(UUIDBaseTable, table=True):
     country: Optional[str] = None
     company: Optional[str] = None
     job_title: Optional[str] = None
-    skill_tags: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
+    
+    skill_tags: Optional[List[Tools]] = Field(
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
     ranking: Optional[int] = None
     avatar: Optional[str] = None
@@ -305,9 +380,7 @@ class Leetcode(UUIDBaseTable, table=True):
     easy_problems_solved: Optional[int] = None
     medium_problems_solved: Optional[int] = None
     hard_problems_solved: Optional[int] = None
-    language_problem_count: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
-    )
+    language_problem_count: Optional[List[dict]] = Field(sa_column=Column(ARRAY(JSONB)))
     attended_contests: Optional[int] = None
     competition_rating: Optional[float] = None
     global_ranking: Optional[int] = None
@@ -356,7 +429,7 @@ class LeetcodeTags(UUIDBaseTable, table=True):
 class Github(UUIDBaseTable, table=True):
     __tablename__ = "Github"
 
-    user_name: str = Field(nullable=False, unique=True)
+    user_name: str = Field(foreign_key="User.github_user_name", nullable=False, unique=True)
     github_bio: Optional[str] = None
     followers: Optional[int] = None
     following: Optional[int] = None
@@ -377,9 +450,12 @@ class Github(UUIDBaseTable, table=True):
     total_repos: Optional[int] = None
     total_commits: Optional[int] = None
     contribution_graph_link: Optional[str] = None
+    profile_id: Optional[UUID] = Field(default=None, foreign_key="Profile.id", nullable=True)
 
     # Relationships
     projects: List["Projects"] = Relationship(back_populates="owner_rel")
+    profile_rel: Optional["Profile"] = Relationship(back_populates="github")
+    user_rel: Optional["User"] = Relationship(back_populates="github_profile")
 
 # -------------------------------------------------------------------------
 # Links model
@@ -387,19 +463,23 @@ class Github(UUIDBaseTable, table=True):
 class Links(UUIDBaseTable, table=True):
     __tablename__ = "Links"
 
-    user_id: Optional[UUID] = Field(foreign_key="User.id", nullable=True)
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
     portfolio_link: Optional[str] = None
     github_user_name: str = Field(nullable=False, unique=True)
-    github_link: str = Field(nullable=False)
+    github_link: Optional[str] = None
     linkedin_user_name: str = Field(nullable=False, unique=True)
-    linkedin_link: str = Field(nullable=False)
+    linkedin_link: Optional[str] = None
     leetcode_user_name: str = Field(nullable=False, unique=True)
-    leetcode_link: str = Field(nullable=False)
-    orcid_id: str = Field(nullable=False, unique=True)
-    orcid_link: str = Field(nullable=False)
+    leetcode_link: Optional[str] = None
+    orcid_id: Optional[str] = Field(default=None, unique=True)
+    orcid_link: Optional[str] = None
+    primary_email: Optional[str] = Field(default="")
+    secondary_email: Optional[str] = None
+    school_email: Optional[str] = None
+    work_email: Optional[str] = None
 
     # Relationships
-    user_rel: Optional[User] = Relationship(back_populates="links")
+    user_rel: User = Relationship(back_populates="links")
 
 # -------------------------------------------------------------------------
 # Blog model
@@ -424,15 +504,83 @@ class Blog(UUIDBaseTable, table=True):
     user_rel: User = Relationship(back_populates="blog_posts")
 
 # -------------------------------------------------------------------------
-# Resume model (updated to make profile_id optional)
+# Document model
 # -------------------------------------------------------------------------
-class Resume(UUIDBaseTable, table=True):
-    __tablename__ = "Resume"
+class Document(UUIDBaseTable, table=True):
+    __tablename__ = "Document"
 
-    profile_id: Optional[UUID] = Field(foreign_key="Profile.id", nullable=True)
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    document_name: Optional[str] = None
+    document_type: Optional[str] = None
+    document_kind: Optional[str] = None
+    latex: Optional[str] = None
+    base_structure: Optional[dict] = Field(
+        default=None,
+        sa_column=Column(JSONB)
+    )
 
     # Relationships
-    profile_rel: Optional[Profile] = Relationship(back_populates="resume")
+    profile_rel: Profile = Relationship(back_populates="documents")
+
+# -------------------------------------------------------------------------
+# Posts model
+# -------------------------------------------------------------------------
+class Posts(UUIDBaseTable, table=True):
+    __tablename__ = "Posts"
+
+    user_id: UUID = Field(foreign_key="User.id", nullable=False)
+    parent_post: Optional[UUID] = None
+    content: str = Field(nullable=False)
+    likes_count: int = Field(default=0, nullable=False)
+    comments_count: int = Field(default=0, nullable=False)
+    repost_count: int = Field(default=0, nullable=False)
+
+    # Relationships
+    user_rel: User = Relationship(back_populates="posts")
+    images: List["PostImages"] = Relationship(back_populates="post_rel")
+    comments: List["PostComments"] = Relationship(back_populates="post_rel")
+    saved_by: List["PostsSaved"] = Relationship(back_populates="post_rel")
+
+# -------------------------------------------------------------------------
+# PostComments model
+# -------------------------------------------------------------------------
+class PostComments(UUIDBaseTable, table=True):
+    __tablename__ = "PostComments"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+    parent_comment_id: UUID = Field(nullable=False)
+    content: str = Field(nullable=False)
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="post_comments")
+    post_rel: Posts = Relationship(back_populates="comments")
+
+# -------------------------------------------------------------------------
+# PostImages model
+# -------------------------------------------------------------------------
+class PostImages(UUIDBaseTable, table=True):
+    __tablename__ = "PostImages"
+
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+    image_url: str = Field(nullable=False)
+    position: int = Field(nullable=False)
+
+    # Relationships
+    post_rel: Posts = Relationship(back_populates="images")
+
+# -------------------------------------------------------------------------
+# PostsSaved model
+# -------------------------------------------------------------------------
+class PostsSaved(UUIDBaseTable, table=True):
+    __tablename__ = "PostsSaved"
+
+    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
+    post_id: UUID = Field(foreign_key="Posts.id", nullable=False)
+
+    # Relationships
+    profile_rel: Profile = Relationship(back_populates="posts_saved")
+    post_rel: Posts = Relationship(back_populates="saved_by")
 
 # -------------------------------------------------------------------------
 # ProjectTask model
@@ -533,10 +681,10 @@ class Job(UUIDBaseTable, table=True):
     )
 
     # Foreign key to Organization
-    organization: Optional[UUID] = Field(
-        default=None, foreign_key="Organizations.id", nullable=True
+    organization: UUID = Field(
+        foreign_key="Organizations.id", nullable=False
     )
-    organization_rel: Optional[Organization] = Relationship(back_populates="jobs")
+    organization_rel: Organization = Relationship(back_populates="jobs")
 
     technologies: Optional[List[str]] = Field(
         default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))

@@ -1,9 +1,31 @@
 # controllers/error_handlers.py
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+from psycopg2.errors import InsufficientPrivilege, UniqueViolation, ForeignKeyViolation
 from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
-from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, UserNotFound, WorkExperienceNotFound
+from Utils.Exceptions.user_exceptions import (
+    CertificationNotFound,
+    DocumentNotFound,
+    EducationNotFound,
+    GitHubUsernameAlreadyExists,
+    GitHubUsernameNotFound,
+    LeetcodeBadgeNotFound,
+    LeetcodeNotFound,
+    LeetcodeTagNotFound,
+    LinksAlreadyExists,
+    LinksNotFound,
+    LocationNotFound,
+    ProfileAlreadyExists,
+    ProfileNotFound,
+    ProjectsNotFound,
+    UserNotFound,
+    VolunteeringNotFound,
+    WorkExperienceNotFound,
+)
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -104,10 +126,143 @@ def register_exception_handlers(app):
     async def work_experience_not_found_handler(request: Request, exc: WorkExperienceNotFound):
         logger.warning(f"Work experience not found: {exc.work_experience_id}")
         raise_api_error(
-            code=ErrorCodes.USER_WORK_EXPERIENCE_NF_A01,
+            code=ErrorCodes.USER_WORKEXP_NF_A01,
             error="Work experience not found",
             detail=str(exc),
             status=404
+        )
+
+    @app.exception_handler(LeetcodeNotFound)
+    async def leetcode_not_found_handler(request: Request, exc: LeetcodeNotFound):
+        logger.warning(f"LeetCode not found: {exc.leetcode_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_LEETCODE_NF_A01,
+            error="LeetCode record not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(LeetcodeBadgeNotFound)
+    async def leetcode_badge_not_found_handler(request: Request, exc: LeetcodeBadgeNotFound):
+        logger.warning(f"LeetCode badge not found: {exc.badge_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_LEETCODE_NF_A02,
+            error="LeetCode badge not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(LeetcodeTagNotFound)
+    async def leetcode_tag_not_found_handler(request: Request, exc: LeetcodeTagNotFound):
+        logger.warning(f"LeetCode tag not found: {exc.tag_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_LEETCODE_NF_A03,
+            error="LeetCode tag not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(CertificationNotFound)
+    async def certification_not_found_handler(request: Request, exc: CertificationNotFound):
+        logger.warning(f"Certificate not found: {exc.certificate_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_CERTIFICATION_NF_A01,
+            error="Certificate not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(ProgrammingError)
+    async def database_programming_error_handler(request: Request, exc: ProgrammingError):
+        """
+        Handle database programming errors including RLS violations
+        """
+        error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
+        
+        # Check if it's an RLS violation
+        if isinstance(exc.orig, InsufficientPrivilege):
+            logger.error(f"Row-Level Security violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_RLS_ERROR,
+                error="Permission Denied",
+                detail="You don't have permission to perform this operation. This may be due to database row-level security policies.",
+                status=403
+            )
+        
+        # Generic programming error
+        logger.error(f"Database programming error: {error_msg}")
+        raise_api_error(
+            code=ErrorCodes.DATABASE_ERROR,
+            error="Database Error",
+            detail="A database operation failed. Please check your data and try again.",
+            status=500
+        )
+
+    @app.exception_handler(IntegrityError)
+    async def database_integrity_error_handler(request: Request, exc: IntegrityError):
+        """
+        Handle database integrity constraint violations (unique, foreign key, etc.)
+        """
+        error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
+        
+        # Check specific constraint violations
+        if isinstance(exc.orig, UniqueViolation):
+            logger.warning(f"Unique constraint violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_UNIQUE_VIOLATION,
+                error="Duplicate Entry",
+                detail="This record already exists. Please use a unique value.",
+                status=409
+            )
+        
+        if isinstance(exc.orig, ForeignKeyViolation):
+            logger.warning(f"Foreign key violation: {error_msg}")
+            raise_api_error(
+                code=ErrorCodes.DATABASE_FK_VIOLATION,
+                error="Invalid Reference",
+                detail="The referenced record does not exist. Please check the related IDs.",
+                status=400
+            )
+        
+        # Generic integrity error
+        logger.error(f"Database integrity error: {error_msg}")
+        raise_api_error(
+            code=ErrorCodes.DATABASE_ERROR,
+            error="Database Constraint Violation",
+            detail="A database constraint was violated. Please check your data.",
+            status=400
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        """
+        Handle Pydantic validation errors (422 errors) and provide clear feedback
+        """
+        errors = []
+        for error in exc.errors():
+            field = " -> ".join(str(loc) for loc in error["loc"])
+            message = error["msg"]
+            error_type = error["type"]
+            
+            # Format error message
+            if error_type == "value_error":
+                # Custom validation error (like our month validator)
+                errors.append(f"{field}: {message}")
+            elif error_type == "missing":
+                errors.append(f"{field}: This field is required")
+            elif error_type == "type_error":
+                errors.append(f"{field}: Invalid type - {message}")
+            else:
+                errors.append(f"{field}: {message}")
+        
+        error_detail = "; ".join(errors)
+        logger.warning(f"Validation error: {error_detail}")
+        
+        raise_api_error(
+            code=ErrorCodes.GENERIC_VALIDATION_ERROR,
+            error="Validation Error",
+            detail=error_detail,
+            status=422
         )
 
     @app.exception_handler(Exception)
@@ -118,4 +273,95 @@ def register_exception_handlers(app):
             error="Internal server error",
             detail="An unexpected error occurred",
             status=500
+        )
+        
+    @app.exception_handler(LinksNotFound)
+    async def links_not_found_handler(request: Request, exc: LinksNotFound):
+        logger.warning(f"Links not found: {exc.identifier}")
+        raise_api_error(
+            code=ErrorCodes.USER_LINKS_NF_A01,
+            error="Links not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(ProjectsNotFound)
+    async def project_not_found_handler(request: Request, exc: ProjectsNotFound):
+        logger.warning(f"Project not found: {exc.project_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_PROJECT_NF_A01,
+            error="Project not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(LinksAlreadyExists)
+    async def links_already_exists_handler(request: Request, exc: LinksAlreadyExists):
+        logger.warning(f"Links already exist for user: {exc.user_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_LINKS_AE_A01,
+            error="Links already exist",
+            detail=str(exc),
+            status=409
+        )
+
+    @app.exception_handler(ProfileAlreadyExists)
+    async def profile_already_exists_handler(request: Request, exc: ProfileAlreadyExists):
+        logger.warning(f"Profile already exists for user: {exc.user_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_PROFILE_AE_A01,
+            error="Profile already exists",
+            detail=str(exc),
+            status=409
+        )
+
+    @app.exception_handler(GitHubUsernameNotFound)
+    async def github_not_found_handler(request: Request, exc: GitHubUsernameNotFound):
+        logger.warning(f"GitHub username not found: {exc.github_username}")
+        raise_api_error(
+            code=ErrorCodes.USER_GITHUB_NF_A01,
+            error="GitHub username not found",
+            detail=str(exc),
+            status=404
+        )
+
+    @app.exception_handler(GitHubUsernameAlreadyExists)
+    async def github_already_exists_handler(request: Request, exc: GitHubUsernameAlreadyExists):
+        logger.warning(f"GitHub username already exists: {exc.github_username}")
+        raise_api_error(
+            code=ErrorCodes.USER_GITHUB_AE_A01,
+            error="GitHub username already exists",
+            detail=str(exc),
+            status=409
+        )
+
+
+    @app.exception_handler(VolunteeringNotFound)
+    async def volunteering_not_found_handler(request: Request, exc: VolunteeringNotFound):
+        logger.warning(f"Volunteering not found: {exc.volunteering_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_VOLUNTEERING_NF_A01,
+            error="Volunteering not found",
+            detail=str(exc),
+            status=404
+        )
+        
+    @app.exception_handler(EducationNotFound)  
+    async def education_not_found_handler(request: Request, exc: EducationNotFound):
+        logger.warning(f"Education not found: {exc.education_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_EDUCATION_NF_A01,
+            error="Education not found",
+            detail=str(exc),
+            status=404,
+        )
+
+    @app.exception_handler(DocumentNotFound)
+    async def document_not_found_handler(request: Request, exc: DocumentNotFound):
+        logger.warning(f"Document not found: {exc.document_id}")
+        raise_api_error(
+            code=ErrorCodes.USER_DOCUMENT_NF_A01,
+            error="Document not found",
+            detail=str(exc),
+            status=404,
         )

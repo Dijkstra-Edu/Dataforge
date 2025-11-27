@@ -85,3 +85,5 @@ def delete_location(location_id: UUID, session: Session = Depends(get_session)):
     message = service.delete_location(location_id)
     logger.info(message)
     return {"detail": message}
+
+# Add a Location by Github Username - For creating a map of user reach in the global market

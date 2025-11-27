@@ -11,6 +11,13 @@ class ErrorCodes:
     """
 
     GENERIC_ERROR = "GEN-ERR-000"  # Generic error code for uncategorized errors
+    GENERIC_VALIDATION_ERROR = "GEN-VAL-001"  # Generic validation error for request payloads
+    
+    # Database errors
+    DATABASE_ERROR = "DB-ERR-001"  # Generic database error
+    DATABASE_RLS_ERROR = "DB-RLS-001"  # Row-Level Security policy violation
+    DATABASE_UNIQUE_VIOLATION = "DB-UNQ-001"  # Unique constraint violation
+    DATABASE_FK_VIOLATION = "DB-FK-001"  # Foreign key constraint violation
 
     # -----------------------------
     # Opportunities → Project Opportunities
@@ -220,3 +227,161 @@ class ErrorCodes:
 
     # Not found errors
     USER_WORKEXP_NF_A01 = "USER-WORKEXP-NF-A01"  # Work experience not found
+
+    # -----------------------------
+    # Users → LeetCode
+    # -----------------------------
+    USER_LEETCODE_DB_A01 = "USER-LEETCODE-DB-A01"  # Failure inserting leetcode record
+    USER_LEETCODE_DB_A02 = "USER-LEETCODE-DB-A02"  # Failure updating leetcode record
+    USER_LEETCODE_DB_A03 = "USER-LEETCODE-DB-A03"  # Failure deleting leetcode record
+    USER_LEETCODE_SRV_A01 = "USER-LEETCODE-SRV-A01"  # Generic service error
+    USER_LEETCODE_SRV_A02 = "USER-LEETCODE-SRV-A02"  # External API fetch failure
+    USER_LEETCODE_VAL_A01 = "USER-LEETCODE-VAL-A01"  # Invalid input
+    USER_LEETCODE_NF_A01 = "USER-LEETCODE-NF-A01"  # Leetcode record not found
+    USER_LEETCODE_NF_A02 = "USER-LEETCODE-NF-A02"  # Badge not found
+    USER_LEETCODE_NF_A03 = "USER-LEETCODE-NF-A03"  # Tag not found
+    
+    # -----------------------------
+    # Users → Certificate
+    # -----------------------------
+
+    # Database errors
+    USER_CERTIFICATION_DB_A01 = "USER_CERTIFICATION-DB-A01"  # Failure inserting certificate
+    USER_CERTIFICATION_DB_A02 = "USER_CERTIFICATION-DB-A02"  # Failure updating certificate
+    USER_CERTIFICATION_DB_A03 = "USER_CERTIFICATION-DB-A03"  # Failure deleting certificate
+
+    # Server / Unexpected errors
+    USER_CERTIFICATION_SRV_A01 = "USER_CERTIFICATION-SRV-A01"  # Generic server error
+    USER_CERTIFICATION_SRV_A02 = "USER_CERTIFICATION-SRV-A02"  # Error fetching certifications list
+
+    # Authentication / Permission errors
+    USER_CERTIFICATION_AUTH_A01 = "USER_CERTIFICATION-AUTH-A01"  # User not authorized
+    USER_CERTIFICATION_AUTH_A02 = "USER_CERTIFICATION-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_CERTIFICATION_VAL_A01 = "USER_CERTIFICATION-VAL-A01"  # Invalid certification payload
+    USER_CERTIFICATION_VAL_A02 = "USER-CERTIFICATION-VAL-A02"  # Required field missing
+
+    USER_CERTIFICATION_NF_A01 = "USER-CERTIFICATION-NF-A01"  # Certification not found / No certifications found
+    
+    
+    # -----------------------------
+    # Users → Links
+    # -----------------------------
+
+    # Database errors
+    USER_LINKS_DB_A01 = "USER-LINKS-DB-A01"  # Failure inserting links
+    USER_LINKS_DB_A02 = "USER-LINKS-DB-A02"  # Failure updating links
+    USER_LINKS_DB_A03 = "USER-LINKS-DB-A03"  # Failure deleting links
+
+    # Server / Unexpected errors
+    USER_LINKS_SRV_A01 = "USER-LINKS-SRV-A01"  # Generic server error
+    USER_LINKS_SRV_A02 = "USER-LINKS-SRV-A02"  # Error fetching links list
+
+    # Validation / Input errors
+    USER_LINKS_VAL_A01 = "USER-LINKS-VAL-A01"  # Invalid links payload
+    USER_LINKS_VAL_A02 = "USER-LINKS-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_LINKS_NF_A01 = "USER-LINKS-NF-A01"  # Links not found
+
+    # Already exists errors
+    USER_LINKS_AE_A01 = "USER-LINKS-AE-A01"  # Links already exist
+
+
+
+    # -----------------------------
+    # Users → GitHub
+    # -----------------------------
+
+    # Database errors
+    USER_GITHUB_DB_A01 = "USER-GITHUB-DB-A01"  # Failure inserting GitHub entry
+    USER_GITHUB_DB_A02 = "USER-GITHUB-DB-A02"  # Failure updating GitHub entry
+    USER_GITHUB_DB_A03 = "USER-GITHUB-DB-A03"  # Failure deleting GitHub entry
+
+    # Server / Unexpected errors
+    USER_GITHUB_SRV_A01 = "USER-GITHUB-SRV-A01"  # Generic server error
+    USER_GITHUB_SRV_A02 = "USER-GITHUB-SRV-A02"  # Error fetching GitHub entry
+
+    # Validation / Input errors
+    USER_GITHUB_VAL_A01 = "USER-GITHUB-VAL-A01"  # Invalid GitHub payload
+    USER_GITHUB_VAL_A02 = "USER-GITHUB-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_GITHUB_NF_A01 = "USER-GITHUB-NF-A01"  # GitHub username not found
+
+    # Already exists errors
+    USER_GITHUB_AE_A01 = "USER-GITHUB-AE-A01"  # GitHub username already exists
+    USER_VOLUNTEERING_NF_A01 = "USER-VOLUNTEERING-NF-A01"  # Volunteering entry not found
+    # Users → Projects
+    # -----------------------------
+
+    # Database errors
+    USER_PROJECT_DB_A01 = "USER-PROJECT-DB-A01"  # Failure inserting project
+    USER_PROJECT_DB_A02 = "USER-PROJECT-DB-A02"  # Failure updating project
+    USER_PROJECT_DB_A03 = "USER-PROJECT-DB-A03"  # Failure deleting project
+
+    # Server / Unexpected errors
+    USER_PROJECT_SRV_A01 = "USER-PROJECT-SRV-A01"  # Generic server error
+    USER_PROJECT_SRV_A02 = "USER-PROJECT-SRV-A02"  # Error fetching projects list
+
+    # Authentication / Permission errors
+    USER_PROJECT_AUTH_A01 = "USER-PROJECT-AUTH-A01"  # User not authorized
+    USER_PROJECT_AUTH_A02 = "USER-PROJECT-AUTH-A02"  # Session expired / invalid token
+
+    # Validation / Input errors
+    USER_PROJECT_VAL_A01 = "USER-PROJECT-VAL-A01"  # Invalid project payload
+    USER_PROJECT_VAL_A02 = "USER-PROJECT-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_PROJECT_NF_A01 = "USER-PROJECT-NF-A01"  # Project not found
+
+    USER_PUBLICATION_NF_A01 = "USER_PUBLICATION_NF_A01"  # Publication not found
+
+    # -----------------------------
+    # Users → Education
+    # -----------------------------
+
+    # Database errors
+    USER_EDUCATION_DB_A01 = "USER-EDUCATION-DB-A01"  # Failure inserting education
+    USER_EDUCATION_DB_A02 = "USER-EDUCATION-DB-A02"  # Failure updating education
+    USER_EDUCATION_DB_A03 = "USER-EDUCATION-DB-A03"  # Failure deleting education
+
+    # Server / Unexpected errors
+    USER_EDUCATION_SRV_A01 = "USER-EDUCATION-SRV-A01"  # Generic server error
+    USER_EDUCATION_SRV_A02 = "USER-EDUCATION-SRV-A02"  # Error fetching educations list
+
+    # Authentication / Permission errors
+    USER_EDUCATION_AUTH_A01 = "USER-EDUCATION-AUTH-A01"  # User not authorized
+    USER_EDUCATION_AUTH_A02 = "USER-EDUCATION-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_EDUCATION_VAL_A01 = "USER-EDUCATION-VAL-A01"  # Invalid education payload
+    USER_EDUCATION_VAL_A02 = "USER-EDUCATION-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_EDUCATION_NF_A01 = "USER-EDUCATION-NF-A01"  # Education not found
+
+    # -----------------------------
+    # Users → Document
+    # -----------------------------
+
+    # Database errors
+    USER_DOCUMENT_DB_A01 = "USER-DOCUMENT-DB-A01"  # Failure inserting document
+    USER_DOCUMENT_DB_A02 = "USER-DOCUMENT-DB-A02"  # Failure updating document
+    USER_DOCUMENT_DB_A03 = "USER-DOCUMENT-DB-A03"  # Failure deleting document
+
+    # Server / Unexpected errors
+    USER_DOCUMENT_SRV_A01 = "USER-DOCUMENT-SRV-A01"  # Generic server error
+    USER_DOCUMENT_SRV_A02 = "USER-DOCUMENT-SRV-A02"  # Error fetching documents list
+
+    # Authentication / Permission errors
+    USER_DOCUMENT_AUTH_A01 = "USER-DOCUMENT-AUTH-A01"  # User not authorized
+    USER_DOCUMENT_AUTH_A02 = "USER-DOCUMENT-AUTH-A02"  # User session expired / invalid token
+
+    # Validation / Input errors
+    USER_DOCUMENT_VAL_A01 = "USER-DOCUMENT-VAL-A01"  # Invalid document payload
+    USER_DOCUMENT_VAL_A02 = "USER-DOCUMENT-VAL-A02"  # Required field missing
+
+    # Not found errors
+    USER_DOCUMENT_NF_A01 = "USER-DOCUMENT-NF-A01"  # Document not found

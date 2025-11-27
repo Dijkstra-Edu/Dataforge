@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile, ReadProfileWithUser
+from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile
+from Entities.UserDTOs.extended_entities import ReadProfileFull, ReadProfileWithUser
 
 from Settings.logging_config import setup_logging
 from Services.User.profile_service import ProfileService
@@ -23,12 +24,53 @@ def create_profile(profile_create: CreateProfile, session: Session = Depends(get
     return profile
 
 
-@router.get("/{profile_id}", response_model=ReadProfileWithUser)
-def get_profile(profile_id: UUID, session: Session = Depends(get_session)):
+@router.get("/id/{profile_id}")
+def get_profile_by_id(
+    profile_id: UUID,
+    all_data: bool = Query(False, description="Include user details"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get profile by ID.
+    
+    - If all_data=False: Returns basic profile data only
+    - If all_data=True: Returns profile with user details
+    """
     service = ProfileService(session)
-    logger.info(f"Fetching Profile with ID: {profile_id}")
-    profile = service.get_profile(profile_id)
-    return profile
+    logger.info(f"Fetching Profile with ID: {profile_id}, all_data={all_data}")
+    
+    if all_data:
+        profile = service.get_profile_with_user_details(profile_id)
+        return profile
+    else:
+        profile = service.get_profile(profile_id)
+        return profile
+
+
+@router.get("/{github_username}")
+def get_profile_by_github_username(
+    github_username: str,
+    all_data: bool = Query(False, description="Include all nested data (education, work experience, certifications, etc.)"),
+    session: Session = Depends(get_session)
+):
+    """
+    Get profile by GitHub username.
+    
+    - If all_data=False: Returns basic profile data only
+    - If all_data=True: Returns full profile with all nested relationships
+    """
+    service = ProfileService(session)
+    logger.info(f"Fetching Profile for GitHub username: {github_username}, all_data={all_data}")
+    
+    if all_data:
+        profile = service.get_profile_full_data_by_github_username(github_username)
+        return profile
+    else:
+        from Services.User.user_service import UserService
+        user_service = UserService(session)
+        user_id = user_service.get_user_id_by_github_username(github_username)
+        profile = service.get_profile_by_user_id(user_id)
+        return profile
 
 
 @router.get("/user/{user_id}", response_model=ReadProfileWithUser)
@@ -64,8 +106,8 @@ def list_profiles(
     return profiles
 
 
-@router.put("/{profile_id}", response_model=ReadProfile)
-def update_profile(
+@router.put("/id/{profile_id}", response_model=ReadProfile)
+def update_profile_by_id(
     profile_id: UUID, profile_update: UpdateProfile, session: Session = Depends(get_session)
 ):
     service = ProfileService(session)
@@ -75,10 +117,30 @@ def update_profile(
     return profile
 
 
-@router.delete("/{profile_id}", response_model=ReadProfile)
-def delete_profile(profile_id: UUID, session: Session = Depends(get_session)):
+@router.put("/{github_username}", response_model=ReadProfile)
+def update_profile_by_github_username(
+    github_username: str, profile_update: UpdateProfile, session: Session = Depends(get_session)
+):
+    service = ProfileService(session)
+    logger.info(f"Updating Profile for GitHub username: {github_username} with data: {profile_update.dict(exclude_unset=True)}")
+    profile = service.update_profile_by_github_username(github_username, profile_update)
+    logger.info(f"Updated Profile ID: {profile.id}")
+    return profile
+
+
+@router.delete("/id/{profile_id}", response_model=dict)
+def delete_profile_by_id(profile_id: UUID, session: Session = Depends(get_session)):
     service = ProfileService(session)
     logger.info(f"Deleting Profile ID: {profile_id}")
     message = service.delete_profile(profile_id)
+    logger.info(message)
+    return {"detail": message}
+
+
+@router.delete("/{github_username}", response_model=dict)
+def delete_profile_by_github_username(github_username: str, session: Session = Depends(get_session)):
+    service = ProfileService(session)
+    logger.info(f"Deleting Profile for GitHub username: {github_username}")
+    message = service.delete_profile_by_github_username(github_username)
     logger.info(message)
     return {"detail": message}

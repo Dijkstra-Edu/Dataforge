@@ -38,8 +38,8 @@ class WorkExperienceRepository:
         location: Optional[UUID] = None,
         location_type: Optional[WorkLocationType] = None,
         currently_working: Optional[bool] = None,
-        start_date_after: Optional[str] = None,
-        start_date_before: Optional[str] = None,
+        start_year_after: Optional[int] = None,
+        start_year_before: Optional[int] = None,
     ) -> List[WorkExperience]:
         statement = select(WorkExperience)
 
@@ -60,10 +60,10 @@ class WorkExperienceRepository:
             statement = statement.where(WorkExperience.location_type == location_type)
         if currently_working is not None:
             statement = statement.where(WorkExperience.currently_working == currently_working)
-        if start_date_after:
-            statement = statement.where(WorkExperience.start_date >= start_date_after)
-        if start_date_before:
-            statement = statement.where(WorkExperience.start_date <= start_date_before)
+        if start_year_after:
+            statement = statement.where(WorkExperience.start_date_year >= start_year_after)
+        if start_year_before:
+            statement = statement.where(WorkExperience.start_date_year <= start_year_before)
 
         # Sorting
         sort_column = getattr(WorkExperience, sort_by, WorkExperience.created_at)

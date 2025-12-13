@@ -14,14 +14,15 @@ from Entities.leetcode_entity import (
     ReadLeetcodeTag,
 )
 
+from Services.User.leetcode_service import get_leetcode_service_with_publisher
+
 logger = setup_logging()
 
 router = APIRouter(prefix="/Dijkstra/v1/leetcode", tags=["Leetcode"])
 
 
 @router.post("/sync/{profile_id}/{lc_username}", response_model=ReadLeetcode)
-def sync_leetcode(profile_id: UUID, lc_username: str, session: Session = Depends(get_session)):
-    service = LeetCodeService(session)
+def sync_leetcode(profile_id: UUID, lc_username: str, service: LeetCodeService = Depends(get_leetcode_service_with_publisher)):
     logger.info(f"Syncing LeetCode data profile_id={profile_id} username={lc_username}")
     return service.create_or_update_from_api(profile_id, lc_username)
 
@@ -55,8 +56,7 @@ def get_leetcode_by_profile(profile_id: UUID, session: Session = Depends(get_ses
 
 
 @router.delete("/{leetcode_id}", status_code=204)
-def delete_leetcode(leetcode_id: UUID, session: Session = Depends(get_session)):
-    service = LeetCodeService(session)
+def delete_leetcode(leetcode_id: UUID, service: LeetCodeService = Depends(get_leetcode_service_with_publisher)):
     service.delete(leetcode_id)
     return Response(status_code=204)
 

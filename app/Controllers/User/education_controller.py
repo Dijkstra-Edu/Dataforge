@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlmodel import Session
 
 from Entities.UserDTOs.education_entity import CreateEducation, UpdateEducation, ReadEducation
-from Services.User.education_service import EducationService
+from Services.User.education_service import EducationService, get_education_service_with_publisher
 from Settings.logging_config import setup_logging
 from db import get_session
 
@@ -14,10 +14,9 @@ router = APIRouter(prefix="/Dijkstra/v1/education", tags=["Education"])
 
 
 @router.post("/", response_model=ReadEducation)
-def create_education(education_create: CreateEducation, session: Session = Depends(get_session)):
-    service = EducationService(session)
+def create_education(education_create: CreateEducation,  education_service: EducationService = Depends(get_education_service_with_publisher)):
     logger.info(f"Creating Education entry for profile_id={education_create.profile_id}")
-    education = service.create_education(education_create)
+    education = education_service.create_education(education_create)
     logger.info(f"Created Education with ID: {education.id}")
     return education
 
@@ -53,19 +52,17 @@ def list_educations(
 
 
 @router.put("/{education_id}", response_model=ReadEducation)
-def update_education(education_id: UUID, education_update: UpdateEducation, session: Session = Depends(get_session)):
-    service = EducationService(session)
+def update_education(education_id: UUID, education_update: UpdateEducation, education_service: EducationService = Depends(get_education_service_with_publisher)):
     logger.info(f"Updating Education ID: {education_id} with data: {education_update.dict(exclude_unset=True)}")
-    education = service.update_education(education_id, education_update)
+    education = education_service.update_education(education_id, education_update)
     logger.info(f"Updated Education ID: {education.id}")
     return education
 
 
 @router.delete("/{education_id}")
-def delete_education(education_id: UUID, session: Session = Depends(get_session)):
-    service = EducationService(session)
+def delete_education(education_id: UUID,  education_service: EducationService = Depends(get_education_service_with_publisher)):
     logger.info(f"Deleting Education ID: {education_id}")
-    message = service.delete_education(education_id)
+    message = education_service.delete_education(education_id)
     logger.info(message)
     return {"detail": message}
 

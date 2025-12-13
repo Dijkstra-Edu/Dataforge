@@ -1,7 +1,8 @@
 from uuid import UUID
+
+from fastapi import Depends
 from sqlmodel import Session
 from typing import List, Optional
-from datetime import date
 
 from Schema.SQL.Models.models import WorkExperience, Profile, Location
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
@@ -10,12 +11,16 @@ from Repository.User.location_repository import LocationRepository
 from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, UpdateWorkExperience, ReadWorkExperience
 from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, WorkExperienceNotFound
+from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
+from db import get_session
 
 class WorkExperienceService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, kafka_producer: KafkaProducerService = None):
         self.repo = WorkExperienceRepository(session)
         self.location_repo = LocationRepository(session)
         self.session = session
+        self.kafka_producer = kafka_producer
+
 
     def _convert_to_read_dto(self, work_experience: WorkExperience) -> ReadWorkExperience:
         """Convert WorkExperience database model to ReadWorkExperience DTO with populated location"""
@@ -74,6 +79,7 @@ class WorkExperienceService:
         
         work_experience = WorkExperience(**work_experience_data)
         created_work_experience = self.repo.create(work_experience)
+        self.publish_profile_on_work_experience_persist(created_work_experience.profile_id)
         return self._convert_to_read_dto(created_work_experience)
 
     def get_work_experience(self, work_experience_id: UUID) -> Optional[ReadWorkExperience]:
@@ -182,6 +188,7 @@ class WorkExperienceService:
         for key, value in update_data.items():
             setattr(work_experience, key, value)
         updated_work_experience = self.repo.update(work_experience)
+        self.publish_profile_on_work_experience_persist(updated_work_experience.profile_id)
         return self._convert_to_read_dto(updated_work_experience) if updated_work_experience else None
 
     def delete_work_experience(self, work_experience_id: UUID) -> Optional[str]:
@@ -189,6 +196,7 @@ class WorkExperienceService:
         if not work_experience:
             raise WorkExperienceNotFound(work_experience_id)
         self.repo.delete(work_experience)
+        self.publish_profile_on_work_experience_persist(work_experience.profile_id)
         return f"Work Experience {work_experience_id} deleted successfully"
 
     def get_work_experiences_by_profile_with_locations(self, profile_id: UUID) -> List[ReadWorkExperience]:
@@ -209,3 +217,16 @@ class WorkExperienceService:
     def get_work_experiences_by_github_username_with_locations(self, github_username: str) -> List[ReadWorkExperience]:
         """Get all work experiences with locations by GitHub username"""
         return self.get_work_experiences_by_github_username(github_username)
+
+    def publish_profile_on_work_experience_persist(self, profile_id: UUID):
+        """Publish profile update when work experience is created or updated"""
+        from Services.User.profile_service import ProfileService
+        profile_service = ProfileService(self.session, self.kafka_producer)
+        profile_service.publish_profile_update(profile_id)
+
+
+def get_workexperience_service_with_publisher(
+    session: Session = Depends(get_session),
+    kafka: KafkaProducerService = Depends(get_kafka_producer),
+):
+    return WorkExperienceService(session=session, kafka_producer=kafka)

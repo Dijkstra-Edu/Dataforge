@@ -9,14 +9,15 @@ from Services.User.workexperience_service import WorkExperienceService
 from db import get_session
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain
 
+from Services.User.workexperience_service import get_workexperience_service_with_publisher
+
 logger = setup_logging()
 
 router = APIRouter(prefix="/Dijkstra/v1/wp", tags=["Work Experiences"])
 
 
 @router.post("/", response_model=ReadWorkExperience)
-def create_work_experience(work_experience_create: CreateWorkExperience, session: Session = Depends(get_session)):
-    service = WorkExperienceService(session)
+def create_work_experience(work_experience_create: CreateWorkExperience, service: WorkExperienceService = Depends(get_workexperience_service_with_publisher)):
     logger.info(f"Creating Work Experience: {work_experience_create.title} at {work_experience_create.company_name}")
     work_experience = service.create_work_experience(work_experience_create)
     logger.info(f"Created Work Experience with ID: {work_experience.id}")
@@ -111,17 +112,15 @@ def autocomplete_work_experiences(
 
 @router.put("/{work_experience_id}", response_model=ReadWorkExperience)
 def update_work_experience(
-    work_experience_id: UUID, work_experience_update: UpdateWorkExperience, session: Session = Depends(get_session)
+    work_experience_id: UUID, work_experience_update: UpdateWorkExperience, service: WorkExperienceService = Depends(get_workexperience_service_with_publisher)
 ):
-    service = WorkExperienceService(session)
     logger.info(f"Updating Work Experience ID: {work_experience_id} with data: {work_experience_update.dict(exclude_unset=True)}")
     work_experience = service.update_work_experience(work_experience_id, work_experience_update)
     logger.info(f"Updated Work Experience ID: {work_experience.id}")
     return work_experience
 
 @router.delete("/{work_experience_id}")
-def delete_work_experience(work_experience_id: UUID, session: Session = Depends(get_session)):
-    service = WorkExperienceService(session)
+def delete_work_experience(work_experience_id: UUID, service: WorkExperienceService = Depends(get_workexperience_service_with_publisher)):
     logger.info(f"Deleting Work Experience ID: {work_experience_id}")
     message = service.delete_work_experience(work_experience_id)
     logger.info(f"Deleted Work Experience ID: {work_experience_id}")

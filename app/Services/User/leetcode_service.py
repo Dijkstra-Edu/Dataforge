@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 import requests
+from fastapi import Depends
 from sqlmodel import Session
 
 from Settings.logging_config import setup_logging
@@ -27,16 +28,19 @@ from Utils.Exceptions.user_exceptions import (
     LeetcodeTagNotFound,
 )
 
+from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
+from db import get_session
+
 logger = setup_logging()
 
 
 class LeetCodeService:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, kafka_producer: KafkaProducerService = None):
         self.session = session
         self.repo = LeetcodeRepository(session)
         self.badge_repo = LeetcodeBadgeRepository(session)
         self.tag_repo = LeetcodeTagRepository(session)
-
+        self.kafka_producer = kafka_producer
     # Basic read helpers (kept small to align with minimal service design)
     def get(self, leetcode_id: UUID) -> Optional[Leetcode]:
         return self.repo.get(leetcode_id)
@@ -187,7 +191,10 @@ class LeetCodeService:
             top_percentage=contest.get("topPercentage"),
             competition_badge=(contest.get("badge") or {}).get("name") if isinstance(contest.get("badge"), dict) else None,
         )
-        return self.repo.create(model)
+
+        model =  self.repo.create(model)
+        self.publish_profile_on_education_persist(model.profile_id)
+        return model
 
     def _fetch_api(self, username: str) -> Dict[str, Any]:
         try:
@@ -206,3 +213,15 @@ class LeetCodeService:
         except Exception as e:  
             logger.exception("LeetCode API fetch failed")
             return {"error": str(e)}
+
+    def publish_profile_on_education_persist(self, profile_id: UUID):
+        """Publish profile update when education is created or updated"""
+        from Services.User.profile_service import ProfileService
+        profile_service = ProfileService(self.session, self.kafka_producer)
+        profile_service.publish_profile_update(profile_id)
+
+def get_leetcode_service_with_publisher(
+    session: Session = Depends(get_session),
+    kafka: KafkaProducerService = Depends(get_kafka_producer),
+):
+    return LeetCodeService(session=session, kafka_producer=kafka)

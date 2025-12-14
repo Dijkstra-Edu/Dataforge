@@ -307,7 +307,7 @@ class ProfileService:
         """
         profile = self.get_profile_by_profile_id(profile_id)
         event = {
-            "eventType": "PROFILE_UPDATED",
+            "eventType": "DataForgeUpdateEvent",
             "data": map_profile_to_kafka_event(profile).model_dump(),
         }
         try:

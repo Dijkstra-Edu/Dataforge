@@ -10,7 +10,7 @@ from Utils.utility_functions import calculate_months_served
 class EducationUpdateEventDTO(BaseModel):
     """Education Update Event DTO"""
     salary: int
-    time_served_in_months: int
+    time_served_months: int
 
 class CpgaUpdateEventDTO(BaseModel):
     """CPGA Update Event DTO"""
@@ -47,7 +47,7 @@ def map_profile_to_kafka_event(profile: Profile) -> ProfileUpdateKafkaEvent:
         work_experience_dtos.append(
             EducationUpdateEventDTO(
                 salary=(wx.yearly_salary_rupees or 2000000) / 100000,
-                time_served_in_months=months_served,
+                time_served_months=months_served,
             )
         )
     # ----------------------------
@@ -70,7 +70,7 @@ def map_profile_to_kafka_event(profile: Profile) -> ProfileUpdateKafkaEvent:
     # Construct final event DTO
     # ----------------------------
     event = ProfileUpdateKafkaEvent(
-        user_id=str(profile.user_id),
+        user_id=str(profile.user_rel.github_user_name),
         work_experiences=work_experience_dtos,
         cgpa_metrics=cgpa_dto,
         dsa_metrics=dsa_dto,

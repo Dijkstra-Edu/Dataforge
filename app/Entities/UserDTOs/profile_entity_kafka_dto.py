@@ -46,7 +46,7 @@ def map_profile_to_kafka_event(profile: Profile) -> ProfileUpdateKafkaEvent:
         )
         work_experience_dtos.append(
             EducationUpdateEventDTO(
-                salary=(wx.yearly_salary_rupees or 2000000) / 100000,
+                salary=(wx.yearly_salary_rupees or 2000000) / 100000, #TODO: This should be 0. Have kept it to a large number for dev testing
                 time_served_months=months_served,
             )
         )
@@ -58,6 +58,7 @@ def map_profile_to_kafka_event(profile: Profile) -> ProfileUpdateKafkaEvent:
          if e.school_type in {SchoolType.UNIVERSITY, SchoolType.COLLEGE}),
         None
     )
+    #FIXME: Currently the CGPA is in the 4 scale while helios expects the 10 scale.
     cgpa_dto = CpgaUpdateEventDTO(cgpa=edu.cgpa) if edu and edu.cgpa is not None else None
 
     # ----------------------------

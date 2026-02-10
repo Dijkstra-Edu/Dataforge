@@ -127,6 +127,26 @@ alembic upgrade head
 
 After this, the schema will match your current models, and you can run the app with:
 
+### First-time migration on existing QA/Prod databases
+
+If QA or production **already have a database** (with or without tables) but **no Alembic history** (no `alembic_version` table or it’s empty), the workflow would run the baseline and fail with “table already exists”. Do a **one-time stamp** so Alembic knows the current revision, then all future pushes will only run `alembic upgrade head`.
+
+From your machine, point your env at the target DB (e.g. use `.env.qa` or `.env.prod`), then:
+
+```bash
+cd app
+# POSTGRES_URL_MIGRATIONS (or DATABASE_URL) must point at the QA or prod DB
+alembic stamp head
+```
+
+If the DB only has the baseline schema (no Mig 1), use `alembic stamp 58d213ac2cce` instead. After that, push to `qa` or `main`; the workflow will run `alembic upgrade head` on every push.
+
+**Workflows**
+
+- **CI** (`.github/workflows/ci.yml`): runs on every push/PR; uses a fresh Postgres service and runs `alembic upgrade head` to verify migrations apply.
+- **QA** (`.github/workflows/migrate-qa.yml`): runs on push to `qa`; applies migrations using `POSTGRES_URL_MIGRATIONS`.
+- **Prod** (`.github/workflows/migrate-prod.yml`): runs on push to `main`; applies migrations using `POSTGRES_URL_MIGRATIONS`.
+
 ```bash
 uvicorn main:app --reload
 ```

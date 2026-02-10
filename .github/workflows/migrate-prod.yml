@@ -11,10 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: production-dijkstra-dataforge/dataforge-prod
 
-    env:
-      POSTGRES_URL_MIGRATIONS: ${{ secrets.POSTGRES_URL_MIGRATIONS }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,17 +23,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Determine Database URL
-        run: |
-          if [ -n "${POSTGRES_URL_MIGRATIONS}" ]; then
-            echo "DB_URL=${POSTGRES_URL_MIGRATIONS}" >> $GITHUB_ENV
-          else
-            echo "DB_URL=${DATABASE_URL}" >> $GITHUB_ENV
-          fi
-          echo "POSTGRES_URL_MIGRATIONS exists? ${POSTGRES_URL_MIGRATIONS:+yes}"
-
       - name: Apply Migrations
         working-directory: app
         env:
-          DATABASE_URL: ${{ env.DB_URL }}
+          POSTGRES_URL_MIGRATIONS: ${{ secrets.POSTGRES_URL_MIGRATIONS }}
         run: alembic upgrade head

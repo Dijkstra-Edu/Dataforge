@@ -6,3 +6,5 @@ app.log
 venv/
 .env/
 .env
+.env.qa
+.env.prod

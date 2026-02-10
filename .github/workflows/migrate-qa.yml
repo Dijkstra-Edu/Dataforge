@@ -32,6 +32,7 @@ jobs:
           echo "Using DB_URL=$DB_URL"
 
       - name: Apply Migrations
+        working-directory: app
         env:
           DATABASE_URL: ${{ env.DB_URL }}
         run: alembic upgrade head

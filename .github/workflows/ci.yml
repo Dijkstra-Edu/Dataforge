@@ -47,6 +47,7 @@ jobs:
           done
 
       - name: Run migrations
+        working-directory: app
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/testdb
         run: alembic upgrade head

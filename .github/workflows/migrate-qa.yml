@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: production-dijkstra-dataforge-qa/dataforge-qa
 
+    env:
+      POSTGRES_URL_MIGRATIONS: ${{ secrets.POSTGRES_URL_MIGRATIONS }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,7 +34,7 @@ jobs:
           else
             echo "DB_URL=${DATABASE_URL}" >> $GITHUB_ENV
           fi
-          echo "Using DB_URL=$DB_URL"
+          echo "POSTGRES_URL_MIGRATIONS exists? ${POSTGRES_URL_MIGRATIONS:+yes}"
 
       - name: Apply Migrations
         working-directory: app

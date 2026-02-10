@@ -1,0 +1,37 @@
+name: QA DB Migrations
+
+on:
+  push:
+    branches:
+      - qa
+
+jobs:
+  migrate:
+    name: Apply Migrations to QA
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install alembic psycopg[binary]
+
+      - name: Determine Database URL
+        run: |
+          if [ -n "${POSTGRES_URL_MIGRATIONS}" ]; then
+            echo "DB_URL=${POSTGRES_URL_MIGRATIONS}" >> $GITHUB_ENV
+          else
+            echo "DB_URL=${DATABASE_URL}" >> $GITHUB_ENV
+          fi
+          echo "Using DB_URL=$DB_URL"
+
+      - name: Apply Migrations
+        env:
+          DATABASE_URL: ${{ env.DB_URL }}
+        run: alembic upgrade head

@@ -17,7 +17,7 @@ load_dotenv()
 
 # Override sqlalchemy.url from .env instead of hard-coding in alembic.ini
 # POSTGRES_URL_MIGRATIONS takes precedence; DATABASE_URL is fallback (e.g. for CI)
-postgres_url_migrations = os.getenv("DATABASE_URL") #os.getenv("POSTGRES_URL_MIGRATIONS") or os.getenv("DATABASE_URL")
+postgres_url_migrations = os.getenv("POSTGRES_URL_MIGRATIONS") or os.getenv("DATABASE_URL")
 if postgres_url_migrations:
     config.set_main_option("sqlalchemy.url", postgres_url_migrations)
 

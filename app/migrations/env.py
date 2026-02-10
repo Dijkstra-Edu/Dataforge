@@ -16,7 +16,8 @@ config = context.config
 load_dotenv()
 
 # Override sqlalchemy.url from .env instead of hard-coding in alembic.ini
-postgres_url_migrations = os.getenv("POSTGRES_URL_MIGRATIONS")
+# POSTGRES_URL_MIGRATIONS takes precedence; DATABASE_URL is fallback (e.g. for CI)
+postgres_url_migrations = os.getenv("DATABASE_URL") #os.getenv("POSTGRES_URL_MIGRATIONS") or os.getenv("DATABASE_URL")
 if postgres_url_migrations:
     config.set_main_option("sqlalchemy.url", postgres_url_migrations)
 
@@ -67,8 +68,13 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Ensure we use the env-overridden url; get_section returns raw INI (placeholder)
+    configuration = config.get_section(config.config_ini_section, {})
+    url = config.get_main_option("sqlalchemy.url")
+    if url:
+        configuration["sqlalchemy.url"] = url
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

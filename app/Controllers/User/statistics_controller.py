@@ -21,4 +21,4 @@ async def getGitHubData(userName: str):
 @router.get('/lc/{userName}')
 async def getLeetCodeData(userName: str):
     logger.info("GET Request LeetCode Data for user: " + userName)
-    return LeetCodeService.getAllLeetcodeData(userName)
+    return await LeetCodeService.getAllLeetcodeData(userName)

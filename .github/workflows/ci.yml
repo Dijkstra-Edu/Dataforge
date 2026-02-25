@@ -1,0 +1,61 @@
+name: DataForgeCI
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  test:
+    name: DataForge DB migrations job
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install postgres client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest alembic psycopg[binary]
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -p 5432 -U test; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+
+      - name: Run migrations
+        working-directory: app
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/testdb
+        run: alembic upgrade head
+
+      # 7️⃣ Run tests (code coverage step commented out)
+      # - name: Run tests with coverage
+      #   working-directory: app
+      #   env:
+      #     DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/testdb
+      #   run: pytest --cov=app --cov-report=xml

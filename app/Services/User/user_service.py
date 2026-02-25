@@ -11,8 +11,11 @@ from Entities.UserDTOs.user_entity import CreateUser, ReadUserAuthDetails, ReadU
 from Schema.SQL.Models.models import User, Profile, Links, Location
 from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, ProfileNotFound, UserNotFound
 from Entities.UserDTOs.location_entity import UpdateLocation, CreateLocation
+from Utils.Helpers.gitripper_client import GitRipperClient, GitRipperClientError
+from Settings.logging_config import setup_logging
+import os
 
-
+logger = setup_logging()
 class UserService:
     def __init__(self, session: Session):
         self.repo = UserRepository(session)
@@ -156,9 +159,15 @@ class UserService:
             )
             self.links_repo.create(links)
             
-            # Refresh to get the updated user with relationships
-            self.session.refresh(created_user)
-            
+            try:
+                GitRipperClient(os.getenv("GITRIPPER_BASE_URL", "http://localhost:7060").rstrip("/")).sync_user(
+                    login_id=onboard_data.github_user_name,
+                    oauth_token=onboard_data.access_token,
+                    email=onboard_data.primary_email
+                )
+            except Exception as gitripper_error:
+                logger.exception("GitRipper sync failed: " + str(gitripper_error))                
+           
             return created_user
         except Exception as e:
             # If anything fails, rollback will happen in repository layer

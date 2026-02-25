@@ -6,6 +6,7 @@ from Controllers.Opportunities import job_controller
 from Controllers.User import (
     certifications_controller,
     dijkstra_certificate_controller,
+    document_controller,
     education_controller,
     leetcode_controller,
     links_controller,
@@ -15,13 +16,16 @@ from Controllers.User import (
     user_controller,
     volunteering_controller,
     workexperience_controller,
+    test_scores_controller,
+    statistics_controller,
 )
 
 from Controllers.Opportunities import fellowships_controller, organization_controller, projects_opportunities_controller
-from Controllers.User import location_controller
+from Controllers.User import location_controller, statistics_controller
 from Controllers import api_key_controller
 from Controllers.error_handlers import register_exception_handlers
 from db import init_db
+
 app = FastAPI()
 
 allowed_origins = [
@@ -62,6 +66,7 @@ app.include_router(profile_controller.router)
 app.include_router(leetcode_controller.router)
 app.include_router(dijkstra_certificate_controller.router)
 app.include_router(certifications_controller.router)
+app.include_router(document_controller.router)
 app.include_router(job_controller.router)
 app.include_router(fellowships_controller.router)
 app.include_router(organization_controller.router)
@@ -72,3 +77,5 @@ app.include_router(projects_controller.router)
 app.include_router(education_controller.router)
 app.include_router(publication_controller.router)
 app.include_router(api_key_controller.router)
+app.include_router(test_scores_controller.router)
+app.include_router(statistics_controller.router)

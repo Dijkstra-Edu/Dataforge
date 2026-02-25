@@ -1,0 +1,30 @@
+name: Production DB Migrations
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  migrate:
+    name: Apply Migrations to Production
+    runs-on: ubuntu-latest
+    environment: production-dijkstra-dataforge/dataforge-prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply Migrations
+        working-directory: app
+        env:
+          POSTGRES_URL_MIGRATIONS: ${{ secrets.POSTGRES_URL_MIGRATIONS }}
+        run: alembic upgrade head

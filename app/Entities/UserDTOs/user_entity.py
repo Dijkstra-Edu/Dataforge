@@ -139,6 +139,7 @@ class OnboardUser(BaseModel):
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
     primary_email: str
+    access_token: str
     tools_to_learn: Optional[List[Tools]] = []
     roles: Optional[List[Role]] = []
 

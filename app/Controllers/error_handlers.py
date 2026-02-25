@@ -403,6 +403,7 @@ def register_exception_handlers(app):
             error=ErrorCodes.AUTH_ERROR_A01,
             detail=str(exc),
             status=403,
+        )
 
     @app.exception_handler(DocumentNotFound)
     async def document_not_found_handler(request: Request, exc: DocumentNotFound):

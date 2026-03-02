@@ -36,14 +36,14 @@ def _decode_authorization_header(
     authorization: Optional[str],
 ) -> str:
     if not authorization:
-        raise raise_api_error(
+        raise_api_error(
             code=ErrorCodes.AUTH_ERROR,
             error=ErrorCodes.AUTH_ERROR_A01,   
             detail="Missing Authorization header",
             status=status.HTTP_401_UNAUTHORIZED,
         )
     if not authorization.startswith("Bearer "):
-        raise raise_api_error(
+        raise_api_error(
             code=ErrorCodes.AUTH_ERROR,
             error=ErrorCodes.AUTH_ERROR_A02,
             detail="Authorization header must start with Bearer",
@@ -51,7 +51,7 @@ def _decode_authorization_header(
         )
     token = authorization.removeprefix("Bearer ").strip()
     if not token:
-        raise raise_api_error(
+        raise_api_error(
             code=ErrorCodes.AUTH_ERROR,
             error=ErrorCodes.AUTH_ERROR_A03,
             detail="Bearer token is empty",

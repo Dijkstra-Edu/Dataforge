@@ -3,7 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
-from Schema.SQL.Enums.enums import Rank, Domain, Tools
+from Schema.SQL.Enums.enums import Rank, Domain, Tools, Role
 
 # ----------------------
 # Input DTOs
@@ -27,6 +27,7 @@ class CreateUser(BaseModel):
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
     tools_to_learn: Optional[List[Tools]] = []
+    roles: Optional[List[Role]] = []
 
     @field_validator('github_user_name')
     def github_user_name_must_not_be_empty(cls, v):
@@ -66,6 +67,7 @@ class UpdateUser(BaseModel):
     dream_company_logo: Optional[str] = None
     dream_position: Optional[str] = None
     tools_to_learn: Optional[List[Tools]] = None
+    roles: Optional[List[Role]] = None
 
     @field_validator('github_user_name')
     def github_user_name_must_not_be_empty(cls, v):
@@ -109,6 +111,7 @@ class ReadUser(BaseModel):
     dream_company_logo: Optional[str]
     dream_position: Optional[str]
     tools_to_learn: Optional[List[Tools]]
+    roles: Optional[List[Role]]
     created_at: datetime
     updated_at: datetime
 
@@ -138,6 +141,7 @@ class OnboardUser(BaseModel):
     primary_email: str
     access_token: str
     tools_to_learn: Optional[List[Tools]] = []
+    roles: Optional[List[Role]] = []
 
     @field_validator('github_user_name', 'linkedin_user_name', 'leetcode_user_name')
     def usernames_must_not_be_empty(cls, v):
@@ -262,3 +266,4 @@ class ReadUserAuthDetails(BaseModel):
     github_user_name: str
     user_id: UUID
     profile_id: UUID
+    roles: List[Role]

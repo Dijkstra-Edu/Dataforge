@@ -390,7 +390,7 @@ class UserService:
         profile = self.profile_repo.get_by_user_id(user.id)
         if not profile:
             raise ProfileNotFound(user.id)
-        return ReadUserAuthDetails(github_user_name=user.github_user_name, user_id=user.id, profile_id=profile.id)
+        return ReadUserAuthDetails(github_user_name=user.github_user_name, user_id=user.id, profile_id=profile.id, roles=user.roles)
 
     def update_user_personal_details_by_github_username(self, github_user_name: str, user_personal_details_update: UpdateUserPersonalDetails) -> ReadUserPersonalDetails:
         """

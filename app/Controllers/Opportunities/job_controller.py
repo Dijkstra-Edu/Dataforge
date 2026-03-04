@@ -6,6 +6,8 @@ from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob, ReadJob
 from Services.Opportunities.jobs_service import JobService
 from Settings.logging_config import setup_logging
 from db import get_session
+from Schema.SQL.Enums.enums import Role
+from Security.unified_dependencies import require_roles
 
 logger = setup_logging()
 
@@ -13,7 +15,11 @@ router = APIRouter(prefix="/Dijkstra/v1/jobs", tags=["Jobs"])
 
 
 @router.post("/", response_model=ReadJob)
-def create_job(job_create: CreateJob, session: Session = Depends(get_session)):
+def create_job(
+    job_create: CreateJob,
+    session: Session = Depends(get_session),
+    _: object = Depends(require_roles(Role.GLOBAL_ADMIN)),
+):
     service = JobService(session)
     logger.info(f"Creating Job: {job_create.title}")
     job = service.create_job(job_create)
@@ -22,7 +28,7 @@ def create_job(job_create: CreateJob, session: Session = Depends(get_session)):
 
 
 @router.get("/{job_id}", response_model=ReadJob)
-def get_job(job_id: UUID, session: Session = Depends(get_session)):
+def get_job(job_id: UUID, session: Session = Depends(get_session), _: object = Depends(require_roles(Role.GLOBAL_ADMIN))):
     service = JobService(session)
     logger.info(f"Fetching Job with ID: {job_id}")
     return service.get_job(job_id)
@@ -76,15 +82,24 @@ def autocomplete_jobs(
     return service.autocomplete_jobs(query, field, limit)
 
 
-@router.put("/{job_id}", response_model=ReadJob)
-def update_job(job_id: UUID, job_update: UpdateJob, session: Session = Depends(get_session)):
+@router.put("/{job_id}", response_model=ReadJob, dependencies=[Depends(require_roles(Role.GLOBAL_ADMIN))])
+def update_job(
+    job_id: UUID,
+    job_update: UpdateJob,
+    session: Session = Depends(get_session),
+    _: object = Depends(require_roles(Role.GLOBAL_ADMIN)),
+):
     service = JobService(session)
     logger.info(f"Updating Job ID: {job_id} with data: {job_update.dict(exclude_unset=True)}")
     return service.update_job(job_id, job_update)
 
 
-@router.delete("/{job_id}", response_model=ReadJob)
-def delete_job(job_id: UUID, session: Session = Depends(get_session)):
+@router.delete("/{job_id}", response_model=ReadJob, dependencies=[Depends(require_roles(Role.GLOBAL_ADMIN))])
+def delete_job(
+    job_id: UUID,
+    session: Session = Depends(get_session),
+    _: object = Depends(require_roles(Role.GLOBAL_ADMIN)),
+):
     service = JobService(session)
     logger.info(f"Deleting Job ID: {job_id}")
     message = service.delete_job(job_id)

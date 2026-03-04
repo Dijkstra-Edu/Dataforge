@@ -7,11 +7,15 @@ from Utils.error_codes import ErrorCodes
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, InvalidTools, JobNotFound, OrganizationNotFound, ProjectOpportunityNotFound
 from Utils.errors import raise_api_error
 from Utils.Exceptions.user_exceptions import (
+    APIKeyExpired,
+    APIKeyInactive,
+    APIKeyNotFound,
     CertificationNotFound,
     DocumentNotFound,
     EducationNotFound,
     GitHubUsernameAlreadyExists,
     GitHubUsernameNotFound,
+    InvalidAPIKeyRoles,
     LeetcodeBadgeNotFound,
     LeetcodeNotFound,
     LeetcodeTagNotFound,
@@ -21,6 +25,7 @@ from Utils.Exceptions.user_exceptions import (
     ProfileAlreadyExists,
     ProfileNotFound,
     ProjectsNotFound,
+    PublicationNotFound,
     UserNotFound,
     VolunteeringNotFound,
     WorkExperienceNotFound,
@@ -358,6 +363,46 @@ def register_exception_handlers(app):
             error="Education not found",
             detail=str(exc),
             status=404,
+        )
+    
+    @app.exception_handler(APIKeyNotFound)
+    async def api_key_not_found_handler(request: Request, exc: APIKeyNotFound):
+        logger.warning(f"API key not found: {exc.api_key_id}")
+        raise_api_error(
+            code=ErrorCodes.AUTH_ERROR,
+            error=ErrorCodes.AUTH_ERROR_A01,
+            detail=str(exc),
+            status=401,
+        )
+    
+    @app.exception_handler(APIKeyExpired)
+    async def api_key_expired_handler(request: Request, exc: APIKeyExpired):
+        logger.warning("API key expired")
+        raise_api_error(
+            code=ErrorCodes.AUTH_ERROR,
+            error=ErrorCodes.AUTH_ERROR_A01,
+            detail=str(exc),
+            status=401,
+        )
+    
+    @app.exception_handler(APIKeyInactive)
+    async def api_key_inactive_handler(request: Request, exc: APIKeyInactive):
+        logger.warning("API key inactive")
+        raise_api_error(
+            code=ErrorCodes.AUTH_ERROR,
+            error=ErrorCodes.AUTH_ERROR_A01,
+            detail=str(exc),
+            status=401,
+        )
+    
+    @app.exception_handler(InvalidAPIKeyRoles)
+    async def invalid_api_key_roles_handler(request: Request, exc: InvalidAPIKeyRoles):
+        logger.warning(f"Invalid API key roles: {exc.requested_roles} not subset of {exc.user_roles}")
+        raise_api_error(
+            code=ErrorCodes.AUTH_ERROR,
+            error=ErrorCodes.AUTH_ERROR_A01,
+            detail=str(exc),
+            status=403,
         )
 
     @app.exception_handler(DocumentNotFound)

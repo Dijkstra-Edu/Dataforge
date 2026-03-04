@@ -8,6 +8,8 @@ from Entities.UserDTOs.extended_entities import ReadProfileFull, ReadProfileWith
 
 from Settings.logging_config import setup_logging
 from Services.User.profile_service import ProfileService
+from Schema.SQL.Enums.enums import Role
+from Security.unified_dependencies import require_roles
 from db import get_session
 
 logger = setup_logging()
@@ -51,7 +53,8 @@ def get_profile_by_id(
 def get_profile_by_github_username(
     github_username: str,
     all_data: bool = Query(False, description="Include all nested data (education, work experience, certifications, etc.)"),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    _: object = Depends(require_roles(Role.PERSONAL_WRITE))
 ):
     """
     Get profile by GitHub username.

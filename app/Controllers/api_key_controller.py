@@ -39,15 +39,12 @@ def create_api_key(
     _ensure_owner(current_user, github_username)
     service = APIKeyService(session)
     logger.info(f"Creating API key for user: {github_username}")
-    
-    is_dev = token_payload.is_dev or False
     user_roles = current_user.roles or []
     
     api_key_response = service.create_api_key(
         github_username=github_username,
         user_roles=user_roles,
-        is_dev=is_dev,
-        create_data=create_data
+        create_data=create_data,
     )
     
     logger.info(f"API key created successfully for user: {github_username}")
@@ -96,10 +93,7 @@ def update_api_key(
     current_user, token_payload = user_and_token
     service = APIKeyService(session)
     logger.info(f"Updating API key {api_key_id} for user: {current_user.github_user_name}")
-    
-    # Extract isDev from JWT token payload
-    is_dev = token_payload.is_dev or False
-    
+
     # Get user roles from database
     user_roles = current_user.roles or []
     
@@ -107,8 +101,7 @@ def update_api_key(
         api_key_id=api_key_id,
         github_username=current_user.github_user_name,
         user_roles=user_roles,
-        is_dev=is_dev,
-        update_data=update_data
+        update_data=update_data,
     )
     
     logger.info(f"API key {api_key_id} updated successfully")

@@ -29,11 +29,8 @@ class APIKeyService:
         """Hash API key with SHA256."""
         return hashlib.sha256(key.encode()).hexdigest()
 
-    def _validate_roles(self, requested_roles: List[Role], user_roles: List[Role], is_dev: bool) -> None:
-        """Validate that requested roles are subset of user roles (unless is_dev=True)."""
-        if is_dev:
-            return  # Allow any role in dev mode
-        
+    def _validate_roles(self, requested_roles: List[Role], user_roles: List[Role]) -> None:
+        """Validate that requested roles are subset of user roles."""
         user_roles_set = set(user_roles)
         requested_roles_set = set(requested_roles)
         
@@ -44,12 +41,11 @@ class APIKeyService:
         self, 
         github_username: str, 
         user_roles: List[Role], 
-        is_dev: bool, 
         create_data: CreateAPIKey
     ) -> APIKeyResponse:
         """Create a new API key."""
         # Validate roles
-        self._validate_roles(create_data.roles, user_roles, is_dev)
+        self._validate_roles(create_data.roles, user_roles)
         
         # Generate key and hash
         plain_key = self._generate_key()
@@ -109,7 +105,6 @@ class APIKeyService:
         api_key_id: UUID,
         github_username: str,
         user_roles: List[Role],
-        is_dev: bool,
         update_data: UpdateAPIKey
     ) -> ReadAPIKey:
         """Update an API key."""
@@ -122,7 +117,7 @@ class APIKeyService:
         
         # Validate roles if being updated
         if update_data.roles is not None:
-            self._validate_roles(update_data.roles, user_roles, is_dev)
+            self._validate_roles(update_data.roles, user_roles)
             api_key.roles = update_data.roles
         
         if update_data.description is not None:

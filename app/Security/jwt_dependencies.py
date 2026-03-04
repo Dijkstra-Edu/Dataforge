@@ -20,7 +20,6 @@ class TokenPayload(BaseModel):
     subject: Optional[str] = Field(default=None, alias="sub")
     github_username: str = Field(alias="githubUsername")
     expires_at: datetime = Field(alias="exp")
-    is_dev: Optional[bool] = Field(default=False, alias="isDev")
 
     @field_validator("expires_at", mode="before")
     @classmethod

@@ -29,7 +29,6 @@ def auth_user_or_api_key(
     """Unified authentication that tries JWT first, then API key."""
     user = None
     api_key = None
-    is_dev = False
     identity = None
     mode = None
     
@@ -38,7 +37,6 @@ def auth_user_or_api_key(
         token = _decode_authorization_header(authorization)
         token_payload = _verify_jwt_token(token, settings)
         user = get_current_user(token_payload, session)
-        is_dev = token_payload.is_dev or False
         identity = user.github_user_name
         mode = "jwt"
     except (HTTPException, JWTError, ValidationError):
@@ -46,8 +44,6 @@ def auth_user_or_api_key(
         try:
             api_key = verify_api_key(authorization, session)
             identity = api_key.github_username
-            # For API key, is_dev is False (no JWT token available)
-            is_dev = False
             mode = "api_key"
         except HTTPException:
             # Both failed
@@ -63,7 +59,6 @@ def auth_user_or_api_key(
         "identity": identity,
         "user": user,
         "api_key": api_key,
-        "is_dev": is_dev,
     }
 
 
@@ -129,7 +124,6 @@ def require_roles(*required_roles: Role) -> Callable:
         session: Session = Depends(get_session),
     ) -> User:
         mode = auth_result["mode"]
-        is_dev = auth_result.get("is_dev", False)
         env_dev = os.getenv("ENV", "").upper() == "DEV"
         
         if mode == "jwt":

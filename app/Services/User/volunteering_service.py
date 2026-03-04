@@ -33,8 +33,8 @@ class VolunteeringService:
 
     def get_volunteering_by_profile_id(self, profile_id: UUID) -> List[Volunteering]:
         volunteering_entries = self.repo.get_by_profile_id(profile_id)
-        if not volunteering_entries:
-            raise VolunteeringNotFound(profile_id)
+        #if not volunteering_entries:
+            #raise VolunteeringNotFound(profile_id)
         return volunteering_entries
     
     def get_volunteering_by_github_username(self, github_username: str) -> List[Volunteering]:

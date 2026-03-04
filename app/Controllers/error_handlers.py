@@ -175,17 +175,21 @@ def register_exception_handlers(app):
     @app.exception_handler(ProgrammingError)
     async def database_programming_error_handler(request: Request, exc: ProgrammingError):
         """
-        Handle database programming errors including RLS violations
+        Handle database programming errors including RLS and table permission errors
         """
         error_msg = str(exc.orig) if hasattr(exc, 'orig') else str(exc)
         
-        # Check if it's an RLS violation
+        # InsufficientPrivilege (42501) can be RLS or missing GRANT on table
         if isinstance(exc.orig, InsufficientPrivilege):
-            logger.error(f"Row-Level Security violation: {error_msg}")
+            # Log the real message so you can tell RLS vs table permission
+            if "permission denied for table" in error_msg.lower():
+                logger.error(f"Database permission denied (table/schema): {error_msg}")
+            else:
+                logger.error(f"Row-Level Security violation: {error_msg}")
             raise_api_error(
                 code=ErrorCodes.DATABASE_RLS_ERROR,
                 error="Permission Denied",
-                detail="You don't have permission to perform this operation. This may be due to database row-level security policies.",
+                detail="You don't have permission to perform this operation. Check database RLS policies or that your DB role has GRANT on the table.",
                 status=403
             )
         

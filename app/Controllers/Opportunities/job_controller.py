@@ -4,10 +4,10 @@ from uuid import UUID
 from sqlmodel import Session
 from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob, ReadJob
 from Services.Opportunities.jobs_service import JobService
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/jobs", tags=["Jobs"])
 

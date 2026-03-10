@@ -6,11 +6,11 @@ from sqlmodel import Session
 from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile, ReadProfile
 from Entities.UserDTOs.extended_entities import ReadProfileFull, ReadProfileWithUser
 
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Services.User.profile_service import ProfileService
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/profile", tags=["Profiles"])
 

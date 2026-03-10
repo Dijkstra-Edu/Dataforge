@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Controllers import main_controller
 from Controllers.Opportunities import job_controller
 from Controllers.User import (
@@ -42,7 +42,7 @@ app.add_middleware(
 )
 
 # Initialize logging
-logger = setup_logging()
+logger = get_logger()
 
 @app.on_event("startup")
 def on_startup():

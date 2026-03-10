@@ -7,10 +7,10 @@ from sqlmodel import Session
 
 from Entities.UserDTOs.user_entity import CreateUser, ReadUserAuthDetails, UpdateUser, ReadUser, OnboardUser, OnboardCheckResponse, ReadUserCardDetails, ReadUserPersonalDetails, UpdateUserPersonalDetails
 from Services.User.user_service import UserService
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/u", tags=["Users"])
 

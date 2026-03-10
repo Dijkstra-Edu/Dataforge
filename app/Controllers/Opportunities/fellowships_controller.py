@@ -7,9 +7,9 @@ import logging
 from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, UpdateFellowship, ReadFellowship
 from Services.Opportunities.fellowships_service import FellowshipService
 from db import get_session
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/fellowships", tags=["Fellowships"])
 

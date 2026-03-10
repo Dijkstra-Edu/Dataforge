@@ -1,6 +1,6 @@
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 
-logger = setup_logging()
+logger = get_logger()
 
 class CertificateGeneratorService:
     @staticmethod

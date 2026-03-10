@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Entities.UserDTOs.links_entity import CreateLinks, ReadLinks, UpdateLinks
 from Services.User.links_service import LinksService
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/links", tags=["Links"])
 

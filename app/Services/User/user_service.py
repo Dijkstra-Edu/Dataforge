@@ -12,10 +12,10 @@ from Schema.SQL.Models.models import User, Profile, Links, Location
 from Utils.Exceptions.user_exceptions import GitHubUsernameAlreadyExists, GitHubUsernameNotFound, ProfileNotFound, UserNotFound
 from Entities.UserDTOs.location_entity import UpdateLocation, CreateLocation
 from Utils.Helpers.gitripper_client import GitRipperClient, GitRipperClientError
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 import os
 
-logger = setup_logging()
+logger = get_logger()
 class UserService:
     def __init__(self, session: Session):
         self.repo = UserRepository(session)

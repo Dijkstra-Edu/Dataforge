@@ -1,4 +1,4 @@
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
@@ -7,7 +7,7 @@ from Schema.SQL.Models.models import TestScores
 from Utils.Exceptions.user_exceptions import TestScoreNotFound
 from Entities.UserDTOs.test_scores_entity import CreateTestScore, UpdateTestScore
 
-logger = setup_logging()
+logger = get_logger()
 
 class TestScoresService:
        

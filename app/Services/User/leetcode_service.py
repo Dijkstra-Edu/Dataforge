@@ -3,7 +3,7 @@ from uuid import UUID
 import requests
 from sqlmodel import Session
 
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Config.constants import LEETCODE_API
 from Config.queries import lc_query
 from Schema.SQL.Models.models import Leetcode, LeetcodeBadges, LeetcodeTags
@@ -27,7 +27,7 @@ from Utils.Exceptions.user_exceptions import (
     LeetcodeTagNotFound,
 )
 
-logger = setup_logging()
+logger = get_logger()
 
 
 class LeetCodeService:

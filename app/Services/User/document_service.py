@@ -1,4 +1,4 @@
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from uuid import UUID
 from typing import Optional
 from sqlmodel import Session
@@ -10,7 +10,7 @@ from Entities.UserDTOs.document_entity import CreateDocument, UpdateDocument
 from Utils.Exceptions.user_exceptions import DocumentNotFound, ProfileNotFound, UserNotFound
 
 
-logger = setup_logging()
+logger = get_logger()
 
 
 class DocumentService:

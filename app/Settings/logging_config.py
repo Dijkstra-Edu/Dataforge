@@ -5,11 +5,14 @@ from dotenv import load_dotenv
 import re
 import os
 
-def setup_logging():
+def get_logger():
     load_dotenv()
     level = os.getenv("LOGGING_LEVEL")
 
     logger = logging.getLogger()
+    if logger.handlers:
+        return logger  # prevent duplicate handlers
+    
     logger.setLevel(logging.DEBUG)
 
     # File handler
@@ -28,7 +31,7 @@ def setup_logging():
     else:
         console_handler.setLevel(logging.INFO)
         file_handler.setLevel(logging.INFO)
-        
+    
     # Formatter
     formatter = logging.Formatter('%(levelname)s - %(asctime)s - | %(filename)s | - %(message)s')
     file_handler.setFormatter(formatter)
@@ -37,5 +40,4 @@ def setup_logging():
     # Add handlers to the logger
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
-
     return logger

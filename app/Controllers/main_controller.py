@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 
 # Initialize logging
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1", tags=["Main Controller"])
 

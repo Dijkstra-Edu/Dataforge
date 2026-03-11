@@ -3,9 +3,9 @@ from typing import Dict
 import os
 from typing import Dict, Any
 from dotenv import load_dotenv
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 
-logger = setup_logging()
+logger = get_logger()
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 

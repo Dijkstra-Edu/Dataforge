@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlmodel import Session
 
 from db import get_session
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Services.User.leetcode_service import LeetCodeService
 from Entities.leetcode_entity import (
     ReadLeetcode,
@@ -15,8 +15,7 @@ from Entities.leetcode_entity import (
 )
 
 from Services.User.leetcode_service import get_leetcode_service_with_publisher
-
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/leetcode", tags=["Leetcode"])
 

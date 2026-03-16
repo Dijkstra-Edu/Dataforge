@@ -1,0 +1,18 @@
+[run]
+source = app
+omit =
+    app/migrations/*
+    app/conftest.py
+    */tests/*
+    */__pycache__/*
+    */.venv/*
+    */venv/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+
+[html]
+directory = htmlcov

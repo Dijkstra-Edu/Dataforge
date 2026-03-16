@@ -53,9 +53,7 @@ jobs:
           DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/testdb
         run: alembic upgrade head
 
-      # 7️⃣ Run tests (code coverage step commented out)
-      # - name: Run tests with coverage
-      #   working-directory: app
-      #   env:
-      #     DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/testdb
-      #   run: pytest --cov=app --cov-report=xml
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: postgresql+psycopg://test:test@localhost:5432/testdb
+        run: pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing

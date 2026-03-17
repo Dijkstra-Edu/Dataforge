@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from Settings.logging_config import get_logger
 from Services.User.github_service import GitHubService
-from Services.User.leetcode_service import LeetCodeService
+from Services.User.statistics_service import StatisticsService
 
 # Initialize logging
 logger = get_logger()
@@ -21,4 +21,4 @@ async def getGitHubData(userName: str):
 @router.get('/lc/{userName}')
 async def getLeetCodeData(userName: str):
     logger.info("GET Request LeetCode Data for user: " + userName)
-    return LeetCodeService.getAllLeetcodeData(userName)
+    return StatisticsService.getAllLeetcodeData(userName)

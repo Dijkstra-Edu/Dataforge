@@ -12,9 +12,6 @@ from Utils.Exceptions.user_exceptions import (
     EducationNotFound,
     GitHubUsernameAlreadyExists,
     GitHubUsernameNotFound,
-    LeetcodeBadgeNotFound,
-    LeetcodeNotFound,
-    LeetcodeTagNotFound,
     LinksAlreadyExists,
     LinksNotFound,
     LocationNotFound,
@@ -128,36 +125,6 @@ def register_exception_handlers(app):
         raise_api_error(
             code=ErrorCodes.USER_WORKEXP_NF_A01,
             error="Work experience not found",
-            detail=str(exc),
-            status=404
-        )
-
-    @app.exception_handler(LeetcodeNotFound)
-    async def leetcode_not_found_handler(request: Request, exc: LeetcodeNotFound):
-        logger.warning(f"LeetCode not found: {exc.leetcode_id}")
-        raise_api_error(
-            code=ErrorCodes.USER_LEETCODE_NF_A01,
-            error="LeetCode record not found",
-            detail=str(exc),
-            status=404
-        )
-
-    @app.exception_handler(LeetcodeBadgeNotFound)
-    async def leetcode_badge_not_found_handler(request: Request, exc: LeetcodeBadgeNotFound):
-        logger.warning(f"LeetCode badge not found: {exc.badge_id}")
-        raise_api_error(
-            code=ErrorCodes.USER_LEETCODE_NF_A02,
-            error="LeetCode badge not found",
-            detail=str(exc),
-            status=404
-        )
-
-    @app.exception_handler(LeetcodeTagNotFound)
-    async def leetcode_tag_not_found_handler(request: Request, exc: LeetcodeTagNotFound):
-        logger.warning(f"LeetCode tag not found: {exc.tag_id}")
-        raise_api_error(
-            code=ErrorCodes.USER_LEETCODE_NF_A03,
-            error="LeetCode tag not found",
             detail=str(exc),
             status=404
         )

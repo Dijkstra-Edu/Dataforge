@@ -4,11 +4,11 @@ from typing import List
 from sqlmodel import Session
 
 from Entities.UserDTOs.document_entity import CreateDocument, UpdateDocument, ReadDocument
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Services.User.document_service import DocumentService
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/document", tags=["Documents"])
 

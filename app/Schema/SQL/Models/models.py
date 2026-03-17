@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
     EmploymentType, Currency, Cause, CertificationType, Domain,
-    LeetcodeTagCategory, Status, TestScoreType, Degree, SkillCategory
+    Status, TestScoreType, Degree, SkillCategory
 )
 
 # Base class with UUID PK and timestamps
@@ -86,7 +86,6 @@ class Profile(UUIDBaseTable, table=True):
     volunteering: List["Volunteering"] = Relationship(back_populates="profile_rel")
     publications: List["Publications"] = Relationship(back_populates="profile_rel")
     projects: List["Projects"] = Relationship(back_populates="profile_rel")
-    leetcode: Optional["Leetcode"] = Relationship(back_populates="profile_rel")
     documents: List["Document"] = Relationship(back_populates="profile_rel")
     github: Optional["Github"] = Relationship(back_populates="profile_rel")
     posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
@@ -352,76 +351,6 @@ class Projects(UUIDBaseTable, table=True):
     # Relationships
     profile_rel: Profile = Relationship(back_populates="projects")
     owner_rel: "Github" = Relationship(back_populates="projects")
-
-# -------------------------------------------------------------------------
-# Leetcode model
-# -------------------------------------------------------------------------
-class Leetcode(UUIDBaseTable, table=True):
-    __tablename__ = "Leetcode"
-
-    profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
-    lc_username: Optional[str] = None
-    real_name: Optional[str] = None
-    about_me: Optional[str] = None
-    school: Optional[str] = None
-    websites: Optional[str] = None
-    country: Optional[str] = None
-    company: Optional[str] = None
-    job_title: Optional[str] = None
-    
-    skill_tags: Optional[List[Tools]] = Field(
-        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
-    )
-    ranking: Optional[int] = None
-    avatar: Optional[str] = None
-    reputation: Optional[int] = None
-    solution_count: Optional[int] = None
-    total_problems_solved: Optional[int] = None
-    easy_problems_solved: Optional[int] = None
-    medium_problems_solved: Optional[int] = None
-    hard_problems_solved: Optional[int] = None
-    language_problem_count: Optional[List[dict]] = Field(sa_column=Column(ARRAY(JSONB)))
-    attended_contests: Optional[int] = None
-    competition_rating: Optional[float] = None
-    global_ranking: Optional[int] = None
-    total_participants: Optional[int] = None
-    top_percentage: Optional[float] = None
-    competition_badge: Optional[str] = None
-
-    # Relationships
-    profile_rel: Profile = Relationship(back_populates="leetcode")
-    badges: List["LeetcodeBadges"] = Relationship(back_populates="leetcode_rel")
-    tags: List["LeetcodeTags"] = Relationship(back_populates="leetcode_rel")
-
-# -------------------------------------------------------------------------
-# LeetcodeBadges model
-# -------------------------------------------------------------------------
-class LeetcodeBadges(UUIDBaseTable, table=True):
-    __tablename__ = "LeetcodeBadges"
-
-    leetcode_id: UUID = Field(foreign_key="Leetcode.id", nullable=False)
-    name: Optional[str] = None
-    icon: Optional[str] = None
-    hover_text: Optional[str] = None
-
-    # Relationships
-    leetcode_rel: Leetcode = Relationship(back_populates="badges")
-
-# -------------------------------------------------------------------------
-# LeetcodeTags model
-# -------------------------------------------------------------------------
-class LeetcodeTags(UUIDBaseTable, table=True):
-    __tablename__ = "LeetcodeTags"
-
-    leetcode_id: UUID = Field(foreign_key="Leetcode.id", nullable=False)
-    tag_category: Optional[LeetcodeTagCategory] = Field(
-        sa_column=Column(SQLEnum(LeetcodeTagCategory, name="LEETCODE_TAG_CATEGORY"))
-    )
-    tag_name: Optional[str] = None
-    problems_solved: Optional[int] = None
-
-    # Relationships
-    leetcode_rel: Leetcode = Relationship(back_populates="tags")
 
 # -------------------------------------------------------------------------
 # Github model

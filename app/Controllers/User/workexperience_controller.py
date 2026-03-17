@@ -3,13 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
 
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, ReadWorkExperience, ReadWorkExperienceWithRelations, UpdateWorkExperience
 from Services.User.workexperience_service import WorkExperienceService
 from db import get_session
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/wp", tags=["Work Experiences"])
 

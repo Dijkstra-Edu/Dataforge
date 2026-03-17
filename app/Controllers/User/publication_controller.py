@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from uuid import UUID
 from sqlmodel import Session
 
-from Settings.logging_config import setup_logging
+from Settings.logging_config import get_logger
 from Entities.UserDTOs.publication_entity import (
     CreatePublication,
     ReadPublication,
@@ -13,7 +13,7 @@ from Entities.UserDTOs.publication_entity import (
 from Services.User.publication_service import PublicationService
 from db import get_session
 
-logger = setup_logging()
+logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/publications", tags=["Publications"])
 

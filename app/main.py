@@ -8,7 +8,6 @@ from Controllers.User import (
     dijkstra_certificate_controller,
     document_controller,
     education_controller,
-    leetcode_controller,
     links_controller,
     profile_controller,
     projects_controller,
@@ -61,7 +60,6 @@ app.include_router(user_controller.router)
 app.include_router(workexperience_controller.router)
 app.include_router(location_controller.router)
 app.include_router(profile_controller.router)
-app.include_router(leetcode_controller.router)
 app.include_router(dijkstra_certificate_controller.router)
 app.include_router(certifications_controller.router)
 app.include_router(document_controller.router)

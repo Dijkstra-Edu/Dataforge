@@ -99,12 +99,6 @@ class SchoolType(str, Enum):
     COURSE = "COURSE"
     BOOTCAMP = "BOOTCAMP"
 
-# LEETCODE_TAG_CATEGORY
-class LeetcodeTagCategory(str, Enum):
-    FUNDAMENTAL = "FUNDAMENTAL"
-    INTERMEDIATE = "INTERMEDIATE"
-    ADVANCED = "ADVANCED"
-
 # PROJECT_LEVEL
 class ProjectLevel(str, Enum):
     USER_PROJECT = "USER_PROJECT"

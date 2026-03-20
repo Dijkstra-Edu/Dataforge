@@ -224,7 +224,6 @@ class ReadUserPersonalDetails(BaseModel):
     streak: Optional[int]
     onboarding_complete: bool
     data_loaded: bool
-    onboarding_journey_completed: bool
 
     class Config:
         from_attributes = True

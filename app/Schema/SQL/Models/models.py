@@ -57,8 +57,6 @@ class User(UUIDBaseTable, table=True):
         default_factory=list,
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
-    onboarding_journey_completed: bool = Field(default=False, nullable=False)
-
     # Relationships
     profile: Optional["Profile"] = Relationship(back_populates="user_rel")
     blog_posts: List["Blog"] = Relationship(back_populates="user_rel")

@@ -2,11 +2,11 @@ from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
 
-from Schema.SQL.Models.models import Publications, Profile
+from Schema.SQL.Models.models import Publications
 from Repository.User.publication_repository import PublicationRepository
 from Entities.UserDTOs.publication_entity import CreatePublication, UpdatePublication
-from Utils.Exceptions.user_exceptions import ProfileNotFound, PublicationNotFound
-
+from Utils.Exceptions.user_exceptions import PublicationNotFound
+from Services.User.profile_service import ProfileService
 
 class PublicationService:
     """
@@ -23,11 +23,13 @@ class PublicationService:
         Creates a new publication for a given profile.
         Ensures the associated profile exists before creation.
         """
-        profile = self.session.get(Profile, publication_create.profile_id)
-        if not profile:
-            raise ProfileNotFound(publication_create.profile_id)
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(publication_create.username)
 
-        publication = Publications(**publication_create.dict(exclude_unset=True))
+        publication_data = publication_create.dict(exclude_unset=True)
+        publication_data.pop("username", None)
+        publication_data["profile_id"] = profile_id
+        publication = Publications(**publication_data)
         return self.repo.create(publication)
 
     def get_publication(self, publication_id: UUID) -> Publications:
@@ -70,14 +72,6 @@ class PublicationService:
         publication = self.repo.get(publication_id)
         if not publication:
             raise PublicationNotFound(publication_id)
-
-        if (
-            publication_update.profile_id
-            and publication_update.profile_id != publication.profile_id
-        ):
-            profile = self.session.get(Profile, publication_update.profile_id)
-            if not profile:
-                raise ProfileNotFound(publication_update.profile_id)
 
         update_data = publication_update.dict(exclude_unset=True)
         for key, value in update_data.items():

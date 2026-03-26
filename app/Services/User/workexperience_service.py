@@ -3,13 +3,14 @@ from sqlmodel import Session
 from typing import List, Optional
 from datetime import date
 
-from Schema.SQL.Models.models import WorkExperience, Profile, Location
+from Schema.SQL.Models.models import WorkExperience, Location
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Tools
 from Repository.User.workexperience_repository import WorkExperienceRepository
 from Repository.User.location_repository import LocationRepository
 from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, UpdateWorkExperience, ReadWorkExperience
 from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
-from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, WorkExperienceNotFound
+from Utils.Exceptions.user_exceptions import WorkExperienceNotFound
+from Services.User.profile_service import ProfileService
 
 class WorkExperienceService:
     def __init__(self, session: Session):
@@ -41,10 +42,8 @@ class WorkExperienceService:
         return [self._convert_to_read_dto(we) for we in work_experiences]
 
     def create_work_experience(self, work_experience_create: CreateWorkExperience) -> ReadWorkExperience:
-        # Check if profile exists
-        profile = self.session.get(Profile, work_experience_create.profile_id)
-        if not profile:
-            raise ProfileNotFound(work_experience_create.profile_id)
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(work_experience_create.username)
         
         # Handle location creation if provided
         location_id = None
@@ -70,6 +69,8 @@ class WorkExperienceService:
         
         # Create work experience data excluding the location object
         work_experience_data = work_experience_create.dict(exclude_unset=True, exclude={'location'})
+        work_experience_data.pop("username", None)
+        work_experience_data["profile_id"] = profile_id
         work_experience_data['location'] = location_id
         
         work_experience = WorkExperience(**work_experience_data)
@@ -141,12 +142,6 @@ class WorkExperienceService:
         if not work_experience:
             return None
         
-        # Check if profile is being updated and if it exists
-        if work_experience_update.profile_id and work_experience_update.profile_id != work_experience.profile_id:
-            profile = self.session.get(Profile, work_experience_update.profile_id)
-            if not profile:
-                raise ProfileNotFound(work_experience_update.profile_id)
-
         # Handle location update if provided
         if work_experience_update.location is not None:
             if work_experience_update.location:
@@ -199,13 +194,13 @@ class WorkExperienceService:
         return self.get_work_experiences_by_profile_id(profile_id)
 
     def get_work_experiences_by_github_username(self, github_username: str) -> List[ReadWorkExperience]:
-        """Get all work experiences by GitHub username"""
-        from Services.User.profile_service import ProfileService
-        
+        """Get all work experiences by GitHub username"""        
         profile_service = ProfileService(self.session)
         profile_id = profile_service.get_profile_id_by_github_username(github_username)
         return self.get_work_experiences_by_profile_id(profile_id)
     
     def get_work_experiences_by_github_username_with_locations(self, github_username: str) -> List[ReadWorkExperience]:
-        """Get all work experiences with locations by GitHub username"""
-        return self.get_work_experiences_by_github_username(github_username)
+        """Get all work experiences with locations by GitHub username"""        
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(github_username)
+        return self.get_work_experiences_by_profile_with_locations(profile_id)

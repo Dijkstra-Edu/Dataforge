@@ -27,6 +27,10 @@ class ProfileRepository:
         statement = select(Profile).where(Profile.user_id == user_id)
         return self.session.exec(statement).first()
 
+    def get_by_username(self, username: str) -> Optional[Profile]:
+        statement = select(Profile).where(Profile.username == username)
+        return self.session.exec(statement).first()
+
     def list(
         self,
         skip: int = 0,

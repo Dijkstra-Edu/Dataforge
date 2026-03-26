@@ -6,6 +6,7 @@ from Repository.User.test_scores_repository import TestScoresRepository
 from Schema.SQL.Models.models import TestScores
 from Utils.Exceptions.user_exceptions import TestScoreNotFound
 from Entities.UserDTOs.test_scores_entity import CreateTestScore, UpdateTestScore
+from Services.User.profile_service import ProfileService
 
 logger = get_logger()
 
@@ -16,7 +17,13 @@ class TestScoresService:
             self.session = session
         
         def create_test_score(self, test_score_create: CreateTestScore):
-            test_score = TestScores(**test_score_create.dict(exclude_unset=True))
+            profile_service = ProfileService(self.session)
+            profile_id = profile_service.get_profile_id_by_github_username(test_score_create.username)
+
+            test_score_data = test_score_create.dict(exclude_unset=True)
+            test_score_data.pop("username", None)
+            test_score_data["profile_id"] = profile_id
+            test_score = TestScores(**test_score_data)
             return self.repo.create(test_score)
         
         def list_all_test_scores(self, skip: int = 0, limit: int = 20, sort_by: str = "created_at", title: Optional[str] = None, order: str = "desc", user_id: Optional[UUID] = None) -> List[TestScores]:

@@ -50,11 +50,9 @@ class ProfileService:
         Returns:
             UUID: Profile ID
         """
-        from Services.User.user_service import UserService
-        
-        user_service = UserService(self.session)
-        user_id = user_service.get_user_id_by_github_username(github_username)
-        profile = self.get_profile_by_user_id(user_id)
+        profile = self.repo.get_by_username(github_username)
+        if not profile:
+            raise ProfileNotFound(github_username)
         return profile.id
 
     def list_profiles(

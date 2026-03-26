@@ -24,19 +24,20 @@ def create_user(user_create: CreateUser, session: Session = Depends(get_session)
     return user
 
 
+"""
+TODO: This is to be removed once onboarding check is confirmed from Next.js Server DB
+
 @router.get("/onboard", response_model=OnboardCheckResponse)
 def check_onboarding(
     username: str = Query(..., description="GitHub username to check"),
     session: Session = Depends(get_session)
 ):
-    """
-    Check if a user has completed onboarding by GitHub username.
-    """    
     service = UserService(session)
     logger.info(f"Checking onboarding status for GitHub username: {username}")
     result = service.check_onboarding_status(username)
     logger.info(f"Onboarding status for {username}: onboarded={result.onboarded}, user_id={result.user_id}")
     return result
+"""
 
 
 @router.post("/onboard", response_model=ReadUser)

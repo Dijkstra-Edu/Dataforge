@@ -30,13 +30,13 @@ class ProfileService:
     def get_profile(self, profile_id: UUID) -> Optional[Profile]:
         profile = self.repo.get(profile_id)
         if not profile:
-            return ProfileNotFound(profile_id)
+            raise ProfileNotFound(profile_id)
         return profile
 
     def get_profile_by_user_id(self, user_id: UUID) -> Optional[Profile]:
         profile = self.repo.get_by_user_id(user_id)
         if not profile:
-            return ProfileNotFound(user_id)
+            raise ProfileNotFound(user_id)
         return profile
 
     def get_profile_id_by_github_username(self, github_username: str) -> UUID:

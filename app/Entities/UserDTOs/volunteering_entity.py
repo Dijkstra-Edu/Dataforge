@@ -8,7 +8,7 @@ from Schema.SQL.Enums.enums import (
 )  
 
 class CreateVolunteering(BaseModel):
-    profile_id: UUID
+    username: str
     organization: str
     role: str
     cause: Cause
@@ -40,7 +40,6 @@ class CreateVolunteering(BaseModel):
 
 
 class UpdateVolunteering(BaseModel):
-    profile_id: Optional[UUID] = None
     organization: Optional[str] = None
     role: Optional[str] = None
     cause: Optional[Cause] = None
@@ -73,6 +72,7 @@ class UpdateVolunteering(BaseModel):
 
 class ReadVolunteering(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     organization: str
     role: str

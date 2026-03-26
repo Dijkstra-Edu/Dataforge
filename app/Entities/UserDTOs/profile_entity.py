@@ -8,6 +8,7 @@ from pydantic import BaseModel, validator
 # ----------------------
 class CreateProfile(BaseModel):
     user_id: UUID
+    username: str
 
     @validator('user_id')
     def user_id_must_be_valid_uuid(cls, v):
@@ -18,6 +19,7 @@ class CreateProfile(BaseModel):
 
 class UpdateProfile(BaseModel):
     user_id: Optional[UUID] = None
+    username: Optional[str] = None
 
     @validator('user_id')
     def user_id_must_be_valid_uuid(cls, v):
@@ -32,6 +34,7 @@ class UpdateProfile(BaseModel):
 class ReadProfile(BaseModel):
     id: UUID
     user_id: UUID
+    username: str
     created_at: datetime
     updated_at: datetime
 

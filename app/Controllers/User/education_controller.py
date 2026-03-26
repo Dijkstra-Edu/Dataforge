@@ -16,7 +16,7 @@ router = APIRouter(prefix="/Dijkstra/v1/education", tags=["Education"])
 @router.post("/", response_model=ReadEducation)
 def create_education(education_create: CreateEducation, session: Session = Depends(get_session)):
     service = EducationService(session)
-    logger.info(f"Creating Education entry for profile_id={education_create.profile_id}")
+    logger.info(f"Creating Education entry for username={education_create.username}")
     education = service.create_education(education_create)
     logger.info(f"Created Education with ID: {education.id}")
     return education

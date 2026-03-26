@@ -4,7 +4,7 @@ from datetime import datetime, date
 from pydantic import BaseModel, field_validator
 from Schema.SQL.Enums.enums import (CertificationType, Tools)
 class CreateCertification(BaseModel):
-    profile_id: UUID
+    username: str
     name: str
     type: CertificationType
     issuing_organization: str
@@ -47,7 +47,6 @@ class CreateCertification(BaseModel):
     
 
 class UpdateCertification(BaseModel):
-    profile_id: Optional[UUID] = None
     name: Optional[str] = None
     type: Optional[CertificationType] = None
     issuing_organization: Optional[str] = None
@@ -91,6 +90,7 @@ class UpdateCertification(BaseModel):
     
 class ReadCertification(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     name: str
     type: CertificationType

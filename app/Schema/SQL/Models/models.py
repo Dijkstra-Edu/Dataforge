@@ -74,6 +74,7 @@ class Profile(UUIDBaseTable, table=True):
     __tablename__ = "Profile"
 
     user_id: UUID = Field(foreign_key="User.id", nullable=False, unique=True)
+    username: str = Field(nullable=False, unique=True)
 
     # Relationships
     user_rel: User = Relationship(back_populates="profile")

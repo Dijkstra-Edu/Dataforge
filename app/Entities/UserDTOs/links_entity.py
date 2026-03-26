@@ -54,7 +54,9 @@ class UpdateLinks(BaseModel):
 
 class ReadLinks(BaseModel):
     id: UUID
+    username: str
     user_id: UUID
+    profile_id: UUID
     portfolio_link: Optional[str]
     github_user_name: str
     github_link: Optional[str]

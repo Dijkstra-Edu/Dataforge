@@ -12,7 +12,7 @@ from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 # Input DTOs
 # ----------------------
 class CreateWorkExperience(BaseModel):
-    profile_id: UUID
+    username: str
     title: str
     employment_type: EmploymentType
     domain: Optional[List[Domain]] = None
@@ -78,7 +78,6 @@ class CreateWorkExperience(BaseModel):
 
 
 class UpdateWorkExperience(BaseModel):
-    profile_id: Optional[UUID] = None
     title: Optional[str] = None
     employment_type: Optional[EmploymentType] = None
     domain: Optional[List[Domain]] = None
@@ -148,6 +147,7 @@ class UpdateWorkExperience(BaseModel):
 # ----------------------
 class ReadWorkExperience(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     title: str
     employment_type: EmploymentType

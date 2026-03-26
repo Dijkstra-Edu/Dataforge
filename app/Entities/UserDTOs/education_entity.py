@@ -8,7 +8,7 @@ from pydantic import BaseModel, field_validator
 from Schema.SQL.Enums.enums import SchoolType, WorkLocationType, Tools, Degree
 
 class CreateEducation(BaseModel):
-    profile_id: UUID
+    username: str
     school_name: str
     school_logo_url: Optional[str] = None
     school_type: SchoolType
@@ -89,6 +89,7 @@ class UpdateEducation(BaseModel):
 
 class ReadEducation(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     school_name: str
     school_logo_url: Optional[str]

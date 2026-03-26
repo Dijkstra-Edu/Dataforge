@@ -44,15 +44,6 @@ def get_publications_by_github_username(github_username: str, session: Session =
     return publications
 
 
-@router.get("/profile/{profile_id}", response_model=List[ReadPublication])
-def get_publications_by_profile_id(profile_id: UUID, session: Session = Depends(get_session)):
-    service = PublicationService(session)
-    logger.info(f"Fetching publications for profile ID: {profile_id}")
-    publications = service.get_publications_by_profile_id(profile_id)
-    logger.info(f"Returned {len(publications)} publications for profile {profile_id}")
-    return publications
-
-
 @router.get("/", response_model=List[ReadPublication])
 def list_publications(
     skip: int = 0,

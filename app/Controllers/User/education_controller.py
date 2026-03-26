@@ -68,11 +68,3 @@ def delete_education(education_id: UUID, session: Session = Depends(get_session)
     message = service.delete_education(education_id)
     logger.info(message)
     return {"detail": message}
-
-@router.get("/profile/{profile_id}", response_model=List[ReadEducation])
-def get_educations_by_profile(profile_id: UUID, session: Session = Depends(get_session)):
-    service = EducationService(session)
-    logger.info(f"Fetching Education entries for profile_id={profile_id}")
-    educations = service.get_educations_by_profile(profile_id)
-    logger.info(f"Returned {len(educations)} education entries for profile_id={profile_id}")
-    return educations

@@ -375,7 +375,6 @@ class UserService:
             streak=user.streak,
             onboarding_complete=user.onboarding_complete,
             data_loaded=user.data_loaded,
-            onboarding_journey_completed=user.onboarding_journey_completed,
         )
 
     def get_user_auth_details_by_github_username(self, github_user_name: str) -> ReadUserAuthDetails:

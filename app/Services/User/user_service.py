@@ -162,7 +162,6 @@ class UserService:
             try:
                 GitRipperClient(os.getenv("GITRIPPER_BASE_URL", "http://localhost:7060").rstrip("/")).sync_user(
                     login_id=onboard_data.github_user_name,
-                    oauth_token=onboard_data.access_token,
                     email=onboard_data.primary_email
                 )
             except Exception as gitripper_error:

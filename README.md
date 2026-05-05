@@ -1,5 +1,5 @@
 # 🎓 Dijkstra Main Server
-
+TEST
 **Certificate-Generator** is a FastAPI-powered backend application that generates personalized certificates based on user data. It includes API endpoints to retrieve GitHub data and download certificates — perfect for automating certificates in bulk for events, competitions, etc.
 
 ---

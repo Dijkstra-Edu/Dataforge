@@ -12,14 +12,12 @@ class GitRipperClient():
     def sync_user(
         self,
         login_id: str,
-        oauth_token: str,
         email: str,
         timeout: float = 3.0,
     ) -> None:
 
         payload = {
             "loginId": login_id,
-            "oauthToken": oauth_token,
             "email": email,
         }
 

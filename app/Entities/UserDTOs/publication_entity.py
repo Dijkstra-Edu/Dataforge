@@ -6,7 +6,7 @@ from pydantic import BaseModel, field_validator
 from Schema.SQL.Enums.enums import Tools  
 
 class CreatePublication(BaseModel):
-    profile_id: UUID
+    username: str
     title: str
     publisher: str
     authors: List[str]
@@ -48,7 +48,6 @@ class CreatePublication(BaseModel):
 
 
 class UpdatePublication(BaseModel):
-    profile_id: Optional[UUID] = None
     title: Optional[str] = None
     publisher: Optional[str] = None
     authors: Optional[List[str]] = None
@@ -84,6 +83,7 @@ class UpdatePublication(BaseModel):
 
 class ReadPublication(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     title: str
     publisher: str

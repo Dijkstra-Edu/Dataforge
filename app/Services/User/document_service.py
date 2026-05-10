@@ -4,34 +4,24 @@ from typing import Optional
 from sqlmodel import Session
 from Repository.User.document_repository import DocumentRepository
 from Repository.User.profile_repository import ProfileRepository
-from Repository.User.user_repository import UserRepository
 from Schema.SQL.Models.models import Document
 from Entities.UserDTOs.document_entity import CreateDocument, UpdateDocument
-from Utils.Exceptions.user_exceptions import DocumentNotFound, ProfileNotFound, UserNotFound
-
+from Utils.Exceptions.user_exceptions import DocumentNotFound, ProfileNotFound
 
 logger = get_logger()
-
 
 class DocumentService:
     
     def __init__(self, session: Session):
         self.repo = DocumentRepository(session)
         self.profile_repo = ProfileRepository(session)
-        self.user_repo = UserRepository(session)
         self.session = session
     
     def create_document(self, document_create: CreateDocument) -> Document:
-        """Create a new document using github_username to find the profile."""
-        # Get user by github_username
-        user = self.user_repo.get_by_github_username(document_create.github_username)
-        if not user:
-            raise UserNotFound(f"User with github username '{document_create.github_username}' not found")
-        
-        # Get profile by user_id
-        profile = self.profile_repo.get_by_user_id(user.id)
+        """Create a new document using profile username to find the profile."""
+        profile = self.profile_repo.get_by_username(document_create.username)
         if not profile:
-            raise ProfileNotFound(f"Profile not found for user '{document_create.github_username}'")
+            raise ProfileNotFound(f"Profile not found for username '{document_create.username}'")
         
         # Create document with the found profile_id
         document = Document(
@@ -78,16 +68,11 @@ class DocumentService:
         return documents if documents else []
     
     def get_documents_by_github_username(self, github_username: str) -> list[Document]:
-        """Get all documents for a user by their GitHub username."""
-        # Get user by github_username
-        user = self.user_repo.get_by_github_username(github_username)
-        if not user:
-            raise UserNotFound(f"User with github username '{github_username}' not found")
-        
-        # Get profile by user_id
-        profile = self.profile_repo.get_by_user_id(user.id)
+        """Get all documents for a user by GitHub username."""
+        profile = self.profile_repo.get_by_username(github_username)
+
         if not profile:
-            raise ProfileNotFound(f"Profile not found for user '{github_username}'")
+            raise ProfileNotFound(f"Profile not found for username '{github_username}'")
         
         # Get all documents for this profile
         documents = self.repo.get_by_profile_id(profile.id)

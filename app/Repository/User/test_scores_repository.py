@@ -26,17 +26,13 @@ class TestScoresRepository:
         sort_by: str = "created_at",
         order: str = "desc",
         title: Optional[str] = None,
-        user_id: Optional[UUID] = None,
+        username: Optional[str] = None,
     ) -> List[TestScores]:
 
         statement = select(TestScores)
 
-        if user_id:
-            statement = (
-                statement.join(Profile, Profile.id == TestScores.profile_id)
-                .join(User, User.id == Profile.user_id)
-                .where(User.id == user_id)
-            )
+        if username:
+            statement = statement.where(TestScores.profile_rel.username == username)
 
         if title:
             title = title.strip()

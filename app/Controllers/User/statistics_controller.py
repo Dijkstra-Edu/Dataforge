@@ -1,22 +1,11 @@
 from fastapi import APIRouter
 from Settings.logging_config import get_logger
-from Services.User.github_service import GitHubService
 from Services.User.statistics_service import StatisticsService
 
 # Initialize logging
 logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/statistics", tags=["Statistics"])
-
-@router.get('/health', status_code=200)
-async def root():
-    logger.info("Health Endpoint Triggered")
-    return {"status": 200, 'message': 'Dijkstra Statistics Health Endpoint Triggered!!!'}
-
-@router.get('/github/{userName}')
-async def getGitHubData(userName: str):
-    logger.info("GET Request GitHub Data for user: " + userName)
-    return await GitHubService.getAllGitHubData(userName)
 
 @router.get('/lc/{userName}')
 async def getLeetCodeData(userName: str):

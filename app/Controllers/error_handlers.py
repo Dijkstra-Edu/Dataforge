@@ -278,7 +278,7 @@ def register_exception_handlers(app):
 
     @app.exception_handler(ProfileAlreadyExists)
     async def profile_already_exists_handler(request: Request, exc: ProfileAlreadyExists):
-        logger.warning(f"Profile already exists for user: {exc.user_id}")
+        logger.warning(f"Profile already exists for GitHub user: {exc.github_user_name}")
         raise_api_error(
             code=ErrorCodes.USER_PROFILE_AE_A01,
             error="Profile already exists",

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, field_validator
 from Schema.SQL.Enums.enums import Domain, Tools
 
 class CreateProject(BaseModel):
-    profile_id: UUID
+    username: str
     name: str = Field(..., min_length=1)
     organization: Optional[str] = None
     owner: str = Field(..., min_length=1)  
@@ -47,7 +47,6 @@ class CreateProject(BaseModel):
 
 
 class UpdateProject(BaseModel):
-    profile_id: Optional[UUID] = None
     name: Optional[str] = None
     organization: Optional[str] = None
     owner: Optional[str] = None
@@ -89,6 +88,7 @@ class UpdateProject(BaseModel):
 
 class ReadProject(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     name: str
     organization: Optional[str]

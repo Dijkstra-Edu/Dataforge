@@ -2,11 +2,11 @@ from uuid import UUID
 from typing import List, Optional
 from sqlmodel import Session
 
-from Schema.SQL.Models.models import Volunteering, Profile
+from Schema.SQL.Models.models import Volunteering
 from Repository.User.volunteering_repository import VolunteeringRepository
 from Entities.UserDTOs.volunteering_entity import CreateVolunteering, UpdateVolunteering
-from Utils.Exceptions.user_exceptions import ProfileNotFound, VolunteeringNotFound
-
+from Utils.Exceptions.user_exceptions import VolunteeringNotFound
+from Services.User.profile_service import ProfileService
 
 class VolunteeringService:
     def __init__(self, session: Session):
@@ -14,12 +14,13 @@ class VolunteeringService:
         self.session = session
 
     def create_volunteering(self, volunteering_create: CreateVolunteering) -> Volunteering:
-        # Ensure profile exists
-        profile = self.session.get(Profile, volunteering_create.profile_id)
-        if not profile:
-            raise ProfileNotFound(volunteering_create.profile_id)
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(volunteering_create.username)
 
-        volunteering = Volunteering(**volunteering_create.dict(exclude_unset=True))
+        volunteering_data = volunteering_create.dict(exclude_unset=True)
+        volunteering_data.pop("username", None)
+        volunteering_data["profile_id"] = profile_id
+        volunteering = Volunteering(**volunteering_data)
         return self.repo.create(volunteering)
 
     def get_volunteering(self, volunteering_id: UUID) -> Volunteering:
@@ -49,12 +50,6 @@ class VolunteeringService:
         volunteering = self.repo.get(volunteering_id)
         if not volunteering:
             raise VolunteeringNotFound(volunteering_id)
-
-        # If profile_id is updated, ensure the profile exists
-        if volunteering_update.profile_id and volunteering_update.profile_id != volunteering.profile_id:
-            profile = self.session.get(Profile, volunteering_update.profile_id)
-            if not profile:
-                raise ProfileNotFound(volunteering_update.profile_id)
 
         update_data = volunteering_update.dict(exclude_unset=True)
         for key, value in update_data.items():

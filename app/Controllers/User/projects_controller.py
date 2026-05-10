@@ -42,14 +42,6 @@ def get_projects_by_github_username(github_username: str, session: Session = Dep
     projects = service.get_projects_by_github_username(github_username)
     return projects
 
-@router.get("/profile/{profile_id}", response_model=List[ReadProject])
-def get_projects_by_profile(profile_id: UUID, session: Session = Depends(get_session)):
-    service = ProjectsService(session)
-    logger.info(f"Fetching projects for profile ID: {profile_id}")
-    projects = service.get_projects_by_profile(profile_id)
-    logger.info(f"Returned {len(projects)} projects for profile {profile_id}")
-    return projects
-
 @router.get("/", response_model=List[ReadProject])
 def list_projects(skip: int = 0, limit: int = 20, session: Session = Depends(get_session)):
     service = ProjectsService(session)

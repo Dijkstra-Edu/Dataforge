@@ -26,7 +26,7 @@ class CertificationsRepository:
         sort_by: str = "created_at",
         order: str = "desc",
         issuing_organization: Optional[str] = None,
-        user_id: Optional[UUID] = None,
+        username: Optional[str] = None,
     ) -> List[Certifications]:
         """List certifications with optional filtering and sorting.
 
@@ -36,17 +36,12 @@ class CertificationsRepository:
             sort_by: Column name on Certifications to sort by
             order: asc or desc
             issuing_organization: Case-insensitive partial match on issuing organization
-            user_id: (Optional) Filter certifications that belong to a given User (via Profile relation)
+            username: (Optional) Filter certifications that belong to a given User (via Profile relation)
         """
         statement = select(Certifications)
 
-        if user_id:
-            statement = (
-                statement.join(Profile, Profile.id == Certifications.profile_id)
-                .join(User, User.id == Profile.user_id)
-                .where(User.id == user_id)
-            )
-
+        if username:
+            statement = statement.where(Certifications.profile_rel.username == username)
         
         if issuing_organization:
             issuing_organization = issuing_organization.strip()

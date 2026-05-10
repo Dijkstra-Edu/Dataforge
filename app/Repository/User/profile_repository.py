@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlmodel import Session, select
 from sqlalchemy import asc, desc
 from sqlalchemy.exc import SQLAlchemyError
-from Schema.SQL.Models.models import Profile
+from Schema.SQL.Models.models import Profile, User
 
 class ProfileRepository:
     def __init__(self, session: Session):
@@ -24,7 +24,15 @@ class ProfileRepository:
         return self.session.exec(statement).first()
 
     def get_by_user_id(self, user_id: UUID) -> Optional[Profile]:
-        statement = select(Profile).where(Profile.user_id == user_id)
+        statement = (
+            select(Profile)
+            .join(User, User.github_user_name == Profile.username)
+            .where(User.id == user_id)
+        )
+        return self.session.exec(statement).first()
+
+    def get_by_username(self, username: str) -> Optional[Profile]:
+        statement = select(Profile).where(Profile.username == username)
         return self.session.exec(statement).first()
 
     def list(
@@ -33,13 +41,13 @@ class ProfileRepository:
         limit: int = 20,
         sort_by: str = "created_at",
         order: str = "desc",
-        user_id: Optional[UUID] = None,
+        username: Optional[str] = None,
     ) -> List[Profile]:
         statement = select(Profile)
 
         # Filtering
-        if user_id:
-            statement = statement.where(Profile.user_id == user_id)
+        if username:
+            statement = statement.where(Profile.username == username)
 
         # Sorting
         sort_column = getattr(Profile, sort_by, Profile.created_at)

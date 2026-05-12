@@ -34,7 +34,7 @@ class WorkExperienceService:
                 work_exp_dict['location'] = None
         else:
             work_exp_dict['location'] = None
-        
+        work_exp_dict['username'] = work_experience.profile_rel.username
         return ReadWorkExperience.model_validate(work_exp_dict)
 
     def _convert_list_to_read_dto(self, work_experiences: List[WorkExperience]) -> List[ReadWorkExperience]:

@@ -32,7 +32,7 @@ class EducationService:
                 education_dict['location'] = None
         else:
             education_dict['location'] = None
-        
+        education_dict['username'] = education.profile_rel.username
         return ReadEducation.model_validate(education_dict)
 
     def _convert_list_to_read_dto(self, educations: List[Education]) -> List[ReadEducation]:

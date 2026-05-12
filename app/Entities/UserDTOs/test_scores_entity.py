@@ -5,7 +5,7 @@ from pydantic import BaseModel, field_validator
 from Schema.SQL.Enums.enums import TestScoreType
 
 class CreateTestScore(BaseModel):
-    profile_id: UUID
+    username: str
     title: str
     type: TestScoreType
     score: str
@@ -31,7 +31,6 @@ class CreateTestScore(BaseModel):
         return v
 
 class UpdateTestScore(BaseModel):
-    profile_id: Optional[UUID] = None
     title: Optional[str] = None
     type: Optional[TestScoreType] = None
     score: Optional[str] = None
@@ -52,6 +51,7 @@ class UpdateTestScore(BaseModel):
 
 class ReadTestScore(BaseModel):
     id: UUID
+    username: str
     profile_id: UUID
     title: str
     type: TestScoreType

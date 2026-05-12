@@ -143,7 +143,7 @@ class UserService:
             created_user = self.repo.create(user)
             
             # Create empty profile for the user
-            profile = Profile(user_id=created_user.id)
+            profile = Profile(username=created_user.github_user_name)
             self.profile_repo.create(profile)
             
             # Create links for the user with auto-generated URLs and primary_email
@@ -162,7 +162,6 @@ class UserService:
             try:
                 GitRipperClient(os.getenv("GITRIPPER_BASE_URL", "http://localhost:7060").rstrip("/")).sync_user(
                     login_id=onboard_data.github_user_name,
-                    oauth_token=onboard_data.access_token,
                     email=onboard_data.primary_email
                 )
             except Exception as gitripper_error:

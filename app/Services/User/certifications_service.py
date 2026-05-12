@@ -6,7 +6,7 @@ from Repository.User.certifications_repository import CertificationsRepository
 from Schema.SQL.Models.models import Certifications
 from Utils.Exceptions.user_exceptions import CertificationNotFound
 from Entities.UserDTOs.certification_entity import CreateCertification, UpdateCertification
-
+from Services.User.profile_service import ProfileService
 
 logger = get_logger()
 
@@ -17,7 +17,13 @@ class CertificationService:
             self.session = session
         
         def create_certification(self, certification_create: CreateCertification):
-            certitification = Certifications(**certification_create.dict(exclude_unset=True))
+            profile_service = ProfileService(self.session)
+            profile_id = profile_service.get_profile_id_by_github_username(certification_create.username)
+
+            certification_data = certification_create.dict(exclude_unset=True)
+            certification_data.pop("username", None)
+            certification_data["profile_id"] = profile_id
+            certitification = Certifications(**certification_data)
             return self.repo.create(certitification)
         
         

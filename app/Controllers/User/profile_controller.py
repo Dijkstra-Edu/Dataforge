@@ -18,7 +18,7 @@ router = APIRouter(prefix="/Dijkstra/v1/profile", tags=["Profiles"])
 @router.post("/", response_model=ReadProfile)
 def create_profile(profile_create: CreateProfile, session: Session = Depends(get_session)):
     service = ProfileService(session)
-    logger.info(f"Creating Profile for user ID: {profile_create.user_id}")
+    logger.info(f"Creating Profile for GitHub username: {profile_create.username}")
     profile = service.create_profile(profile_create)
     logger.info(f"Created Profile with ID: {profile.id}")
     return profile

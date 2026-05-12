@@ -8,11 +8,9 @@ from Entities.UserDTOs.projects_entity import (
     ReadProject,
     UpdateProject,
 )
-from Schema.SQL.Models.models import Projects, Profile, User
-from Utils.Exceptions.user_exceptions import (
-    ProfileNotFound,
-    ProjectsNotFound,
-)
+from Schema.SQL.Models.models import Projects
+from Utils.Exceptions.user_exceptions import (ProjectsNotFound)
+from Services.User.profile_service import ProfileService
 
 class ProjectsService:
     def __init__(self, session: Session):
@@ -20,13 +18,14 @@ class ProjectsService:
         self.session = session
 
     def create_project(self, project_create: CreateProject) -> ReadProject:
-        # Check if profile exists
-        profile = self.session.get(Profile, project_create.profile_id)
-        if not profile:
-            raise ProfileNotFound(project_create.profile_id)
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(project_create.username)
 
         # Create project if checks pass
-        project = Projects(**project_create.dict(exclude_unset=True))
+        project_data = project_create.dict(exclude_unset=True)
+        project_data.pop("username", None)
+        project_data["profile_id"] = profile_id
+        project = Projects(**project_data)
         project = self.repo.create(project)
         return ReadProject.model_validate(project)
 
@@ -45,9 +44,7 @@ class ProjectsService:
         return [ReadProject.model_validate(proj) for proj in projects]
     
     def get_projects_by_github_username(self, github_username: str) -> List[ReadProject]:
-        """Get all projects by GitHub username"""
-        from Services.User.profile_service import ProfileService
-        
+        """Get all projects by GitHub username"""        
         profile_service = ProfileService(self.session)
         profile_id = profile_service.get_profile_id_by_github_username(github_username)
         return self.get_projects_by_profile(profile_id)

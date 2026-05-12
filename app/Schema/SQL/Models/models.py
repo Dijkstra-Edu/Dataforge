@@ -3,7 +3,7 @@ from datetime import date, datetime, timezone
 
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float
+from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 
 from Schema.SQL.Enums.enums import (
@@ -58,7 +58,7 @@ class User(UUIDBaseTable, table=True):
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
     # Relationships
-    profile: Optional["Profile"] = Relationship(back_populates="user_rel")
+    profile: Optional["Profile"] = Relationship(back_populates="user_rel", sa_relationship_kwargs={"uselist": False})
     blog_posts: List["Blog"] = Relationship(back_populates="user_rel")
     links: Optional["Links"] = Relationship(back_populates="user_rel")
     created_tasks: List["Task"] = Relationship(back_populates="creator_rel", sa_relationship_kwargs={"foreign_keys": "[Task.creator_id]"})
@@ -73,7 +73,14 @@ class User(UUIDBaseTable, table=True):
 class Profile(UUIDBaseTable, table=True):
     __tablename__ = "Profile"
 
-    user_id: UUID = Field(foreign_key="User.id", nullable=False, unique=True)
+    username: str = Field(
+        sa_column=Column(
+            String,
+            ForeignKey("User.github_user_name", onupdate="CASCADE", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        ),
+    )
 
     # Relationships
     user_rel: User = Relationship(back_populates="profile")
@@ -89,6 +96,12 @@ class Profile(UUIDBaseTable, table=True):
     posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
     post_comments: List["PostComments"] = Relationship(back_populates="profile_rel")
     skills: List["Skills"] = Relationship(back_populates="profile_rel")
+
+    @property
+    def user_id(self) -> UUID:
+        """Logical user id for API serialization; loads ``user_rel`` if needed."""
+        return self.user_rel.id
+
 
 # -------------------------------------------------------------------------
 # Location model

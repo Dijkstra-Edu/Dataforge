@@ -40,15 +40,6 @@ def get_work_experiences_by_github_username(github_username: str, session: Sessi
     return work_experiences
 
 
-@router.get("/profile/{profile_id}", response_model=List[ReadWorkExperience])
-def get_work_experiences_by_profile_id(profile_id: UUID, session: Session = Depends(get_session)):
-    service = WorkExperienceService(session)
-    logger.info(f"Fetching Work Experiences for profile ID: {profile_id}")
-    work_experiences = service.get_work_experiences_by_profile_id(profile_id)
-    logger.info(f"Returned {len(work_experiences)} work experiences for profile {profile_id}")
-    return work_experiences
-
-
 @router.get("/", response_model=List[ReadWorkExperience])
 def list_work_experiences(
     skip: int = 0,

@@ -39,15 +39,6 @@ def get_volunteering_by_github_username(github_username: str, session: Session =
     return volunteering
 
 
-@router.get("/profile/{profile_id}", response_model=List[ReadVolunteering])
-def get_volunteering_by_profile_id(profile_id: UUID, session: Session = Depends(get_session)):
-    service = VolunteeringService(session)
-    logger.info(f"Fetching volunteering entries for profile ID: {profile_id}")
-    volunteering_entries = service.get_volunteering_by_profile_id(profile_id)
-    logger.info(f"Returned {len(volunteering_entries)} volunteering entries for profile {profile_id}")
-    return volunteering_entries
-
-
 @router.get("/", response_model=List[ReadVolunteering])
 def list_volunteering(
     skip: int = 0,

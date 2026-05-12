@@ -14,9 +14,11 @@ class ProfileNotFound(ServiceError):
         self.profile_id = profile_id
 
 class ProfileAlreadyExists(ServiceError):
-    def __init__(self, user_id):
-        super().__init__(f"Profile already exists for user ID {user_id}.")
-        self.user_id = user_id
+    def __init__(self, github_user_name: str):
+        super().__init__(
+            f"Profile already exists for GitHub username '{github_user_name}'."
+        )
+        self.github_user_name = github_user_name
 
 class LocationNotFound(ServiceError):
     def __init__(self, location_id):

@@ -9,6 +9,7 @@ from Entities.UserDTOs.education_entity import CreateEducation, UpdateEducation,
 from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
 from Schema.SQL.Models.models import Education, Profile, Location
 from Utils.Exceptions.user_exceptions import EducationNotFound, ProfileNotFound, LocationNotFound
+from Services.User.profile_service import ProfileService
 from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
 from db import get_session
 
@@ -36,7 +37,7 @@ class EducationService:
                 education_dict['location'] = None
         else:
             education_dict['location'] = None
-        
+        education_dict['username'] = education.profile_rel.username
         return ReadEducation.model_validate(education_dict)
 
     def _convert_list_to_read_dto(self, educations: List[Education]) -> List[ReadEducation]:
@@ -44,10 +45,8 @@ class EducationService:
         return [self._convert_to_read_dto(edu) for edu in educations]
 
     def create_education(self, education_create: CreateEducation) -> ReadEducation:
-        # Check if profile exists
-        profile = self.session.get(Profile, education_create.profile_id)
-        if not profile:
-            raise ProfileNotFound(education_create.profile_id)
+        profile_service = ProfileService(self.session)
+        profile_id = profile_service.get_profile_id_by_github_username(education_create.username)
         
         # Handle location creation if provided
         location_id = None
@@ -73,6 +72,8 @@ class EducationService:
         
         # Create education data excluding the location object
         education_data = education_create.dict(exclude_unset=True, exclude={'location'})
+        education_data.pop("username", None)
+        education_data["profile_id"] = profile_id
         education_data['location'] = location_id
         
         education = Education(**education_data)

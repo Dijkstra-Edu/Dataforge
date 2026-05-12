@@ -7,23 +7,26 @@ from pydantic import BaseModel, validator
 # Input DTOs
 # ----------------------
 class CreateProfile(BaseModel):
-    user_id: UUID
+    """``username`` must match an existing ``User.github_user_name``."""
+    username: str
 
-    @validator('user_id')
-    def user_id_must_be_valid_uuid(cls, v):
-        if not v:
-            raise ValueError('user_id cannot be empty')
-        return v
+    @validator("username")
+    def username_non_empty(cls, v: str) -> str:
+        if not v or not str(v).strip():
+            raise ValueError("username cannot be empty")
+        return str(v).strip()
 
 
 class UpdateProfile(BaseModel):
-    user_id: Optional[UUID] = None
+    username: Optional[str] = None
 
-    @validator('user_id')
-    def user_id_must_be_valid_uuid(cls, v):
-        if v is not None and not v:
-            raise ValueError('user_id cannot be empty')
-        return v
+    @validator("username")
+    def username_non_empty_when_set(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        if not str(v).strip():
+            raise ValueError("username cannot be empty")
+        return str(v).strip()
 
 
 # ----------------------
@@ -32,6 +35,7 @@ class UpdateProfile(BaseModel):
 class ReadProfile(BaseModel):
     id: UUID
     user_id: UUID
+    username: str
     created_at: datetime
     updated_at: datetime
 

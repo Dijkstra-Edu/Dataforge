@@ -25,6 +25,6 @@ class KafkaProducerService:
     def flush(self):
         self._producer.flush()
 
-@lru_cache()
+@lru_cache() #TODO: Ensure that this is thread safe and creates only one instance in a multi-threaded environment
 def get_kafka_producer() -> KafkaProducerService:
     return KafkaProducerService()

@@ -5,6 +5,7 @@ from sqlalchemy import null
 
 from Schema.SQL.Enums.enums import SchoolType
 from Utils.utility_functions import calculate_months_served
+from Services.User.statistics_service import StatisticsService
 
 
 class EducationUpdateEventDTO(BaseModel):
@@ -64,8 +65,18 @@ def map_profile_to_kafka_event(profile: Profile) -> ProfileUpdateKafkaEvent:
     # ----------------------------
     # DSA Metrics Mapping
     # ----------------------------
-    leetcode_profile = profile.leetcode
-    dsa_dto = DsaMetricsUpdateEventDTO(global_rank=leetcode_profile.global_ranking, contest_rating=leetcode_profile.competition_rating) if leetcode_profile is not None and leetcode_profile.competition_rating is not None else None
+    # leetcode_profile = profile.leetcode
+    leetcode_username = (
+        profile.user_rel
+        and profile.user_rel.links
+        and profile.user_rel.links.leetcode_user_name
+    )
+    leetcode_statistics = StatisticsService.getAllLeetcodeData(leetcode_username) if leetcode_username else None
+    print("Leetcode statistics: " + str(leetcode_statistics["leetcode"]["profile"]) if leetcode_statistics else "No LeetCode data")
+    dsa_dto = DsaMetricsUpdateEventDTO(
+        contest_rating=int(leetcode_statistics["leetcode"]["contestRanking"]["rating"]) if leetcode_statistics else 0,
+        global_rank=int(leetcode_statistics["leetcode"]["profile"]["profile"]["ranking"]) if leetcode_statistics else 0
+    ) if leetcode_statistics else None
 
     # ----------------------------
     # Construct final event DTO

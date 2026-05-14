@@ -9,19 +9,18 @@ from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain, Too
 from Repository.User.workexperience_repository import WorkExperienceRepository
 from Repository.User.location_repository import LocationRepository
 from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, UpdateWorkExperience, ReadWorkExperience
-from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
-from Utils.Exceptions.user_exceptions import LocationNotFound, ProfileNotFound, WorkExperienceNotFound
-from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
-from db import get_session
+from Entities.UserDTOs.location_entity import ReadLocation
+from Utils.Exceptions.user_exceptions import WorkExperienceNotFound
 from Utils.Exceptions.user_exceptions import WorkExperienceNotFound
 from Services.User.profile_service import ProfileService
-
+from Settings.logging_config import get_logger
+ 
+logger = get_logger()
 class WorkExperienceService:
-    def __init__(self, session: Session, kafka_producer: KafkaProducerService = None):
+    def __init__(self, session: Session):
         self.repo = WorkExperienceRepository(session)
         self.location_repo = LocationRepository(session)
         self.session = session
-        self.kafka_producer = kafka_producer
 
 
     def _convert_to_read_dto(self, work_experience: WorkExperience) -> ReadWorkExperience:
@@ -146,6 +145,8 @@ class WorkExperienceService:
 
     def update_work_experience(self, work_experience_id: UUID, work_experience_update: UpdateWorkExperience) -> Optional[ReadWorkExperience]:
         work_experience = self.repo.get(work_experience_id)
+        logger.info(f"Original Work Experience: {str(work_experience)}")   
+
         if not work_experience:
             return None
         
@@ -184,6 +185,7 @@ class WorkExperienceService:
         for key, value in update_data.items():
             setattr(work_experience, key, value)
         updated_work_experience = self.repo.update(work_experience)
+        logger.info(f"Updated Work Experience: {str(updated_work_experience)}")   
         self.publish_profile_on_work_experience_persist(updated_work_experience.profile_id)
         return self._convert_to_read_dto(updated_work_experience) if updated_work_experience else None
 
@@ -219,12 +221,5 @@ class WorkExperienceService:
     def publish_profile_on_work_experience_persist(self, profile_id: UUID):
         """Publish profile update when work experience is created or updated"""
         from Services.User.profile_service import ProfileService
-        profile_service = ProfileService(self.session, self.kafka_producer)
+        profile_service = ProfileService(self.session)
         profile_service.publish_profile_update(profile_id)
-
-
-def get_workexperience_service_with_publisher(
-    session: Session = Depends(get_session),
-    kafka: KafkaProducerService = Depends(get_kafka_producer),
-):
-    return WorkExperienceService(session=session, kafka_producer=kafka)

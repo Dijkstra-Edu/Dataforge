@@ -16,10 +16,9 @@ from Services.Kafka.producer_service import KafkaProducerService, get_kafka_prod
 from db import get_session
 
 class ProfileService:
-    def __init__(self, session: Session, kafka_producer: KafkaProducerService = None):
+    def __init__(self, session: Session):
         self.repo = ProfileRepository(session)
         self.session = session
-        self.kafka_producer = kafka_producer
 
     def create_profile(self, profile_create: CreateProfile) -> Profile:
         user = self.session.exec(
@@ -306,7 +305,8 @@ class ProfileService:
             "data": map_profile_to_kafka_event(profile).model_dump(),
         }
         try:
-            self.kafka_producer.publish("dm_user_metrics", key=str(profile.user_rel.github_user_name), value=event)
+            kafka_producer = get_kafka_producer()
+            kafka_producer.publish("dm_user_metrics", key=str(profile.user_rel.github_user_name), value=event)
         except Exception as ex:
             # Production: log and/or use DLQ
             print(f"Kafka publish failed: {ex}")

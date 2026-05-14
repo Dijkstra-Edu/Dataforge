@@ -4,7 +4,7 @@ from uuid import UUID
 from sqlmodel import Session
 
 from Entities.UserDTOs.education_entity import CreateEducation, UpdateEducation, ReadEducation
-from Services.User.education_service import EducationService, get_education_service_with_publisher
+from Services.User.education_service import EducationService
 from Settings.logging_config import get_logger
 from db import get_session
 
@@ -53,16 +53,18 @@ def list_educations(
 
 
 @router.put("/{education_id}", response_model=ReadEducation)
-def update_education(education_id: UUID, education_update: UpdateEducation, education_service: EducationService = Depends(get_education_service_with_publisher)):
+def update_education(education_id: UUID, education_update: UpdateEducation, session: Session = Depends(get_session)):
+    service = EducationService(session)
     logger.info(f"Updating Education ID: {education_id} with data: {education_update.dict(exclude_unset=True)}")
-    education = education_service.update_education(education_id, education_update)
+    education = service.update_education(education_id, education_update)
     logger.info(f"Updated Education ID: {education.id}")
     return education
 
 
 @router.delete("/{education_id}")
-def delete_education(education_id: UUID,  education_service: EducationService = Depends(get_education_service_with_publisher)):
+def delete_education(education_id: UUID, session: Session = Depends(get_session)):
+    service = EducationService(session)
     logger.info(f"Deleting Education ID: {education_id}")
-    message = education_service.delete_education(education_id)
+    message = service.delete_education(education_id)
     logger.info(message)
     return {"detail": message}

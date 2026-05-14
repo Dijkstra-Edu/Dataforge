@@ -1,25 +1,21 @@
 from uuid import UUID
 from typing import List, Optional
-from fastapi.params import Depends
 from sqlmodel import Session
 
 from Repository.User.education_repository import EducationRepository
 from Repository.User.location_repository import LocationRepository
 from Entities.UserDTOs.education_entity import CreateEducation, UpdateEducation, ReadEducation
-from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
+from Entities.UserDTOs.location_entity import ReadLocation
 from Schema.SQL.Models.models import Education, Profile, Location
-from Utils.Exceptions.user_exceptions import EducationNotFound, ProfileNotFound, LocationNotFound
+from Utils.Exceptions.user_exceptions import EducationNotFound, ProfileNotFound
 from Services.User.profile_service import ProfileService
-from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
-from db import get_session
 
 
 class EducationService:
-    def __init__(self, session: Session, kafka_producer: KafkaProducerService = None):
+    def __init__(self, session: Session):
         self.repo = EducationRepository(session)
         self.location_repo = LocationRepository(session)
         self.session = session
-        self.kafka_producer = kafka_producer
 
     def _convert_to_read_dto(self, education: Education) -> ReadEducation:
         """Convert Education database model to ReadEducation DTO with populated location"""
@@ -172,13 +168,5 @@ class EducationService:
     def publish_profile_on_education_persist(self, profile_id: UUID):
         """Publish profile update when education is created or updated"""
         from Services.User.profile_service import ProfileService
-
-        profile_service = ProfileService(self.session, self.kafka_producer)
+        profile_service = ProfileService(self.session)
         profile_service.publish_profile_update(profile_id)
-
-
-def get_education_service_with_publisher(
-    session: Session = Depends(get_session),
-    kafka: KafkaProducerService = Depends(get_kafka_producer),
-):
-    return EducationService(session=session, kafka_producer=kafka)

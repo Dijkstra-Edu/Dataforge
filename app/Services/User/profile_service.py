@@ -1,12 +1,19 @@
 from uuid import UUID
+from fastapi import Depends
+from kafka import KafkaProducer
 from sqlmodel import Session, select
 from typing import List, Optional
 
 
-from Entities.UserDTOs.profile_entity import CreateProfile, UpdateProfile
+from Entities.UserDTOs.profile_entity import CreateProfile, ReadProfile, UpdateProfile
 from Schema.SQL.Models.models import Profile, User
 from Repository.User.profile_repository import ProfileRepository
 from Utils.Exceptions.user_exceptions import GitHubUsernameNotFound, ProfileAlreadyExists, ProfileNotFound, ProfileNotFound
+from Utils.Exceptions.user_exceptions import ProfileAlreadyExists, ProfileNotFound, ProfileNotFound, UserNotFound
+
+from Entities.UserDTOs.profile_entity_kafka_dto import map_profile_to_kafka_event
+from Services.Kafka.producer_service import KafkaProducerService, get_kafka_producer
+from db import get_session
 
 class ProfileService:
     def __init__(self, session: Session):
@@ -112,72 +119,124 @@ class ProfileService:
         return None
 
 
-    def get_profile_full_data_by_user_id(self, user_id: UUID) -> dict:
+    def get_profile_by_profile_id(self, profile_id: UUID) -> Profile:
         """
         Get full profile data with all nested relationships populated.
         Returns profile with education, work experience, certifications, 
         publications, volunteering, projects, and leetcode (None for now).
         """
+        
+        # Get the base profile
+        from Entities.UserDTOs.profile_entity import ReadProfile
+        profile = self.get_profile(profile_id)
+        return profile
+    
+    def populate_full_profile_data(self, profile: Profile, fields: list[str] | str = "all") -> dict:
+        """
+        Populate full profile data with selected nested relationships.
+        
+        Args:
+            profile (Profile): Base profile object.
+            fields (list[str] | str): Sections to fetch. 
+                                    Use "all" (default) to fetch everything.
+                                    Example: ["education", "projects", "certifications"]
+
+        Returns:
+            dict: Profile dictionary with selected nested relations populated.
+        """
+
+        # If user passed "all" or omitted fields → fetch everything
+        fetch_all = fields == "all"
+        if not fetch_all and not isinstance(fields, list):
+            raise ValueError("fields must be 'all' or a list of field names")
+
+        # Local import to avoid circular dependencies
         from Services.User.education_service import EducationService
         from Services.User.workexperience_service import WorkExperienceService
         from Services.User.certifications_service import CertificationService
         from Services.User.publication_service import PublicationService
         from Services.User.volunteering_service import VolunteeringService
         from Services.User.projects_service import ProjectsService
-        from Entities.UserDTOs.profile_entity import ReadProfile
+
         from Entities.UserDTOs.certification_entity import ReadCertification
         from Entities.UserDTOs.publication_entity import ReadPublication
         from Entities.UserDTOs.volunteering_entity import ReadVolunteering
-        from Entities.UserDTOs.projects_entity import ReadProject
-        
-        # Get the base profile
-        profile = self.get_profile_by_user_id(user_id)
-        profile_dict = ReadProfile.model_validate(profile).model_dump()
-        
-        # Initialize all sub-services
+
+        profile_id = profile.id
+        # Initialize sub-services (only once)
         education_service = EducationService(self.session)
         work_exp_service = WorkExperienceService(self.session)
         cert_service = CertificationService(self.session)
         pub_service = PublicationService(self.session)
         vol_service = VolunteeringService(self.session)
         proj_service = ProjectsService(self.session)
-        
-        # Get all related data
-        profile_dict['education'] = education_service.get_educations_by_profile_with_locations(profile.id)
-        profile_dict['work_experience'] = work_exp_service.get_work_experiences_by_profile_with_locations(profile.id)
-        
-        # Get certifications
-        try:
-            certifications = cert_service.get_certifications_by_profile(profile.id)
-            profile_dict['certifications'] = [ReadCertification.model_validate(cert).model_dump() for cert in certifications]
-        except:
-            profile_dict['certifications'] = []
-        
-        # Get publications
-        try:
-            publications = pub_service.get_publications_by_profile_id(profile.id)
-            profile_dict['publications'] = [ReadPublication.model_validate(pub).model_dump() for pub in publications]
-        except:
-            profile_dict['publications'] = []
-        
-        # Get volunteering
-        try:
-            volunteering = vol_service.get_volunteering_by_profile_id(profile.id)
-            profile_dict['volunteering'] = [ReadVolunteering.model_validate(vol).model_dump() for vol in volunteering]
-        except:
-            profile_dict['volunteering'] = []
-        
-        # Get projects
-        try:
-            projects = proj_service.get_projects_by_profile(profile.id)
-            profile_dict['projects'] = [proj.model_dump() if hasattr(proj, 'model_dump') else proj for proj in projects]
-        except:
-            profile_dict['projects'] = []
-        
-        # Leetcode excluded for now
-        profile_dict['leetcode'] = None
-        
+        profile_dict = ReadProfile.model_validate(profile).model_dump()
+        # Helper to check whether a field needs to be fetched
+        def need(field_name: str) -> bool:
+            return fetch_all or field_name in fields
+
+        # -------------------------------
+        # Conditional population
+        # -------------------------------
+        if need("education"):
+            profile_dict["education"] = education_service.get_educations_by_profile_with_locations(profile_id)
+
+        if need("work_experience"):
+            profile_dict["work_experience"] = work_exp_service.get_work_experiences_by_profile_with_locations(profile_id)
+
+        if need("certifications"):
+            try:
+                certifications = cert_service.get_certifications_by_profile(profile_id)
+                profile_dict["certifications"] = [
+                    ReadCertification.model_validate(cert).model_dump() for cert in certifications
+                ]
+            except Exception:
+                profile_dict["certifications"] = []
+
+        if need("publications"):
+            try:
+                publications = pub_service.get_publications_by_profile_id(profile_id)
+                profile_dict["publications"] = [
+                    ReadPublication.model_validate(pub).model_dump() for pub in publications
+                ]
+            except Exception:
+                profile_dict["publications"] = []
+
+        if need("volunteering"):
+            try:
+                vols = vol_service.get_volunteering_by_profile_id(profile_id)
+                profile_dict["volunteering"] = [
+                    ReadVolunteering.model_validate(vol).model_dump() for vol in vols
+                ]
+            except Exception:
+                profile_dict["volunteering"] = []
+
+        if need("projects"):
+            try:
+                projects = proj_service.get_projects_by_profile(profile_id)
+                # Some DTOs use model_dump, others do not
+                profile_dict["projects"] = [
+                    proj.model_dump() if hasattr(proj, "model_dump") else proj for proj in projects
+                ]
+            except Exception:
+                profile_dict["projects"] = []
+
+        # Leetcode (placeholder)
+        if need("leetcode"):
+            profile_dict["leetcode"] = None
+
         return profile_dict
+    
+    def get_profile_full_data_by_user_id(self, user_id: UUID) -> dict:
+        """
+        Get full profile data with all nested relationships populated.
+        Returns profile with education, work experience, certifications, 
+        publications, volunteering, projects, and leetcode (None for now).
+        """
+        from Entities.UserDTOs.profile_entity import ReadProfile
+        # Get the base profile
+        profile = self.get_profile_by_user_id(user_id)        
+        return self.populate_full_profile_data(profile)
 
     
     def get_profile_full_data_by_github_username(self, github_username: str) -> dict:
@@ -233,3 +292,29 @@ class ProfileService:
         
         # Delete the profile using the existing method
         return self.delete_profile(profile.id)
+    
+    def publish_profile_update(self, profile_id: UUID):
+        """
+        Publish profile update event.
+        This is a placeholder for the actual implementation of publishing
+        profile updates to a message broker or notification system.
+        """
+        profile = self.get_profile_by_profile_id(profile_id)
+        event = {
+            "eventType": "DataForgeUpdateEvent",
+            "data": map_profile_to_kafka_event(profile).model_dump(),
+        }
+        try:
+            kafka_producer = get_kafka_producer()
+            kafka_producer.publish("dm_user_metrics", key=str(profile.user_rel.github_user_name), value=event)
+        except Exception as ex:
+            # Production: log and/or use DLQ
+            print(f"Kafka publish failed: {ex}")
+            raise
+
+
+def get_profile_service_with_publisher(
+    session: Session = Depends(get_session),
+    kafka: KafkaProducerService = Depends(get_kafka_producer),
+):
+    return ProfileService(session=session, kafka_producer=kafka)

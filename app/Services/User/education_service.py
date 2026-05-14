@@ -5,10 +5,11 @@ from sqlmodel import Session
 from Repository.User.education_repository import EducationRepository
 from Repository.User.location_repository import LocationRepository
 from Entities.UserDTOs.education_entity import CreateEducation, UpdateEducation, ReadEducation
-from Entities.UserDTOs.location_entity import CreateLocation, ReadLocation
+from Entities.UserDTOs.location_entity import ReadLocation
 from Schema.SQL.Models.models import Education, Profile, Location
-from Utils.Exceptions.user_exceptions import EducationNotFound, ProfileNotFound, LocationNotFound
+from Utils.Exceptions.user_exceptions import EducationNotFound, ProfileNotFound
 from Services.User.profile_service import ProfileService
+
 
 class EducationService:
     def __init__(self, session: Session):
@@ -73,6 +74,7 @@ class EducationService:
         
         education = Education(**education_data)
         created_education = self.repo.create(education)
+        self.publish_profile_on_education_persist(created_education.profile_id)
         return self._convert_to_read_dto(created_education)
 
     def get_education(self, education_id: UUID) -> ReadEducation:
@@ -136,13 +138,16 @@ class EducationService:
             setattr(education, key, value)
         
         updated_education = self.repo.update(education)
+        self.publish_profile_on_education_persist(updated_education.profile_id)
         return self._convert_to_read_dto(updated_education)
 
     def delete_education(self, education_id: UUID) -> str:
         education = self.repo.get(education_id)
         if not education:
             raise EducationNotFound(education_id)
+        profile_id = education.profile_id
         self.repo.delete(education)
+        self.publish_profile_on_education_persist(profile_id)
         return f"Education {education_id} deleted successfully"
 
     def get_educations_by_profile_with_locations(self, profile_id: UUID) -> List[ReadEducation]:
@@ -159,3 +164,9 @@ class EducationService:
         profile_service = ProfileService(self.session)
         profile_id = profile_service.get_profile_id_by_github_username(github_username)
         return self.get_educations_by_profile(profile_id)
+    
+    def publish_profile_on_education_persist(self, profile_id: UUID):
+        """Publish profile update when education is created or updated"""
+        from Services.User.profile_service import ProfileService
+        profile_service = ProfileService(self.session)
+        profile_service.publish_profile_update(profile_id)

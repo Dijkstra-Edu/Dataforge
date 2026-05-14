@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from uuid import UUID
 from sqlmodel import Session
 
@@ -8,7 +8,6 @@ from Entities.UserDTOs.workexperience_entity import CreateWorkExperience, ReadWo
 from Services.User.workexperience_service import WorkExperienceService
 from db import get_session
 from Schema.SQL.Enums.enums import EmploymentType, WorkLocationType, Domain
-
 logger = get_logger()
 
 router = APIRouter(prefix="/Dijkstra/v1/wp", tags=["Work Experiences"])

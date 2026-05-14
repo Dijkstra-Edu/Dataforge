@@ -154,6 +154,7 @@ class ReadWorkExperience(BaseModel):
     domain: Optional[List[Domain]]
     company_name: str
     company_logo: Optional[str]
+    yearly_salary_rupees: Optional[float]
     currently_working: bool
     location: Optional[ReadLocation]
     location_type: WorkLocationType

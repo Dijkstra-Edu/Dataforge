@@ -194,7 +194,7 @@ class WorkExperience(UUIDBaseTable, table=True):
     tools_used: Optional[List[Tools]] = Field(
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
-
+    yearly_salary_rupees: Optional[float] = None
     # Relationships
     profile_rel: Profile = Relationship(back_populates="work_experience")
     location_rel: Optional[Location] = Relationship(back_populates="work_experience")

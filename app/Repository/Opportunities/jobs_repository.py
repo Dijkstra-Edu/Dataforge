@@ -2,7 +2,7 @@
 from typing import List, Optional
 from uuid import UUID
 from sqlmodel import Session, select
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func
 from sqlalchemy.exc import SQLAlchemyError
 
 from Schema.SQL.Models.models import Job
@@ -24,6 +24,34 @@ class JobRepository:
     def get(self, job_id: UUID) -> Optional[Job]:
         statement = select(Job).where(Job.id == job_id)
         return self.session.exec(statement).first()
+    
+    def get_distinct_locations(self) -> List[str]:
+        statement = select(Job.location).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+    
+    def get_distinct_location_types(self) -> List[str]:
+        statement = select(Job.location_type).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+
+    def get_distinct_employment_types(self) -> List[str]:
+        statement = select(Job.employment_type).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+
+    def get_distinct_categories(self) -> List[str]:
+        statement = select(Job.category).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+
+    def get_distinct_departments(self) -> List[str]:
+        statement = select(Job.department).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+
+    def get_distinct_organizations(self) -> List[UUID]:
+        statement = select(Job.organization).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+    
+    def get_distinct_experience_levels(self) -> List[str]:
+        statement = select(Job.experience_level).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
 
     def list(
         self,
@@ -37,6 +65,8 @@ class JobRepository:
         location_type: Optional[str] = None,
         employment_type: Optional[str] = None,
         category: Optional[str] = None,
+        featured: Optional[bool] = None,
+        department: Optional[str] = None,
     ) -> List[Job]:
         statement = select(Job)
 
@@ -53,7 +83,16 @@ class JobRepository:
             statement = statement.where(Job.employment_type == employment_type)
         if category:
             statement = statement.where(Job.category == category)
+        if featured is not None:
+            statement = statement.where(Job.featured == featured)
+        if department:
+            statement = statement.where(Job.department.ilike(f"%{department}%"))
+        # Count query BEFORE pagination
+        count_statement = select(func.count()).select_from(
+            statement.subquery()
+        )
 
+        total = self.session.exec(count_statement).one()
         # Sorting
         sort_column = getattr(Job, sort_by, Job.created_at)
         if order.lower() == "desc":
@@ -64,7 +103,7 @@ class JobRepository:
         # Pagination
         statement = statement.offset(skip).limit(limit)
 
-        return self.session.exec(statement).all()
+        return self.session.exec(statement).all(), total
 
     def autocomplete(self, query: str, field: str = "title", limit: int = 10) -> List[Job]:
         """

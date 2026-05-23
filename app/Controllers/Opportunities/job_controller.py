@@ -1,8 +1,9 @@
 from typing import List, Optional
+from unittest import skip
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
-from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob, ReadJob
+from Entities.OpportunityDTOs.jobs_entity import CreateJob, PaginatedReadJobs, UpdateJob, ReadJob
 from Services.Opportunities.jobs_service import JobService
 from Settings.logging_config import get_logger
 from db import get_session
@@ -21,14 +22,22 @@ def create_job(job_create: CreateJob, session: Session = Depends(get_session)):
     return job
 
 
-@router.get("/{job_id}", response_model=ReadJob)
+@router.get("/fetch/{job_id}", response_model=ReadJob)
 def get_job(job_id: UUID, session: Session = Depends(get_session)):
     service = JobService(session)
     logger.info(f"Fetching Job with ID: {job_id}")
     return service.get_job(job_id)
 
 
-@router.get("/", response_model=List[ReadJob])
+@router.get("/filter_helpers", response_model=dict)
+def get_filter_helpers(
+    session: Session = Depends(get_session)
+):
+    service = JobService(session)
+    logger.info( f"Fetching filter helpers for Jobs")  
+    return service.get_filter_helpers()
+
+@router.get("/", response_model=PaginatedReadJobs)
 def list_jobs(
     skip: int = 0,
     limit: int = 20,
@@ -40,15 +49,17 @@ def list_jobs(
     location_type: Optional[str] = None,
     employment_type: Optional[str] = None,
     category: Optional[str] = None,
+    featured: Optional[bool] = None,
+    department: Optional[str] = None,
     session: Session = Depends(get_session),
 ):
     service = JobService(session)
     logger.info(
         f"Listing Jobs: skip={skip}, limit={limit}, sort_by={sort_by}, order={order}, "
         f"title={title}, organization={organization}, location={location}, "
-        f"location_type={location_type}, employment_type={employment_type}, category={category}"
+        f"location_type={location_type}, employment_type={employment_type}, category={category}, featured={featured}, department={department}"
     )
-    jobs = service.list_jobs(
+    jobs, total = service.list_jobs(
         skip,
         limit,
         sort_by,
@@ -59,9 +70,11 @@ def list_jobs(
         location_type,
         employment_type,
         category,
+        featured,
+        department
     )
     logger.info(f"Returned {len(jobs)} jobs")
-    return jobs
+    return PaginatedReadJobs(jobs=jobs, total=total)
 
 
 @router.get("/autocomplete/", response_model=List[ReadJob])

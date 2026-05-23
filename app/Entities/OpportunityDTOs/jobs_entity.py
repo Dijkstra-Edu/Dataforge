@@ -89,3 +89,9 @@ class ReadJob(BaseModel):
     class Config:
         from_attributes = True
 
+
+class PaginatedReadJobs(BaseModel):
+    jobs: List[ReadJob]
+    total: int
+    class Config:
+        from_attributes = True

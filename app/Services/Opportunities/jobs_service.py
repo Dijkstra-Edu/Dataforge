@@ -8,8 +8,9 @@ from Entities.OpportunityDTOs.jobs_entity import CreateJob, UpdateJob
 from Schema.SQL.Models.models import Job, Organization
 from Utils.Exceptions.opportunities_exceptions import JobNotFound, OrganizationNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
+from Settings.logging_config import get_logger
 
-
+logger = get_logger()
 class JobService:
     def __init__(self, session: Session):
         self.session = session
@@ -32,6 +33,21 @@ class JobService:
         if not job:
             raise JobNotFound(job_id)
         return job
+    
+    def get_filter_helpers(self) -> dict:
+        """
+        Get distinct values for filterable fields to help frontend build filter options.
+        """
+        logger.info("Fetching distinct filter values for jobs")
+        filters = {
+            "locations": self.repo.get_distinct_locations(),
+            "locationTypes": self.repo.get_distinct_location_types(),
+            "employmentTypes": self.repo.get_distinct_employment_types(),
+            "experienceLevels": self.repo.get_distinct_experience_levels(),
+            "departments": self.repo.get_distinct_departments(),
+            "organizations": self.repo.get_distinct_organizations()
+        }
+        return filters
 
     def list_jobs(
         self,
@@ -45,6 +61,8 @@ class JobService:
         location_type: Optional[str] = None,
         employment_type: Optional[str] = None,
         category: Optional[str] = None,
+        featured: Optional[bool] = None,
+        department: Optional[str] = None,
     ) -> List[Job]:
         """
         Supports pagination, filtering, and sorting.
@@ -60,6 +78,8 @@ class JobService:
             location_type=location_type,
             employment_type=employment_type,
             category=category,
+            featured=featured,
+            department=department
         )
 
     def autocomplete_jobs(

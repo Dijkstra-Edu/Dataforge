@@ -1,6 +1,5 @@
 from uuid import UUID
 from fastapi import Depends
-from kafka import KafkaProducer
 from sqlmodel import Session, select
 from typing import List, Optional
 

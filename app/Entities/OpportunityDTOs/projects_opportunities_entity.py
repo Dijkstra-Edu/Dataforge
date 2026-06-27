@@ -2,7 +2,7 @@
 from typing import List, Optional
 from uuid import UUID
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from Schema.SQL.Enums.enums import ProjectLevel, Difficulty, Tools
 
 class CreateProject(BaseModel):
@@ -16,15 +16,12 @@ class CreateProject(BaseModel):
     repository: Optional[str] = None
     languages: Optional[List[Tools]] = []
     frameworks: Optional[List[Tools]] = []
-    stars: Optional[int] = None
-    forks: Optional[int] = None
     last_updated: Optional[date] = None
     description: Optional[str] = None
     featured: Optional[bool] = None
     highlight: Optional[str] = None
     category: Optional[List[str]] = []
     difficulty: Optional[Difficulty] = None
-    issues_count: Optional[int] = None
     contributors_count: Optional[int] = None
     license: Optional[str] = None
     topics: Optional[List[str]] = []
@@ -54,6 +51,7 @@ class UpdateProject(BaseModel):
     topics: Optional[List[str]] = []
 
 class ReadProject(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     title: Optional[str]
     project_level: Optional[ProjectLevel]
@@ -77,5 +75,12 @@ class ReadProject(BaseModel):
     contributors_count: Optional[int]
     license: Optional[str]
     topics: Optional[List[str]]
+    readme: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+
+class PaginatedReadProjects(BaseModel):
+    projects: List[ReadProject]
+    total: int
+    class Config:
+        from_attributes = True

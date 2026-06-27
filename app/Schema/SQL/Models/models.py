@@ -3,8 +3,8 @@ from datetime import date, datetime, timezone
 
 from uuid import UUID, uuid4
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String, Integer, BigInteger, Float, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy import ARRAY, Column, Enum as SQLEnum, String,ForeignKey, Text
+from sqlalchemy.dialects.postgresql import BYTEA, UUID as PG_UUID, JSONB
 
 from Schema.SQL.Enums.enums import (
     Difficulty, ProjectLevel, Rank, SchoolType, Tools, WorkLocationType,
@@ -65,7 +65,6 @@ class User(UUIDBaseTable, table=True):
     assigned_tasks: List["Task"] = Relationship(back_populates="assignee_rel", sa_relationship_kwargs={"foreign_keys": "[Task.assignee_id]"})
     posts: List["Posts"] = Relationship(back_populates="user_rel")
     location_rel: Optional["Location"] = Relationship(back_populates="users")
-    github_profile: Optional["Github"] = Relationship(back_populates="user_rel")
 
 # -------------------------------------------------------------------------
 # Profile model
@@ -92,7 +91,6 @@ class Profile(UUIDBaseTable, table=True):
     publications: List["Publications"] = Relationship(back_populates="profile_rel")
     projects: List["Projects"] = Relationship(back_populates="profile_rel")
     documents: List["Document"] = Relationship(back_populates="profile_rel")
-    github: Optional["Github"] = Relationship(back_populates="profile_rel")
     posts_saved: List["PostsSaved"] = Relationship(back_populates="profile_rel")
     post_comments: List["PostComments"] = Relationship(back_populates="profile_rel")
     skills: List["Skills"] = Relationship(back_populates="profile_rel")
@@ -328,7 +326,7 @@ class Projects(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     name: str = Field(nullable=False)
     organization: Optional[str] = None
-    owner: str = Field(foreign_key="Github.user_name", nullable=False)
+    owner: str = Field(nullable=False)
     private: bool = Field(nullable=False)
     github_stars: int = Field(nullable=False)
     github_about: Optional[str] = None
@@ -361,41 +359,6 @@ class Projects(UUIDBaseTable, table=True):
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="projects")
-    owner_rel: "Github" = Relationship(back_populates="projects")
-
-# -------------------------------------------------------------------------
-# Github model
-# -------------------------------------------------------------------------
-class Github(UUIDBaseTable, table=True):
-    __tablename__ = "Github"
-
-    user_name: str = Field(foreign_key="User.github_user_name", nullable=False, unique=True)
-    github_bio: Optional[str] = None
-    followers: Optional[int] = None
-    following: Optional[int] = None
-    repositories: Optional[int] = None
-    current_work: Optional[str] = None
-    current_location: Optional[str] = None
-    current_timezone: Optional[str] = None
-    avatar: Optional[str] = None
-    websites: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
-    )
-    organization: Optional[List[str]] = Field(
-        sa_column=Column(ARRAY(String))
-    )
-    total_lines_contributed: Optional[int] = None
-    total_prs_raised: Optional[int] = None
-    total_issues_created: Optional[int] = None
-    total_repos: Optional[int] = None
-    total_commits: Optional[int] = None
-    contribution_graph_link: Optional[str] = None
-    profile_id: Optional[UUID] = Field(default=None, foreign_key="Profile.id", nullable=True)
-
-    # Relationships
-    projects: List["Projects"] = Relationship(back_populates="owner_rel")
-    profile_rel: Optional["Profile"] = Relationship(back_populates="github")
-    user_rel: Optional["User"] = Relationship(back_populates="github_profile")
 
 # -------------------------------------------------------------------------
 # Links model
@@ -630,6 +593,14 @@ class Job(UUIDBaseTable, table=True):
         default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
 
+class Blob(UUIDBaseTable, table=True):
+    __tablename__ = "Blob"
+
+    filename: str = Field(nullable=False)
+    data: bytes = Field(
+        sa_column=Column(BYTEA, nullable=False)
+    )
+
 # -------------------------------------------------------------------------
 # Projects Opportunities model
 # -------------------------------------------------------------------------
@@ -657,10 +628,10 @@ class ProjectsOpportunities(UUIDBaseTable, table=True):
         sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
 
-    stars: Optional[int] = None
-    forks: Optional[int] = None
-    last_updated: Optional[date] = None
-    description: Optional[str] = None
+    stars: Optional[int] = None #Deprecating this, should be fetched real-time from GitHub
+    forks: Optional[int] = None  #Deprecating this, should be fetched real-time from GitHub
+    last_updated: Optional[date] = None  #Deprecating this, should be fetched real-time from GitHub
+    description: Optional[str] = None 
     featured: Optional[bool] = None
     highlight: Optional[str] = None
     category: Optional[List[str]] = Field(
@@ -669,13 +640,13 @@ class ProjectsOpportunities(UUIDBaseTable, table=True):
     difficulty: Optional[Difficulty] = Field(
         sa_column=Column(SQLEnum(Difficulty, name="DIFFICULTY"))
     )
-    issues_count: Optional[int] = None
-    contributors_count: Optional[int] = None
+    issues_count: Optional[int] = None  #Deprecating this, should be fetched real-time from GitHub
+    contributors_count: Optional[int] = None  #Deprecating this, should be fetched real-time from GitHub
     license: Optional[str] = None
     topics: Optional[List[str]] = Field(
         default_factory=list, sa_column=Column(ARRAY(String))
     )
-
+    last_synced: Optional[date] = None
     # Relationships
     organization_rel: Optional[Organization] = Relationship(back_populates="projects")
 

@@ -8,7 +8,7 @@ class CreateProject(BaseModel):
     username: str
     name: str = Field(..., min_length=1)
     organization: Optional[str] = None
-    owner: str = Field(..., min_length=1)  
+    owner: Optional[str] = None
     private: bool
     github_stars: int = 0
     github_about: Optional[str] = None

@@ -1,10 +1,10 @@
 # repositories/projects_opportunities_repository.py
 from typing import List, Optional
 from uuid import UUID
-from sqlmodel import Session, select
-from Schema.SQL.Models.models import ProjectsOpportunities
+from sqlmodel import Session, func, select
+from Schema.SQL.Models.models import Job, Job, ProjectsOpportunities
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy import ARRAY
 class ProjectsOpportunitiesRepository:
     def __init__(self, session: Session):
         self.session = session
@@ -30,22 +30,31 @@ class ProjectsOpportunitiesRepository:
         filters: dict = {},
         sort_by: str = "created_at",
         order: str = "desc"
-    ) -> List[ProjectsOpportunities]:
+    ):
         statement = select(ProjectsOpportunities)
-        
         for field, value in filters.items():
             if value is not None:
+                if field == "title":
+                    statement = statement.where(ProjectsOpportunities.title.ilike(f"%{value}%"))
+                    continue
                 column = getattr(ProjectsOpportunities, field, None)
                 if column is not None:
-                    statement = statement.where(column == value)
-        
+                    if isinstance(column.type, ARRAY):
+                        statement = statement.where(column.any(value))
+                    else:
+                        statement = statement.where(column == value)
+         # Count query BEFORE pagination
+        count_statement = select(func.count()).select_from(
+            statement.subquery()
+        )
+        total = self.session.exec(count_statement).one()
         if order.lower() == "desc":
             statement = statement.order_by(getattr(ProjectsOpportunities, sort_by).desc())
         else:
             statement = statement.order_by(getattr(ProjectsOpportunities, sort_by).asc())
         
         statement = statement.offset(skip).limit(limit)
-        return self.session.exec(statement).all()
+        return self.session.exec(statement).all(), total
 
     def autocomplete(self, query: str, field: str = "title", limit: int = 10):
         column = getattr(ProjectsOpportunities, field, None)
@@ -71,3 +80,32 @@ class ProjectsOpportunitiesRepository:
         except SQLAlchemyError:
             self.session.rollback()
             raise
+
+    def get_distinct_languages(self) -> List[str]:
+        statement = select(ProjectsOpportunities.languages).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+    
+    def get_distinct_frameworks(self) -> List[str]:
+        statement = select(ProjectsOpportunities.frameworks).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+    
+    def get_distinct_organizations(self) -> List[str]:
+        statement = select(ProjectsOpportunities.organization).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+
+    def get_distinct_categories(self) -> List[str]:
+        statement = select(ProjectsOpportunities.category)
+        result = list({
+            item
+            for row in self.session.exec(statement).all()
+            if row is not None
+            for item in row
+        })
+        return result    
+    def get_distinct_difficulties(self) -> List[str]:
+        statement = select(ProjectsOpportunities.difficulty).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]
+    
+    def get_distinct_licenses(self) -> List[str]:
+        statement = select(ProjectsOpportunities.license).distinct()
+        return [row for row in self.session.exec(statement).all() if row is not None]

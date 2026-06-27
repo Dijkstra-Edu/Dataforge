@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from uuid import UUID
 from sqlmodel import Session
-from Entities.OpportunityDTOs.projects_opportunities_entity import CreateProject, UpdateProject, ReadProject
+from Entities.OpportunityDTOs.projects_opportunities_entity import CreateProject, PaginatedReadProjects, UpdateProject, ReadProject
 from Services.Opportunities.projects_opportunities_service import ProjectsOpportunitiesService
 from Settings.logging_config import get_logger
 from db import get_session
@@ -19,13 +19,21 @@ def create_project(project_create: CreateProject, session: Session = Depends(get
     logger.info(f"Created project {project.id}")
     return project
 
-@router.get("/{project_id}", response_model=ReadProject)
+@router.get("/fetch/{project_id}", response_model=ReadProject)
 def get_project(project_id: UUID, session: Session = Depends(get_session)):
     service = ProjectsOpportunitiesService(session)
     project = service.get_project(project_id)
     return project
 
-@router.get("/", response_model=List[ReadProject])
+@router.get("/filter_helpers", response_model=dict)
+def get_filter_helpers(
+    session: Session = Depends(get_session)
+):
+    service = ProjectsOpportunitiesService(session)
+    logger.info( f"Fetching filter helpers for Projects")  
+    return service.get_filter_helpers()
+
+@router.get("/", response_model=PaginatedReadProjects)
 def list_projects(
     skip: int = 0,
     limit: int = 20,
@@ -35,6 +43,10 @@ def list_projects(
     organization: Optional[UUID] = None,
     project_level: Optional[str] = None,
     difficulty: Optional[str] = None,
+    category: Optional[str] = None,
+    language: Optional[str] = None,
+    license: Optional[str] = None,
+    featured: Optional[bool] = None,
     session: Session = Depends(get_session)
 ):
     service = ProjectsOpportunitiesService(session)
@@ -42,9 +54,15 @@ def list_projects(
         "title": title,
         "organization": organization,
         "project_level": project_level,
-        "difficulty": difficulty
+        "difficulty": difficulty,
+        "category": category,
+        "languages": language,
+        "license": license,
+        "featured": featured
     }
+    logger.info(f"Filters applied: {filters}")
     return service.list_projects(skip=skip, limit=limit, filters=filters, sort_by=sort_by, order=order)
+   
 
 @router.get("/autocomplete/", response_model=List[ReadProject])
 def autocomplete_projects(

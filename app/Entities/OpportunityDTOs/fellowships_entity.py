@@ -52,6 +52,7 @@ class ReadFellowship(BaseModel):
     id: UUID
     title: Optional[str]
     organization: UUID
+    organization_logo: Optional[str] = None
     hero_image: Optional[str]
     location: Optional[str]
     location_type: Optional[str]
@@ -69,3 +70,10 @@ class ReadFellowship(BaseModel):
     technologies: Optional[List[Tools]]
     created_at: datetime
     updated_at: datetime
+
+
+class PaginatedReadFellowships(BaseModel):
+    fellowships: List[ReadFellowship]
+    total: int
+    class Config:
+        from_attributes = True

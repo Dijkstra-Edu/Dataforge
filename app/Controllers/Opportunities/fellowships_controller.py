@@ -2,9 +2,9 @@ from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
-import logging
+from urllib.parse import unquote, unquote_plus
 
-from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, UpdateFellowship, ReadFellowship
+from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, PaginatedReadFellowships, UpdateFellowship, ReadFellowship
 from Services.Opportunities.fellowships_service import FellowshipService
 from db import get_session
 from Settings.logging_config import get_logger
@@ -23,7 +23,7 @@ def create_fellowship(fellowship_create: CreateFellowship, session: Session = De
     return fellowship
 
 
-@router.get("/{fellowship_id}", response_model=ReadFellowship)
+@router.get("/fetch/{fellowship_id}", response_model=ReadFellowship)
 def get_fellowship(fellowship_id: UUID, session: Session = Depends(get_session)):
     service = FellowshipService(session)
     logger.info(f"Fetching Fellowship with ID: {fellowship_id}")
@@ -31,23 +31,26 @@ def get_fellowship(fellowship_id: UUID, session: Session = Depends(get_session))
     return fellowship
 
 
-@router.get("/", response_model=List[ReadFellowship])
+@router.get("/", response_model=PaginatedReadFellowships)
 def list_fellowships(
     skip: int = 0,
     limit: int = 20,
     sort_by: str = "created_at",
     order: str = "desc",
     title: Optional[str] = None,
-    organization: Optional[UUID] = None,
+    organization: Optional[str] = None,
     location: Optional[str] = None,
+    location_type: Optional[str] = None,
+    duration: Optional[int] = None,
+    category: Optional[str] = None,
     featured: Optional[bool] = None,
     session: Session = Depends(get_session),
 ):
     service = FellowshipService(session)
-    logger.info(f"Listing Fellowships: skip={skip}, limit={limit}, sort_by={sort_by}, order={order}")
-    fellowships = service.list_fellowships(skip, limit, sort_by, order, title, organization, location, featured)
-    logger.info(f"Returned {len(fellowships)} Fellowships")
-    return fellowships
+    organization = unquote_plus(organization) if organization else None
+    category = unquote_plus(category) if category else None
+    logger.info(f"Listing Fellowships: skip={skip}, limit={limit}, sort_by={sort_by}, order={order} organisation={organization} category={category}")
+    return service.list_fellowships(skip, limit, sort_by, order, title, organization, location, featured, location_type, duration, category)
 
 
 @router.put("/{fellowship_id}", response_model=ReadFellowship)
@@ -75,3 +78,12 @@ def autocomplete_fellowships(query: str, field: str = "title", limit: int = 10, 
     results = service.autocomplete_fellowships(query, field, limit)
     logger.info(f"Autocomplete returned {len(results)} results")
     return results
+
+
+@router.get("/filter_helpers", response_model=dict)
+def get_filter_helpers(
+    session: Session = Depends(get_session)
+):
+    service = FellowshipService(session)
+    logger.info( f"Fetching filter helpers for Fellowships")  
+    return service.get_filter_helpers()

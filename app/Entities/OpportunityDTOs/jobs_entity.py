@@ -24,6 +24,7 @@ class CreateJob(BaseModel):
     salary_annual_min: Optional[int] = None
     salary_annual_max: Optional[int] = None
     salary_currency: Optional[Currency] = None
+    application_url: Optional[str] = None
     description: Optional[str] = None
     featured: Optional[bool] = None
     highlight: Optional[str] = None
@@ -51,6 +52,7 @@ class UpdateJob(BaseModel):
     description: Optional[str] = None
     featured: Optional[bool] = None
     highlight: Optional[str] = None
+    application_url: Optional[str] = None
     category: Optional[str] = None
     perks: Optional[List[str]] = None
     organization: Optional[UUID] = None
@@ -80,6 +82,7 @@ class ReadJob(BaseModel):
     featured: Optional[bool]
     highlight: Optional[str]
     category: Optional[str]
+    application_url: Optional[str] = None
     perks: Optional[List[str]]
     organization: UUID
     created_at: datetime

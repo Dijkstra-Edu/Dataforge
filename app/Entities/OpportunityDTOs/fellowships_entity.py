@@ -17,6 +17,7 @@ class CreateFellowship(BaseModel):
     stipend_month: Optional[float] = None
     stipend_currency: Optional[str] = None
     application_deadline: Optional[date] = None
+    application_url: Optional[str]
     start_date: Optional[date] = None
     description: Optional[str] = None
     featured: Optional[bool] = None
@@ -36,6 +37,7 @@ class UpdateFellowship(BaseModel):
     duration_weeks: Optional[int] = None
     stipend_month: Optional[float] = None
     stipend_currency: Optional[str] = None
+    application_url: Optional[str]
     application_deadline: Optional[date] = None
     start_date: Optional[date] = None
     description: Optional[str] = None
@@ -60,6 +62,7 @@ class ReadFellowship(BaseModel):
     stipend_month: Optional[float]
     stipend_currency: Optional[str]
     application_deadline: Optional[date]
+    application_url: Optional[str]
     start_date: Optional[date]
     description: Optional[str]
     featured: Optional[bool]

@@ -582,6 +582,7 @@ class Job(UUIDBaseTable, table=True):
     perks: Optional[List[str]] = Field(
         default_factory=list, sa_column=Column(ARRAY(String))
     )
+    application_url: Optional[str] = None
 
     # Foreign key to Organization
     organization: UUID = Field(
@@ -685,6 +686,7 @@ class Fellowship(UUIDBaseTable, table=True):
     technologies: Optional[List[str]] = Field(
         default_factory=list, sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")))
     )
+    application_url: Optional[str] = None
 
     # Relationships
     organization_rel: Optional[Organization] = Relationship(

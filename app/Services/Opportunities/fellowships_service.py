@@ -4,7 +4,7 @@ from sqlmodel import Session
 
 from Schema.SQL.Models.models import Fellowship, Organization
 from Repository.Opportunities.fellowships_repository import FellowshipRepository
-from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, UpdateFellowship
+from Entities.OpportunityDTOs.fellowships_entity import CreateFellowship, PaginatedReadFellowships, ReadFellowship, UpdateFellowship
 from Schema.SQL.Enums.enums import Tools
 from Utils.Exceptions.opportunities_exceptions import FellowshipNotFound, OrganizationNotFound
 from Utils.Helpers.opportunities_helpers import _validate_tools
@@ -40,11 +40,39 @@ class FellowshipService:
         sort_by: str = "created_at",
         order: str = "desc",
         title: Optional[str] = None,
-        organization: Optional[UUID] = None,
+        organization: Optional[str] = None,
         location: Optional[str] = None,
         featured: Optional[bool] = None,
-    ) -> List[Fellowship]:
-        return self.repo.list(skip, limit, sort_by, order, title, organization, location, featured)
+        location_type: Optional[str] = None,
+        duration: Optional[int] = None,
+        category: Optional[str] = None,
+    ) -> PaginatedReadFellowships:
+        fellowship_db_models, total = self.repo.list(
+            skip,
+            limit,
+            sort_by,
+            order,
+            title,
+            organization,
+            location,
+            featured,
+            location_type,
+            duration,
+            category,
+        )
+
+        response_list = []
+
+        for fellowship in fellowship_db_models:
+            dto = ReadFellowship.model_validate(fellowship, from_attributes=True)
+            dto.organization_logo = fellowship.organization_rel.image
+            response_list.append(dto)
+
+        return PaginatedReadFellowships(
+            fellowships=response_list,
+            total=total
+        )
+                
 
     def update_fellowship(self, fellowship_id: UUID, fellowship_update: UpdateFellowship) -> Optional[Fellowship]:
         fellowship = self.repo.get(fellowship_id)
@@ -69,3 +97,11 @@ class FellowshipService:
 
     def autocomplete_fellowships(self, query: str, field: str = "title", limit: int = 10) -> List[Fellowship]:
         return self.repo.autocomplete(query, field, limit)
+
+    def get_filter_helpers(self) -> dict:
+        return {
+            "locationTypes": self.repo.get_distinct_locationTypes(),
+            "categories": self.repo.get_distinct_categories(),
+            "durations": self.repo.get_distinct_durations(),
+            "organizations": self.repo.get_distinct_organizations()
+        }

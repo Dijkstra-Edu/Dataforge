@@ -326,12 +326,8 @@ class Projects(UUIDBaseTable, table=True):
     profile_id: UUID = Field(foreign_key="Profile.id", nullable=False)
     name: str = Field(nullable=False)
     organization: Optional[str] = None
-    owner: str = Field(nullable=False)
-    private: bool = Field(nullable=False)
-    github_stars: int = Field(nullable=False)
-    github_about: Optional[str] = None
-    github_open_issues: int = Field(nullable=False)
-    github_forks: int = Field(nullable=False)
+    owner: str = Field(nullable=True)
+    github_repo_url: str = Field(nullable=True)
     description: str = Field(nullable=False)
     domain: Domain = Field(
         sa_column=Column(SQLEnum(Domain, name="DOMAIN"))
@@ -340,22 +336,12 @@ class Projects(UUIDBaseTable, table=True):
         sa_column=Column(ARRAY(String))
     )
     tools: List[Tools] = Field(
-        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")), nullable=False)
+        sa_column=Column(ARRAY(SQLEnum(Tools, name="TOOLS")), nullable=True)
     )
-    readme: bool = Field(nullable=False)
-    license: bool = Field(nullable=False)
-    landing_page: bool = Field(nullable=False)
     landing_page_link: Optional[str] = None
-    docs_page: bool = Field(nullable=False)
     docs_page_link: Optional[str] = None
-    own_domain_name: bool = Field(nullable=False)
     domain_name: Optional[str] = None
-    total_lines_contributed: Optional[int] = None
-    improper_uploads: Optional[bool] = None
-    complexity_rating: Optional[float] = None
-    testing_framework_present: bool = Field(nullable=False)
-    testing_framework: Optional[str] = None
-    project_organization_logo: Optional[str] = None
+    project_logo: Optional[str] = None
 
     # Relationships
     profile_rel: Profile = Relationship(back_populates="projects")

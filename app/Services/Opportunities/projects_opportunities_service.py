@@ -12,6 +12,8 @@ from Utils.Helpers.opportunities_helpers import _validate_tools
 from Utils.Helpers.gitripper_client import GitRipperClient, GitRipperClientError
 from datetime import date, datetime, timedelta
 
+from Entities.Gitripper.git_repository import GitRepoStats
+
 logger = get_logger()
 class ProjectsOpportunitiesService:
     def __init__(self, session: Session):
@@ -30,14 +32,10 @@ class ProjectsOpportunitiesService:
         
         project = ProjectsOpportunities(**project_create.dict(exclude_unset=True))
         stats = self.fetch_project_github_data(project)
-        logger.info("Hello from here")
-
-        logger.info("Stats received:"+str(stats))
-        logger.info("Hello from here")
-        project.issues_count = stats["issuesCount"]
-        project.stars = stats["stars"]
-        project.forks = stats["forks"]
-        project.last_updated = stats["lastUpdatedAt"]
+        project.issues_count = stats.issuesCount
+        project.stars = stats.stars
+        project.forks = stats.forks
+        project.last_updated = stats.lastUpdatedAt
         project.last_synced = date.today()
         return self.repo.create(project)
 
@@ -59,10 +57,10 @@ class ProjectsOpportunitiesService:
         for project in projects:
             if project.last_synced < datetime.now() - timedelta(days=10):
                 stats = self.fetch_project_github_data(project)
-                project.issues_count = stats["issuesCount"]
-                project.stars = stats["stars"]
-                project.forks = stats["forks"]
-                project.last_updated = stats["lastUpdatedAt"]
+                project.issues_count = stats.issuesCount
+                project.stars = stats.stars
+                project.forks = stats.forks
+                project.last_updated = stats.lastUpdatedAt
                 project.last_synced = date.today()
                 self.repo.update(project)
 
@@ -74,7 +72,7 @@ class ProjectsOpportunitiesService:
         
         return response
     
-    def fetch_project_github_data(self, project: ProjectsOpportunities) -> dict:
+    def fetch_project_github_data(self, project: ProjectsOpportunities) -> GitRepoStats:
         gitripper_client = GitRipperClient()
         try:
             return gitripper_client.fetch_repo_stats(project.repository)

@@ -70,6 +70,11 @@ class ProjectsNotFound(ServiceError):
     def __init__(self, project_id):
         super().__init__(f"Project with ID {project_id} does not exist.")
         self.project_id = project_id
+
+class ProjectAlreadyExists(ServiceError):
+    def __init__(self, github_repo_url):
+        super().__init__(f"Project with Git repo link {github_repo_url} already exists")
+        self.github_repo_url = github_repo_url
     
 class EducationNotFound(ServiceError):
     def __init__(self, education_id):

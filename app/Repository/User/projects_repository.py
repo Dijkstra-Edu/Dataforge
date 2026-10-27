@@ -23,6 +23,10 @@ class ProjectsRepository:
         statement = select(Projects).where(Projects.id == project_id)
         return self.session.exec(statement).first()
 
+    def find_by_repo_url(self, github_repo_url: str) -> Optional[Projects]:
+        statement = select(Projects).where(Projects.github_repo_url == github_repo_url)
+        return self.session.exec(statement).first()
+
     def list(self, skip: int = 0, limit: int = 20) -> List[Projects]:
         statement = select(Projects).offset(skip).limit(limit)
         return self.session.exec(statement).all()

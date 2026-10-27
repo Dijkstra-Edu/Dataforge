@@ -10,7 +10,7 @@ from db import get_session
 
 logger = get_logger()
 
-router = APIRouter(prefix="/Dijkstra/v1/projects/opportunities", tags=["ProjectsOpportunities"])
+router = APIRouter(prefix="/Dijkstra/v1/opportunities/projects", tags=["ProjectsOpportunities"])
 
 @router.post("/", response_model=ReadProject)
 def create_project(project_create: CreateProject, session: Session = Depends(get_session)):
